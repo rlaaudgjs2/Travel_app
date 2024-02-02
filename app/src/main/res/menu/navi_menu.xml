@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/plannerFragment"
+        android:title="플래너"
+        android:icon="@drawable/ic_planner"
+        />
+    <item
+        android:id="@+id/homeFragment"
+        android:title="홈"
+        android:icon="@drawable/ic_home"
+        android:checked="true"
+        />
+    <item
+        android:id="@+id/moreFragment"
+        android:title="더보기"
+        android:icon="@drawable/ic_more"
+        />
+</menu>

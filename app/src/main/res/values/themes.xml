@@ -6,4 +6,5 @@
     </style>
 
     <style name="Theme.Travel_App" parent="Base.Theme.Travel_App" />
+    <style name="Theme.Travel_App1" parent="Theme.MaterialComponents.Light.DarkActionBar" />
 </resources>
