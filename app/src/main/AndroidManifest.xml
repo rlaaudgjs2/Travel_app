@@ -15,16 +15,17 @@
         <activity
             android:name=".MainActivity"
             android:exported="true">
+        </activity>
+        <activity android:name=".NaviActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Travel_App1"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".NaviActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Travel_App1"
-            />
     </application>
 
 </manifest>
