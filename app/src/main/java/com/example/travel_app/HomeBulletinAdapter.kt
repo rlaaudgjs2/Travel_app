@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 
-class HomeBulletinAdapter (private var list: MutableList<TestData>): RecyclerView.Adapter<HomeBulletinAdapter.HomeBulletinViewHolder>() {
+class HomeBulletinAdapter (private var list: ArrayList<TestData>): RecyclerView.Adapter<HomeBulletinAdapter.HomeBulletinViewHolder>() {
 
     inner class HomeBulletinViewHolder(itemView: View?): RecyclerView.ViewHolder(itemView!!){
         var data1Text: TextView = itemView!!.findViewById(R.id.data1Text)
@@ -38,5 +38,10 @@ class HomeBulletinAdapter (private var list: MutableList<TestData>): RecyclerVie
     override fun onBindViewHolder(holder: HomeBulletinViewHolder, position: Int) {
         Log.d("ListAdapter", "===== ===== ===== ===== onBindViewHolder ===== ===== ===== =====")
         holder.bind(list[position], position)
+    }
+    fun updateData(newList: ArrayList<TestData>){
+        list.clear()
+        list.addAll(newList)
+        notifyDataSetChanged()
     }
 }

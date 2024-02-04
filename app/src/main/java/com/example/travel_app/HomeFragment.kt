@@ -27,22 +27,20 @@ class HomeFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
+    @Suppress("DEPRECATION")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        var list: ArrayList<TestData> = requireActivity().intent!!.extras!!.get("DataList") as ArrayList<TestData>
-        Log.e("HomeFragment", "Data List: ${list}")
+        val dataBundle = requireActivity().intent?.extras
+        val list: ArrayList<TestData>? = dataBundle?.getParcelableArrayList("DataList") ?: arrayListOf()
 
+        Log.e("HomeFragment", "Data List: $list")
         val rvBulletin: RecyclerView = view.findViewById(R.id.rvBulletin)
 
         //Fragment에서 전달받은 list를 넘기면서 ListAdapter 생성
-        homeBulletinAdapter = HomeBulletinAdapter(list)
+        homeBulletinAdapter = HomeBulletinAdapter(list?: arrayListOf())
         rvBulletin.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
         rvBulletin.adapter = homeBulletinAdapter
-
-
-
-
 
     }
 

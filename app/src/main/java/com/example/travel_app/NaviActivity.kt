@@ -1,6 +1,8 @@
 package com.example.travel_app
 
 import android.os.Bundle
+import android.os.Parcel
+import android.os.Parcelable
 import android.widget.Button
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,29 +21,53 @@ import com.example.travel_app.databinding.ActivityNaviBinding
 private const val TAG_PLANNER = "planner_fragment"
 private const val TAG_HOME = "home_fragment"
 private const val TAG_MORE = "more_fragment"
-
+private lateinit var homeBulletinAdapter: HomeBulletinAdapter
 class TestData(
     private var data1: String? = null,
     private var data2: String? = null,
     private var data3: String? = null
-){
+) : Parcelable {
     fun getData1(): String? {
         return data1
     }
     fun setData1(name: String){
-        this.data1 = data1
+        this.data1 = name
     }
     fun getData2(): String? {
         return data2
     }
     fun setData2(address: String){
-        this.data2 = data2
+        this.data2 = address
     }
     fun getData3(): String? {
         return data3
     }
     fun setData3(type: String){
-        this.data3 = data3
+        this.data3 = type
+    }
+
+    constructor(parcel: Parcel) : this(
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString()
+    )
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    override fun writeToParcel(parcel: Parcel, flag: Int) {
+        parcel.writeString(data1)
+        parcel.writeString(data2)
+        parcel.writeString(data3)
+    }
+    companion object CREATOR : Parcelable.Creator<TestData>{
+        override fun createFromParcel(parcel: Parcel): TestData {
+            return TestData(parcel)
+        }
+
+        override fun newArray(size: Int): Array<TestData?> {
+            return arrayOfNulls(size)
+        }
     }
 }
 class NaviActivity : AppCompatActivity() {
@@ -73,7 +99,7 @@ class NaviActivity : AppCompatActivity() {
         //하단탭에서 홈 탭이 눌린 것으로 초기화
         binding.navigationView.menu.findItem(R.id.homeFragment)?.isChecked = true
 
-        setFragment(TAG_HOME, HomeFragment())
+//        setFragment(TAG_HOME, HomeFragment())
 
         binding.navigationView.setOnItemSelectedListener { item ->
             when(item.itemId){
@@ -84,13 +110,16 @@ class NaviActivity : AppCompatActivity() {
             true
         }
 
-        val transaction = supportFragmentManager.beginTransaction()
-        transaction.replace(
-            R.id.mainFrameLayout,
-            HomeFragment()
-        )
-        transaction.commit()
 
+//        val transaction = supportFragmentManager.beginTransaction()
+//        transaction.replace(
+//            R.id.mainFrameLayout,
+//            HomeFragment()
+//        )
+//        transaction.commit()
+
+        homeBulletinAdapter = HomeBulletinAdapter(dataList)
+        updateDataInAdapter(dataList)
     }
 
     private fun setFragment(tag: String, fragment: Fragment){
@@ -130,6 +159,11 @@ class NaviActivity : AppCompatActivity() {
         }
 
         fragTransaction.commitAllowingStateLoss()
+    }
+    private fun updateDataInAdapter(newList: ArrayList<TestData>){
+        if(::homeBulletinAdapter.isInitialized){
+            homeBulletinAdapter.updateData(newList)
+        }
     }
 }
 
