@@ -90,7 +90,6 @@ class NaviActivity : AppCompatActivity() {
             HomeFragment()
         )
         transaction.commit()
-        intent.putExtra("DataList", dataList)
 
     }
 
