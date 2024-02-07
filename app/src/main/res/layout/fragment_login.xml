@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragmentContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SignIn">
+    tools:context=".MainActivity">
 
 
     <ImageView
@@ -21,7 +21,7 @@
 
 
     <android.widget.Button
-        android:id="@+id/cats_login"
+        android:id="@+id/travel_signIn"
         android:layout_width="204dp"
         android:layout_height="38dp"
         android:background="@color/blue"
@@ -58,7 +58,7 @@
         app:layout_constraintVertical_bias="0.382" />
 
     <EditText
-        android:id="@+id/input_id"
+        android:id="@+id/signIn_id"
         android:layout_width="234dp"
         android:layout_height="44dp"
         android:layout_marginTop="10dp"
@@ -75,7 +75,7 @@
         app:layout_constraintVertical_bias="0.45" />
 
     <EditText
-        android:id="@+id/input_password"
+        android:id="@+id/signIn_password"
         android:layout_width="233dp"
         android:layout_height="40dp"
         android:background="@drawable/border"
@@ -92,7 +92,7 @@
         app:layout_constraintVertical_bias="0.519" />
 
     <com.google.android.gms.common.SignInButton
-        android:id="@+id/buttonGoogle"
+        android:id="@+id/buttonGoogleSign"
         android:layout_width="209dp"
         android:layout_height="51dp"
         android:layout_marginTop="283dp"
@@ -105,9 +105,10 @@
         app:layout_constraintVertical_bias="0.581" />
 
     <TextView
+        android:id="@+id/signUp_change"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="No account? Click Sign In"
+        android:text="No account? Click Sign Up"
         android:textSize="15dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -115,5 +116,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.963" />
+
+    <FrameLayout
+        android:id="@+id/signUp_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="-68dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
