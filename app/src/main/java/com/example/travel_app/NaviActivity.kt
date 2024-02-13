@@ -1,5 +1,6 @@
 package com.example.travel_app
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
@@ -111,12 +112,12 @@ class NaviActivity : AppCompatActivity() {
         }
 
 
-//        val transaction = supportFragmentManager.beginTransaction()
-//        transaction.replace(
-//            R.id.mainFrameLayout,
-//            HomeFragment()
-//        )
-//        transaction.commit()
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(
+            R.id.mainFrameLayout,
+            HomeFragment()
+        )
+        transaction.commit()
 
         homeBulletinAdapter = HomeBulletinAdapter(dataList)
         updateDataInAdapter(dataList)
@@ -150,7 +151,6 @@ class NaviActivity : AppCompatActivity() {
         }else if(tag == TAG_HOME){
             if(home!=null){
                 fragTransaction.show(home)
-
             }
         }else if(tag == TAG_MORE){
             if(more!=null){
