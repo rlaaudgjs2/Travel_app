@@ -1,3 +1,5 @@
+package com.example.travel_app
+
 import android.content.ContentValues.TAG
 import android.os.Bundle
 import android.util.Log

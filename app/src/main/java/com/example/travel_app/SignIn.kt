@@ -13,6 +13,7 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat.startActivity
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
 import java.io.BufferedReader
@@ -43,7 +44,6 @@ class SignIn : Fragment() , View.OnClickListener {
     private lateinit var userIdEditText: EditText
     private lateinit var userPasswordEditText: EditText
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -57,6 +57,8 @@ class SignIn : Fragment() , View.OnClickListener {
         savedInstanceState: Bundle?
     ): View? {
         view = inflater.inflate(R.layout.fragment_login, container, false)
+        val googleSignInOption = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestServerAuthCode(getString(R.string.google_login_client_id))
 
         val travelsign = view.findViewById<Button>(R.id.travel_signIn)
         val kakakoButton = view.findViewById<Button>(R.id.kakao_login)
@@ -143,6 +145,8 @@ class SignIn : Fragment() , View.OnClickListener {
     companion object {
         private const val TAG = "SignIn"
     }
+
+
 }
 
 
