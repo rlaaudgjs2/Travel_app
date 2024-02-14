@@ -13,7 +13,11 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat.startActivity
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.SignInButton
+import com.google.android.gms.common.api.ApiException
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
 import java.io.BufferedReader
@@ -30,6 +34,8 @@ import java.net.URLEncoder
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
+private var googleLoginClient: GoogleSignInClient? = null
+private val REQ_GOOGLE_LOGIN = 1001
 
 /**
  * A simple [Fragment] subclass.
@@ -68,7 +74,51 @@ class SignIn : Fragment() , View.OnClickListener {
         kakakoButton.setOnClickListener(this)
         travelsign.setOnClickListener(this)
 
+        val webClientId = getString(R.string.google_login_client_id)
+        val signInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(webClientId)
+            .requestEmail()
+            .build()
+        googleLoginClient = GoogleSignIn.getClient(requireActivity(), signInOptions)
+
+        // Set OnClickListener for Google login button
+        val googleLoginButton = view.findViewById<SignInButton>(R.id.buttonGoogleSign)
+        googleLoginButton.setOnClickListener {
+            loginGoogle()
+        }
+
+
         return view
+    }
+
+    private fun loginGoogle() {
+        googleLoginClient?.let { client ->
+            client.signOut().addOnCompleteListener(requireActivity()) {
+                startActivityForResult(client.signInIntent, REQ_GOOGLE_LOGIN)
+            }
+        }
+    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQ_GOOGLE_LOGIN) {
+            handleGoogleActivityResult(resultCode, data)
+        }
+    }
+
+    private fun handleGoogleActivityResult(resultCode: Int, data: Intent?) {
+        val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            if (account != null && account.id != null && account.email != null) {
+                Log.d("GoogleSignIn", "email = ${account.email}, id = ${account.id}, token = ${account.idToken}")
+                // Handle successful login
+            }
+        } catch (e: ApiException) {
+            Log.d("GoogleSignIn", "Google login fail = ${e.message}")
+            if (e.statusCode == 12501) {
+                // Handle user cancellation
+            }
+        }
     }
 
     override fun onClick(view: View) {
