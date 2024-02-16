@@ -104,9 +104,9 @@ class NaviActivity : AppCompatActivity() {
 
         binding.navigationView.setOnItemSelectedListener { item ->
             when(item.itemId){
-                R.id.homeFragment -> setFragment(TAG_HOME, HomeFragment())
-                R.id.moreFragment -> setFragment(TAG_MORE, MoreFragment())
-                R.id.plannerFragment -> setFragment(TAG_PLANNER, PlannerFragment())
+                R.id.homeFragment -> setFragment(HomeFragment())
+                R.id.moreFragment -> setFragment(MoreFragment())
+                R.id.plannerFragment -> setFragment(PlannerFragment())
             }
             true
         }
@@ -123,42 +123,42 @@ class NaviActivity : AppCompatActivity() {
         updateDataInAdapter(dataList)
     }
 
-    private fun setFragment(tag: String, fragment: Fragment){
+    private fun setFragment(fragment: Fragment){
         val manager: FragmentManager = supportFragmentManager
         val fragTransaction = manager.beginTransaction()
 
-        if(manager.findFragmentByTag(tag) == null){
-            fragTransaction.add(R.id.mainFrameLayout, fragment, tag)
+        fragTransaction.apply {
+            replace(R.id.mainFrameLayout, fragment)
+            addToBackStack(null)
+            commit()
         }
-
-        val planner = manager.findFragmentByTag(TAG_PLANNER)
-        val home = manager.findFragmentByTag(TAG_HOME)
-        val more = manager.findFragmentByTag(TAG_MORE)
-
-        if(planner != null){
-            fragTransaction.hide(planner)
-        }
-        if(home != null){
-            fragTransaction.hide(home)
-        }
-        if(more != null){
-            fragTransaction.hide(more)
-        }
-        if(tag == TAG_PLANNER){
-            if(planner!=null){
-                fragTransaction.show(planner)
-            }
-        }else if(tag == TAG_HOME){
-            if(home!=null){
-                fragTransaction.show(home)
-            }
-        }else if(tag == TAG_MORE){
-            if(more!=null){
-                fragTransaction.show(more)
-            }
-        }
-
-        fragTransaction.commitAllowingStateLoss()
+//        if(planner != null){
+//            fragTransaction.hide(planner)
+//        }
+//        if(home != null){
+//            fragTransaction.hide(home)
+//        }
+//        if(more != null){
+//            fragTransaction.hide(more)
+//        }
+//        when(tag){
+//            TAG_PLANNER -> {
+//                if(planner != null){
+//                    fragTransaction.show(planner)
+//                }
+//            }
+//            TAG_HOME -> {
+//                if(home != null){
+//                    fragTransaction.show(home)
+//                }
+//            }
+//            TAG_MORE -> {
+//                if(more !=null){
+//                    fragTransaction.show(more)
+//                }
+//            }
+//        }
+//        fragTransaction.commitAllowingStateLoss()
     }
     private fun updateDataInAdapter(newList: ArrayList<TestData>){
         if(::homeBulletinAdapter.isInitialized){

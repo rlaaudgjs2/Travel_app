@@ -107,63 +107,12 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintRight_toLeftOf="@+id/small_region_layout"
                     >
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="전체"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="20dp"
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:id="@+id/big_region_recycler"
                         />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="서울"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="20dp"
-                        />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="경기"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="20dp"
-                        />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="충청"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="20dp"
-                        android:backgroundTint="@color/maincolor"
-                        />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="전라"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="20dp"
-                        />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="경상"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="20dp"
-                        />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="제주"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="20dp"
-                        />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="강원"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="20dp"
-                        />
+
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -175,40 +124,10 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     >
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="대전"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="20dp"
-                        />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="천안"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="20dp"
-                        />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="서산"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="20dp"
-                        />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="세종"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="20dp"
-                        />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="당진"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="20dp"
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:id="@+id/small_region_recycler"
                         />
                 </LinearLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
