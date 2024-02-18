@@ -26,11 +26,23 @@ class WriteDayBulletinFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val selectedDay = arguments?.getString("selectedDay")
+
+        binding.txtWriteDayBulletinDay.text = "Day ${selectedDay}"
         binding.btnBackspace.setOnClickListener{
             parentFragmentManager.popBackStack()
         }
         binding.btnWriteDayBulletin.setOnClickListener{
             parentFragmentManager.popBackStack()
+        }
+    }
+    companion object {
+        fun newInstance(selectedDay: Int): WriteDayBulletinFragment {
+            val fragment = WriteDayBulletinFragment()
+            val args = Bundle()
+            args.putString("selectedDay", selectedDay?.toString())
+            fragment.arguments = args
+            return fragment
         }
     }
 }

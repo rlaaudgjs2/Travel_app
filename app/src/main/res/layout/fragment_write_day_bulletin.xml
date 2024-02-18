@@ -36,6 +36,7 @@
                     android:layout_marginTop="25dp"
                     android:text="Day1"
                     android:textSize="25dp"
+                    android:id="@+id/txt_write_day_bulletin_day"
                     app:layout_constraintEnd_toStartOf="@+id/btn_write_day_bulletin"
                     app:layout_constraintLeft_toRightOf="@+id/btn_backspace"
                     app:layout_constraintStart_toEndOf="@+id/btn_backspace"

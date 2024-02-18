@@ -1,5 +1,6 @@
 package com.example.travel_app
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -9,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.SearchView
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -39,24 +41,24 @@ class HomeFragment : Fragment() {
 
 
 
-        val dataBundle = requireActivity().intent?.extras
-        val list: ArrayList<TestData>? = dataBundle?.getParcelableArrayList("DataList") ?: arrayListOf()
-
-        Log.e("HomeFragment", "Data List: $list")
-        val rvBulletin: RecyclerView = view.findViewById(R.id.rvBulletin)
-
-        //Fragment에서 전달받은 list를 넘기면서 ListAdapter 생성
-        homeBulletinAdapter = HomeBulletinAdapter(list?: arrayListOf())
-        rvBulletin.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
-        rvBulletin.adapter = homeBulletinAdapter
+//        val dataBundle = requireActivity().intent?.extras
+//        val list: ArrayList<TestData>? = dataBundle?.getParcelableArrayList("DataList") ?: arrayListOf()
+//
+//        Log.e("HomeFragment", "Data List: $list")
+//        val rvBulletin: RecyclerView = view.findViewById(R.id.rvBulletin)
+//
+//        //Fragment에서 전달받은 list를 넘기면서 ListAdapter 생성
+//        homeBulletinAdapter = HomeBulletinAdapter(list?: arrayListOf())
+//        rvBulletin.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
+//        rvBulletin.adapter = homeBulletinAdapter
 
         binding.btnWriteBulletin.setOnClickListener{
-
-            parentFragmentManager.beginTransaction().apply {
-                replace(R.id.mainFrameLayout, WriteBulletinFragment())
-                addToBackStack(null)
-                commit()
-            }
+            showDaysDialog()
+//            parentFragmentManager.beginTransaction().apply {
+//                replace(R.id.mainFrameLayout, WriteBulletinFragment())
+//                addToBackStack(null)
+//                commit()
+//            }
         }
         binding.homeSearch.setOnQueryTextFocusChangeListener{ _, hasFocus ->
             if(hasFocus){
@@ -70,6 +72,24 @@ class HomeFragment : Fragment() {
         }
 
 
+    }
+    private fun showDaysDialog() {
+        val daysArray = arrayOf("1일", "2일", "3일") // 필요한 일 수 목록
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("일 수 선택")
+            .setItems(daysArray) { dialog, which ->
+                val selectedDaysString = daysArray[which]
+                val fragment = WriteBulletinFragment.newInstance(selectedDaysString)
+                parentFragmentManager.beginTransaction().apply {
+                    replace(R.id.mainFrameLayout, fragment)
+                    addToBackStack(null)
+                    commit()
+                }
+//                Toast.makeText(requireContext(), selectedDaysString, Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }
+            .show()
     }
 
 }
