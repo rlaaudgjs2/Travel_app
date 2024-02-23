@@ -115,8 +115,20 @@
                             android:layout_marginTop="20dp"
                             android:layout_marginLeft="30dp"
                             android:src="@drawable/ic_image"
+                            android:id="@+id/btn_upload_image"
                             android:backgroundTint="@color/maincolor"
                             />
+
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/dynamic_day_content_layout"
+                        android:orientation="vertical"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginLeft="40dp"
+                        >
+
                     </LinearLayout>
                     <LinearLayout
                         android:layout_width="match_parent"
