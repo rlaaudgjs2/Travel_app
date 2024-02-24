@@ -44,12 +44,13 @@ class WriteBulletinFragment : Fragment() {
 
         val selectedDays = arguments?.getString("selectedDays")
 
-        componentDayViewModel.selectedTitle?.let { Log.e("zlzlzl", it) }
-        componentDayViewModel.selectedUri?.let { Log.e("zlzlzlzl", it.toString()) }
-        componentDayViewModel.selectedIndex?.let { Log.e("zlzlzlzlzl",it.toString()) }
-        componentDayViewModel.selectedContent?.let { Log.e("zlzlzlzlzlzlzl", it) }
+//        componentDayViewModel.selectedTitle?.let { Log.e("zlzlzl", it) }
+//        componentDayViewModel.selectedUri?.let { Log.e("zlzlzlzl", it.toString()) }
+//        componentDayViewModel.selectedIndex?.let { Log.e("zlzlzlzlzl",it.toString()) }
+//        componentDayViewModel.selectedContent?.let { Log.e("zlzlzlzlzlzlzl", it) }
 
-//        updateDayComponent()
+
+        updateDayComponent()
         selectedDays?.let { days ->
             val inflater = LayoutInflater.from(requireContext())
             val textViewList = mutableListOf<TextView>() // TextView를 모아둘 리스트
@@ -59,8 +60,8 @@ class WriteBulletinFragment : Fragment() {
             if (check != null) {
                 repeat(check) { index ->
                     // select_day_item_layout.xml을 inflate하여 동적으로 TextView를 생성하고 리스트에 추가
-                    val dayView = inflater.inflate(R.layout.select_day_item_layout, binding.dynamicDayContentLayout, false) as TextView
-                    val dayWriteView = inflater.inflate(R.layout.write_day_item_layout, binding.dynamicDayContentLayout, false) as TextView
+                    val dayView = inflater.inflate(R.layout.select_day_item_layout, binding.dynamicDayLayout, false) as TextView
+                    val dayWriteView = inflater.inflate(R.layout.write_day_item_layout, binding.dynamicDayLayout, false) as TextView
 //                    val dayImageView = inflater.inflate(R.layout.show_image_item_layout, binding.dynamicDayContentLayout, false) as ImageView
                     dayView.text = "Day ${index + 1}"
                     dayWriteView.text = "작성하기"
@@ -75,6 +76,7 @@ class WriteBulletinFragment : Fragment() {
                             commit()
                         }
                     }
+
                 }
             }
 
@@ -125,17 +127,17 @@ class WriteBulletinFragment : Fragment() {
 //            }
 //        }
 //    }
-    fun setImage(index: Int, uri: Uri) {
-        imageList.add(ImageData(index, uri))
-        addImageView(index, uri)
-    }
-
-    private fun addImageView(index: Int, uri: Uri) {
-        val imageView = ImageView(requireContext())
-        imageView.setImageURI(uri)
-        Log.e("complete", uri.toString())
-        binding.dynamicDayContentLayout.addView(imageView)
-    }
+//    fun setImage(index: Int, uri: Uri) {
+//        imageList.add(ImageData(index, uri))
+//        addImageView(index, uri)
+//    }
+//
+//    private fun addImageView(index: Int, uri: Uri) {
+//        val imageView = ImageView(requireContext())
+//        imageView.setImageURI(uri)
+//        Log.e("complete", uri.toString())
+//        binding.dynamicDayContentLayout.addView(imageView)
+//    }
 
     companion object {
         fun newInstance(selectedDays: String): WriteBulletinFragment {
@@ -150,34 +152,51 @@ class WriteBulletinFragment : Fragment() {
     private fun updateDayComponent(){
         val inflater = LayoutInflater.from(requireContext())
 
-        val textViewList = mutableListOf<TextView>()
-
+//        val textViewList = mutableListOf<TextView>()
+        // LinearLayout 대신에 component_day_content 레이아웃을 inflate하여 뷰를 가져옴
+        val dayContentLayout = inflater.inflate(R.layout.component_day_content, binding.dynamicDayContentLayout, false)
+        Log.e("called", "zz")
         componentDayViewModel.selectedTitle?.let { title ->
-            val dayTitleView = inflater.inflate(R.layout.component_day_content, binding.dynamicDayContentLayout, false) as TextView
-            dayTitleView.text = title
-            textViewList.add(dayTitleView)
 
-            componentDayViewModel.selectedContent?.let { content ->
-                val dayContentView = inflater.inflate(R.layout.component_day_content, binding.dynamicDayContentLayout, false) as TextView
-                dayContentView.text= content
-                textViewList.add(dayContentView)
-            }
-            for (textView in textViewList) {
-                binding.dynamicDayContentLayout.addView(textView)
-            }
+            // dayContentLayout에서 TextView와 ImageView를 찾아서 값 설정
+            val dayTitleView = dayContentLayout.findViewById<TextView>(R.id.txt_component_day_title)
+            dayTitleView.text = title
+//            textViewList.add(dayTitleView)
+
+            Log.e("called title", title)
+
         }
+        componentDayViewModel.selectedContent?.let { content ->
+            // LinearLayout 대신에 component_day_content 레이아웃을 inflate하여 뷰를 가져옴
+//                val dayContentLayout = inflater.inflate(R.layout.component_day_content, binding.dynamicDayContentLayout, false)
+
+            // dayContentLayout에서 TextView와 ImageView를 찾아서 값 설정
+            val dayContentView = dayContentLayout.findViewById<TextView>(R.id.txt_component_day_content)
+            dayContentView.text = content
+//                textViewList.add(dayContentView)
+
+            Log.e("called content", content)
+        }
+
 
         componentDayViewModel.selectedUri?.let { uri ->
             componentDayViewModel.selectedIndex?.let { index ->
                 val imageView = ImageView(requireContext())
                 imageView.setImageURI(uri)
+                imageView.id = R.id.img_component_day_image // 이미지뷰의 id를 설정
 
+                Log.e("called uri, index", uri.toString())
                 // 이미지를 레이아웃에 추가
                 binding.dynamicDayContentLayout.addView(imageView)
-
+                Log.e("added img", "zz")
                 // 이미지 리스트에 데이터 추가
                 imageList.add(ImageData(index, uri))
+                Log.e("added list", "zzz")
             }
+        }
+
+        if (dayContentLayout.parent == null) {
+            binding.dynamicDayContentLayout.addView(dayContentLayout)
         }
     }
 

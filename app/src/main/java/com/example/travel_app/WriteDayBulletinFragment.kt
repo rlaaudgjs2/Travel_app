@@ -37,13 +37,6 @@ class WriteDayBulletinFragment : Fragment() {
             dayImageView.setImageURI(selectedImageUri)
             binding.dynamicDayContentLayout.addView(dayImageView)
 
-            selectedImageUri?.let {
-                val index = arguments?.getInt("index", -1)
-                index?.let { idx ->
-                    (parentFragment as? WriteBulletinFragment)?.setImage(idx, it)
-                }
-            }
-            Log.e("gozz", selectedImageUri.toString())
         }
     }
 
