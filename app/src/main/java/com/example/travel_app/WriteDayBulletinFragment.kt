@@ -12,6 +12,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import com.example.travel_app.databinding.FragmentWriteDayBulletinBinding
 
 
@@ -22,6 +25,7 @@ class WriteDayBulletinFragment : Fragment() {
 
     private var selectedImageUri: Uri? = null
 
+    private val componentDayViewModel: ComponentDayViewModel by activityViewModels()
     private val getContent = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val data: Intent? = result.data
@@ -39,7 +43,7 @@ class WriteDayBulletinFragment : Fragment() {
                     (parentFragment as? WriteBulletinFragment)?.setImage(idx, it)
                 }
             }
-            Log.e("go", selectedImageUri.toString())
+            Log.e("gozz", selectedImageUri.toString())
         }
     }
 
@@ -47,6 +51,7 @@ class WriteDayBulletinFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         // Inflate the layout for this fragment
         _binding = FragmentWriteDayBulletinBinding.inflate(inflater, container, false)
         return binding.root
@@ -59,14 +64,17 @@ class WriteDayBulletinFragment : Fragment() {
 
         val index = selectedDay?.toInt()?.minus(1)
         binding.txtWriteDayBulletinDay.text = "Day ${selectedDay}"
+
         binding.btnBackspace.setOnClickListener{
             parentFragmentManager.popBackStack()
         }
         binding.btnWriteDayBulletin.setOnClickListener{
             Log.e("간다", selectedImageUri.toString())
-
+            componentDayViewModel.selectedTitle = binding.edtTitle.text.toString()
+            componentDayViewModel.selectedUri = selectedImageUri
+            componentDayViewModel.selectedContent = binding.edtContents.text.toString()
+            componentDayViewModel.selectedIndex = index
             parentFragmentManager.popBackStack()
-            openGallery()
         }
         binding.btnUploadImage.setOnClickListener{
             openGallery()

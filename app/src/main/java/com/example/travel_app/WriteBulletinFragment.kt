@@ -10,6 +10,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import com.example.travel_app.databinding.FragmentWriteBulletinBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
@@ -23,6 +25,8 @@ class WriteBulletinFragment : Fragment() {
     private data class ImageData(val index: Int, val uri: Uri)
 
     private val imageList = mutableListOf<ImageData>()
+
+    private val componentDayViewModel: ComponentDayViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,6 +44,12 @@ class WriteBulletinFragment : Fragment() {
 
         val selectedDays = arguments?.getString("selectedDays")
 
+        componentDayViewModel.selectedTitle?.let { Log.e("zlzlzl", it) }
+        componentDayViewModel.selectedUri?.let { Log.e("zlzlzlzl", it.toString()) }
+        componentDayViewModel.selectedIndex?.let { Log.e("zlzlzlzlzl",it.toString()) }
+        componentDayViewModel.selectedContent?.let { Log.e("zlzlzlzlzlzlzl", it) }
+
+//        updateDayComponent()
         selectedDays?.let { days ->
             val inflater = LayoutInflater.from(requireContext())
             val textViewList = mutableListOf<TextView>() // TextView를 모아둘 리스트
@@ -51,7 +61,7 @@ class WriteBulletinFragment : Fragment() {
                     // select_day_item_layout.xml을 inflate하여 동적으로 TextView를 생성하고 리스트에 추가
                     val dayView = inflater.inflate(R.layout.select_day_item_layout, binding.dynamicDayContentLayout, false) as TextView
                     val dayWriteView = inflater.inflate(R.layout.write_day_item_layout, binding.dynamicDayContentLayout, false) as TextView
-                    val dayImageView = inflater.inflate(R.layout.show_image_item_layout, binding.dynamicDayContentLayout, false) as ImageView
+//                    val dayImageView = inflater.inflate(R.layout.show_image_item_layout, binding.dynamicDayContentLayout, false) as ImageView
                     dayView.text = "Day ${index + 1}"
                     dayWriteView.text = "작성하기"
                     textViewList.add(dayView)
@@ -134,6 +144,40 @@ class WriteBulletinFragment : Fragment() {
             args.putString("selectedDays", selectedDays)
             fragment.arguments = args
             return fragment
+        }
+    }
+
+    private fun updateDayComponent(){
+        val inflater = LayoutInflater.from(requireContext())
+
+        val textViewList = mutableListOf<TextView>()
+
+        componentDayViewModel.selectedTitle?.let { title ->
+            val dayTitleView = inflater.inflate(R.layout.component_day_content, binding.dynamicDayContentLayout, false) as TextView
+            dayTitleView.text = title
+            textViewList.add(dayTitleView)
+
+            componentDayViewModel.selectedContent?.let { content ->
+                val dayContentView = inflater.inflate(R.layout.component_day_content, binding.dynamicDayContentLayout, false) as TextView
+                dayContentView.text= content
+                textViewList.add(dayContentView)
+            }
+            for (textView in textViewList) {
+                binding.dynamicDayContentLayout.addView(textView)
+            }
+        }
+
+        componentDayViewModel.selectedUri?.let { uri ->
+            componentDayViewModel.selectedIndex?.let { index ->
+                val imageView = ImageView(requireContext())
+                imageView.setImageURI(uri)
+
+                // 이미지를 레이아웃에 추가
+                binding.dynamicDayContentLayout.addView(imageView)
+
+                // 이미지 리스트에 데이터 추가
+                imageList.add(ImageData(index, uri))
+            }
         }
     }
 
