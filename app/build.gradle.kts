@@ -62,11 +62,17 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.6")
     implementation("androidx.fragment:fragment-ktx:1.6.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
+
+    implementation("com.google.android.gms:play-services-auth:20.1.0")
+    implementation ("com.kakao.sdk:v2-user:2.12.1")
+    implementation("com.android.volley:volley:1.2.1")
+
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.1.0")
     debugImplementation("androidx.compose.ui:ui-tooling:1.1.0")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.1.0")
+
 
 }
