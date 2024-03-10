@@ -1,4 +1,5 @@
 package com.example.travel_app
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -18,6 +19,12 @@ class SignUp : Fragment() {
     private lateinit var signUpPasswordEditText: EditText
     private lateinit var signUpButton: Button
 
+    private fun navigateToNaviActivity() {
+        val intent = Intent(requireActivity(), NaviActivity::class.java)
+        startActivity(intent)
+        // 현재 Fragment를 벗어나고, NaviActivity로 이동합니다.
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -33,12 +40,13 @@ class SignUp : Fragment() {
 
             // 회원가입 요청을 서버로 전송
             sendSignUpRequest(user_id, user_password)
+            navigateToNaviActivity()
         }
         return view
     }
 
     private fun sendSignUpRequest(user_id: String, user_password: String) {
-        val url = "http://10.0.2.2/UserInfo.php"
+        val url = "http://10.0.2.2/User_Info.php"
 
         val request = object : StringRequest(
             Request.Method.POST, url,

@@ -180,6 +180,7 @@ class SignIn : Fragment() , View.OnClickListener {
                 requireActivity().runOnUiThread {
                     if (result == "success") {
                         Log.d(TAG, "travel_Sign: 로그인 성공")
+                        navigateToNaviActivity()
                         // 성공 시 동작 추가
                     } else {
                         Log.d(TAG, "travel_Sign: 로그인 실패")
@@ -196,6 +197,10 @@ class SignIn : Fragment() , View.OnClickListener {
         private const val TAG = "SignIn"
     }
 
+    private fun navigateToNaviActivity() {
+        val intent = Intent(requireActivity(), NaviActivity::class.java)
+        startActivity(intent)
+    }
 
 }
 
