@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SelectRegion">
+
+    <LinearLayout
+        android:id="@+id/layout_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="80dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/text_1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="여행 장소 설정"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="80dp"
+
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_1"
+        tools:ignore="ExtraText">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="장소를 선택하세요."
+            android:textAlignment="center"
+            android:gravity="center"
+            android:textColor="#ADADAD"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/layout_3"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginEnd="40dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_2"
+        app:layout_constraintBottom_toTopOf="@+id/create_button">
+        <TableRow tools:ignore="UselessParent">
+            <Button
+                android:id="@+id/btn_1"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_margin="2dp"
+                android:text="전북"
+                android:onClick="@{() -> selectRegion.onButtonClick(btn_1)}"
+                android:textColor="#000000"
+                android:background="@drawable/btn_pressed_check"
+                android:layout_weight="1"
+                style="?android:attr/buttonBarButtonStyle" />
+            <Button
+                android:id="@+id/btn_2"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_margin="2dp"
+                android:text="전남"
+                android:textColor="#000000"
+                android:background="@drawable/btn_pressed_check"
+                android:layout_weight="1"
+                style="?android:attr/buttonBarButtonStyle"/>
+            <Button
+                android:id="@+id/btn_3"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_margin="2dp"
+                android:text="경기"
+                android:textColor="#000000"
+                android:background="@drawable/btn_pressed_check"
+                android:layout_weight="1"
+                style="?android:attr/buttonBarButtonStyle"/>
+        </TableRow>
+        <TableRow tools:ignore="UselessParent">
+            <Button
+                android:id="@+id/btn_4"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_margin="2dp"
+                android:text="강원"
+                android:textColor="#000000"
+                android:background="@drawable/btn_pressed_check"
+                android:layout_weight="1"
+                style="?android:attr/buttonBarButtonStyle" />
+            <Button
+                android:id="@+id/btn_5"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_margin="2dp"
+                android:text="충남"
+                android:textColor="#000000"
+                android:background="@drawable/btn_pressed_check"
+                android:layout_weight="1"
+                style="?android:attr/buttonBarButtonStyle"/>
+            <Button
+                android:id="@+id/btn_6"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_margin="2dp"
+                android:text="충북"
+                android:textColor="#000000"
+                android:background="@drawable/btn_pressed_check"
+                android:layout_weight="1"
+                style="?android:attr/buttonBarButtonStyle"/>
+        </TableRow>
+        <TableRow tools:ignore="UselessParent">
+            <Button
+                android:id="@+id/btn_7"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_margin="2dp"
+                android:text="경북"
+                android:textColor="#000000"
+                android:background="@drawable/btn_pressed_check"
+                android:layout_weight="1"
+                style="?android:attr/buttonBarButtonStyle" />
+            <Button
+                android:id="@+id/btn_8"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_margin="2dp"
+                android:text="경남"
+                android:textColor="#000000"
+                android:background="@drawable/btn_pressed_check"
+                android:layout_weight="1"
+                style="?android:attr/buttonBarButtonStyle"/>
+            <Button
+                android:id="@+id/btn_9"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_margin="2dp"
+                android:text="제주"
+                android:textColor="#000000"
+                android:background="@drawable/btn_pressed_check"
+                android:layout_weight="1"
+                style="?android:attr/buttonBarButtonStyle"/>
+        </TableRow>
+    </TableLayout>
+
+    <Button
+        android:id="@+id/create_button"
+        android:layout_width="230dp"
+        android:layout_height="55dp"
+        android:layout_marginBottom="20dp"
+        android:gravity="center"
+        android:text="선택 완료"
+        android:textSize="12dp"
+        android:background="@drawable/btn_style"
+        app:layout_constraintTop_toBottomOf="@id/layout_3"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
