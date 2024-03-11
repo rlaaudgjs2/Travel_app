@@ -53,12 +53,11 @@ class HomeFragment : Fragment() {
 //        rvBulletin.adapter = homeBulletinAdapter
 
         binding.btnWriteBulletin.setOnClickListener{
-            showDaysDialog()
-//            parentFragmentManager.beginTransaction().apply {
-//                replace(R.id.mainFrameLayout, WriteBulletinFragment())
-//                addToBackStack(null)
-//                commit()
-//            }
+            parentFragmentManager.beginTransaction().apply {
+                replace(R.id.mainFrameLayout, WriteBulletinFragment())
+                addToBackStack(null)
+                commit()
+            }
         }
         binding.homeSearch.setOnQueryTextFocusChangeListener{ _, hasFocus ->
             if(hasFocus){
@@ -73,23 +72,6 @@ class HomeFragment : Fragment() {
 
 
     }
-    private fun showDaysDialog() {
-        val daysArray = arrayOf("1일", "2일", "3일") // 필요한 일 수 목록
 
-        AlertDialog.Builder(requireContext())
-            .setTitle("일 수 선택")
-            .setItems(daysArray) { dialog, which ->
-                val selectedDaysString = daysArray[which]
-                val fragment = WriteBulletinFragment.newInstance(selectedDaysString)
-                parentFragmentManager.beginTransaction().apply {
-                    replace(R.id.mainFrameLayout, fragment)
-                    addToBackStack(null)
-                    commit()
-                }
-//                Toast.makeText(requireContext(), selectedDaysString, Toast.LENGTH_SHORT).show()
-                dialog.dismiss()
-            }
-            .show()
-    }
 
 }
