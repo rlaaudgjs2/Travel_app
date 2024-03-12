@@ -20,6 +20,6 @@ WriteBulletinFragment 65번째 줄부터 있는, viewmodel에 담긴 내용을 p
  - 이 전까진 이해를 돕기위한 코드. 실질적으로 데이터를 db에 저장할 때 이부분을 잘 봐야 함
  - one, two까지 장소 추가를 하고 난 로그를 보면 recyclerview 하나의 요소 당 title, imgUri, content가 저장된 것을 볼 수 있음
  - 저 placesList를 가지고 db에 삽입하면 될듯
- - WriteBulletinFragment 85번째 줄에 binding.txtWrite.setOnClickListener 부분 주석처리 해놨는데 저게 게시글 작성 버튼임.
+ - WriteBulletinFragment 에 binding.btnRegisterBulletin.setOnClickListener 추가해야함. 이게 오른쪽 위 등록 버튼
  - 저 버튼 눌렀을 때 db에 저장하는 코드 넣으면 될듯.
  - 아직 해시태그는 기능 추가중
