@@ -65,7 +65,7 @@ class WriteBulletinFragment : Fragment() {
         placeViewModel.placesLiveData.observe(viewLifecycleOwner) { places ->
             placesList.clear()
             placesList.addAll(places)
-            Log.e("장소 리스트 확인", places.toString())
+            Log.e("장소 리스트 확인", placesList.toString())
             adapter.notifyDataSetChanged()
         }
         adapter = PlaceAdapter(requireContext(), placesList)
