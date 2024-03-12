@@ -54,7 +54,7 @@ class CreateSchedule : Fragment(){
             val fragment = SelectRegion()
 
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, fragment)
+                .replace(R.id.mainFrameLayout, fragment)
                 .addToBackStack(null)
                 .commit()
         }
