@@ -23,3 +23,9 @@ WriteBulletinFragment 65번째 줄부터 있는, viewmodel에 담긴 내용을 p
  - WriteBulletinFragment 에 binding.btnRegisterBulletin.setOnClickListener 추가해야함. 이게 오른쪽 위 등록 버튼
  - 저 버튼 눌렀을 때 db에 저장하는 코드 넣으면 될듯.
  - 아직 해시태그는 기능 추가중
+
+
+hashtag 작성 fragment 추가
+1. WriteBulletinFragment의 btnRegisterBulletin(게시글 등록) 버튼을 누르면 hashtag 작성 fragment로 이동.
+2. WriteHashTagFragment에서 hashtagList에 사용자가 작성한 해시태그들이 담기게 됨
+3. binding.btnRegisterHashtag.setOnClickListener에 있는 Log를 통해 해시태그 목록을 확인할 수 있음
