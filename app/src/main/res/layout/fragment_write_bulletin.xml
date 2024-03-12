@@ -69,23 +69,6 @@
                 android:layout_gravity="center"
                 android:text="장소 추가"
                 />
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/btn_add_hashtag"
-                android:layout_gravity="center"
-                android:text="해시태그 추가"
-                android:layout_marginTop="30dp"
-                />
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="해시태그를 추가하세요"
-                android:id="@+id/txt_hashtag"
-                android:gravity="center"
-                android:layout_marginTop="15dp"
-                />
-
         </LinearLayout>
 
     </LinearLayout>

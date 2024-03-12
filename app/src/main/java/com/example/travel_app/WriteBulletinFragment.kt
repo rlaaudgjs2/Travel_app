@@ -89,13 +89,20 @@ class WriteBulletinFragment : Fragment() {
 //                commit()
 //            }
 //        }
+        binding.btnRegisterBulletin.setOnClickListener{
+            parentFragmentManager.beginTransaction().apply {
+                replace(R.id.mainFrameLayout, WriteHashTagFragment())
+                addToBackStack(null)
+                commit()
+            }
+        }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        showBottomNavigationView()
-        _binding = null
-    }
+//    override fun onDestroyView() {
+//        super.onDestroyView()
+//        showBottomNavigationView()
+//        _binding = null
+//    }
 
     private fun hideBottomNavigationView(){
         val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)
