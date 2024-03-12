@@ -70,15 +70,15 @@ class WriteBulletinFragment : Fragment() {
         }
         adapter = PlaceAdapter(requireContext(), placesList)
         recyclerView.adapter = adapter
-        addAddPlaceButton()
+//        addAddPlaceButton()
 
-//        binding.btnAddPlace.setOnClickListener{
-//            parentFragmentManager.beginTransaction().apply {
-//                replace(R.id.mainFrameLayout, WriteDayBulletinFragment())
-//                addToBackStack(null)
-//                commit()
-//            }
-//        }
+        binding.btnAddPlace.setOnClickListener{
+            parentFragmentManager.beginTransaction().apply {
+                replace(R.id.mainFrameLayout, WriteDayBulletinFragment())
+                addToBackStack(null)
+                commit()
+            }
+        }
         binding.btnBackspace.setOnClickListener{
             parentFragmentManager.popBackStack()
         }
@@ -106,42 +106,42 @@ class WriteBulletinFragment : Fragment() {
         bottomNavigationView?.visibility = View.VISIBLE
     }
 
-    private fun addAddPlaceButton() {
-        val addPlaceButton = Button(requireContext())
-        addPlaceButton.text = "장소 추가"
-
-        // Button에 대한 LayoutParams 설정
-        val layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-
-        // 여기서는 LinearLayout의 vertical 방향을 사용하여 버튼을 추가하고자 하는 위치를 지정합니다.
-        layoutParams.gravity = Gravity.CENTER_HORIZONTAL
-
-        addPlaceButton.layoutParams = layoutParams
-
-        // Button의 클릭 리스너 설정
-        addPlaceButton.setOnClickListener {
-            parentFragmentManager.beginTransaction().apply {
-                replace(R.id.mainFrameLayout, WriteDayBulletinFragment())
-                addToBackStack(null)
-                commit()
-            }
-        }
-
-        // RecyclerView의 아이템 수에 따라 버튼을 추가하거나 제거합니다.
-        if (placesList.isEmpty()) {
-            // RecyclerView가 비어있을 때는 첫 번째 위치에 버튼을 추가합니다.
-            binding.placeRecycler.addView(addPlaceButton, 0)
-            Log.e("버튼 만듬 첫번쨰", "ㅋㅋ")
-        } else {
-            // RecyclerView에 아이템이 있을 때는 마지막 위치에 버튼을 추가합니다.
-            binding.placeRecycler.addView(addPlaceButton)
-            Log.e("버튼 만듬 그 이후", "ㅋㅋㅋ")
-        }
-
-    }
+//    private fun addAddPlaceButton() {
+//        val addPlaceButton = Button(requireContext())
+//        addPlaceButton.text = "장소 추가"
+//
+//        // Button에 대한 LayoutParams 설정
+//        val layoutParams = LinearLayout.LayoutParams(
+//            LinearLayout.LayoutParams.WRAP_CONTENT,
+//            LinearLayout.LayoutParams.WRAP_CONTENT
+//        )
+//
+//        // 여기서는 LinearLayout의 vertical 방향을 사용하여 버튼을 추가하고자 하는 위치를 지정합니다.
+//        layoutParams.gravity = Gravity.CENTER_HORIZONTAL
+//
+//        addPlaceButton.layoutParams = layoutParams
+//
+//        // Button의 클릭 리스너 설정
+//        addPlaceButton.setOnClickListener {
+//            parentFragmentManager.beginTransaction().apply {
+//                replace(R.id.mainFrameLayout, WriteDayBulletinFragment())
+//                addToBackStack(null)
+//                commit()
+//            }
+//        }
+//
+//        // RecyclerView의 아이템 수에 따라 버튼을 추가하거나 제거합니다.
+//        if (placesList.isEmpty()) {
+//            // RecyclerView가 비어있을 때는 첫 번째 위치에 버튼을 추가합니다.
+//            binding.placeRecycler.addView(addPlaceButton, 0)
+//            Log.e("버튼 만듬 첫번쨰", "ㅋㅋ")
+//        } else {
+//            // RecyclerView에 아이템이 있을 때는 마지막 위치에 버튼을 추가합니다.
+//            binding.placeRecycler.addView(addPlaceButton)
+//            Log.e("버튼 만듬 그 이후", "ㅋㅋㅋ")
+//        }
+//
+//    }
 
     class PlaceAdapter(
         private val context: Context,

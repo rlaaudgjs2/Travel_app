@@ -62,6 +62,14 @@
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 />
 
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/btn_add_place"
+                android:layout_gravity="center"
+                android:text="장소 추가"
+                />
+
 
         </LinearLayout>
 
