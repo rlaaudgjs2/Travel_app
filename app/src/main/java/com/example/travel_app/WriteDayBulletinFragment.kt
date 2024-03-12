@@ -25,7 +25,7 @@ class WriteDayBulletinFragment : Fragment() {
 
     private var selectedImageUri: Uri? = null
 
-    private val componentDayViewModel: ComponentDayViewModel by activityViewModels()
+    private val placeViewModel: PlaceViewModel by activityViewModels()
     private val getContent = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val data: Intent? = result.data
@@ -53,20 +53,20 @@ class WriteDayBulletinFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val selectedDay = arguments?.getString("selectedDay")
-
-        val index = selectedDay?.toInt()?.minus(1)
-        binding.txtWriteDayBulletinDay.text = "Day ${selectedDay}"
+        binding.txtWriteDayBulletinDay.text = "Day "
 
         binding.btnBackspace.setOnClickListener{
             parentFragmentManager.popBackStack()
         }
         binding.btnWriteDayBulletin.setOnClickListener{
-            Log.e("간다", selectedImageUri.toString())
-            componentDayViewModel.selectedTitle = binding.edtTitle.text.toString()
-            componentDayViewModel.selectedUri = selectedImageUri
-            componentDayViewModel.selectedContent = binding.edtContents.text.toString()
-            componentDayViewModel.selectedIndex = index
+
+            val title = binding.edtTitle.text.toString()
+            val imgUri = selectedImageUri
+            val content = binding.edtContents.text.toString()
+
+            placeViewModel.savePlace(title, imgUri, content)
+
+            Log.e("뷰 모델에 삽입", imgUri.toString())
             parentFragmentManager.popBackStack()
         }
         binding.btnUploadImage.setOnClickListener{
@@ -78,14 +78,5 @@ class WriteDayBulletinFragment : Fragment() {
         getContent.launch(intent)
     }
 
-    companion object {
-        fun newInstance(selectedDay: Int, index: Int?): WriteDayBulletinFragment {
-            val fragment = WriteDayBulletinFragment()
-            val args = Bundle()
-            args.putString("selectedDay", selectedDay?.toString())
-            args.putInt("index", index ?: -1)
-            fragment.arguments = args
-            return fragment
-        }
-    }
+
 }
