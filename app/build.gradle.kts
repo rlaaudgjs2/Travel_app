@@ -73,4 +73,9 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.1.0")
     debugImplementation("androidx.compose.ui:ui-tooling:1.1.0")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.1.0")
+
+    implementation("com.kakao.maps.open:android:2.9.2")
+
+    // Kakao maps sdk
+    implementation files('libs/libDaumMapAndroid.jar')
 }

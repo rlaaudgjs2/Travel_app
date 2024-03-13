@@ -24,6 +24,10 @@
             android:name="네이티브앱 키 값"
             android:value="65e1571c0b9d501c7fa536ce6a697638" />
 
+        <meta-data
+            android:name="com.kakao.vectormap.APP_KEY"
+            android:value="34c29a15bcfabcc51fd2b04433679cfb"/>
+
         <activity android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
             android:exported="true">
             <intent-filter>
