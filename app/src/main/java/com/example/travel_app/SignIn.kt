@@ -122,11 +122,11 @@ class SignIn : Fragment() , View.OnClickListener {
     }
 
     override fun onClick(view: View) {
-        val user_id = userIdEditText.text.toString()
-        val user_password = userPasswordEditText.text.toString()
+        val userID = userIdEditText.text.toString()
+        val userPassword = userPasswordEditText.text.toString()
 
         if (view.id == R.id.travel_signIn) {
-            travelSign(user_id, user_password)
+            travelSign(userID, userPassword)
         }
         if(view.id == R.id.kakao_login) {
            kakaoSign()
@@ -148,7 +148,7 @@ class SignIn : Fragment() , View.OnClickListener {
     }
 
 
-    private fun travelSign(user_id: String, user_password: String) {
+    private fun travelSign(userID: String, userPassword: String) {
         Thread {
             try {
                 val url = "http://10.0.2.2/travel_login.php"
@@ -158,8 +158,8 @@ class SignIn : Fragment() , View.OnClickListener {
 
                 val outputStream: OutputStream = connection.outputStream
                 val writer = BufferedWriter(OutputStreamWriter(outputStream, "UTF-8"))
-                val postData = URLEncoder.encode("user_id", "UTF-8") + "=" + URLEncoder.encode(user_id, "UTF-8") + "&" +
-                        URLEncoder.encode("user_password", "UTF-8") + "=" + URLEncoder.encode(user_password, "UTF-8")
+                val postData = URLEncoder.encode("userID", "UTF-8") + "=" + URLEncoder.encode(userID, "UTF-8") + "&" +
+                        URLEncoder.encode("userPassword", "UTF-8") + "=" + URLEncoder.encode(userPassword, "UTF-8")
                 writer.write(postData)
                 writer.flush()
                 writer.close()
@@ -180,7 +180,9 @@ class SignIn : Fragment() , View.OnClickListener {
                 requireActivity().runOnUiThread {
                     if (result == "success") {
                         Log.d(TAG, "travel_Sign: 로그인 성공")
+                        saveUserIdToSharedPreferences(userID)
                         navigateToNaviActivity()
+                        
                         // 성공 시 동작 추가
                     } else {
                         Log.d(TAG, "travel_Sign: 로그인 실패")
@@ -193,9 +195,18 @@ class SignIn : Fragment() , View.OnClickListener {
         }.start()
     }
 
+
+    private fun saveUserIdToSharedPreferences(userID: String) {
+        val sharedPreferences = requireContext().getSharedPreferences("user_info", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("user_id", userID)
+        editor.apply()
+    }
+
     companion object {
         private const val TAG = "SignIn"
     }
+
 
     private fun navigateToNaviActivity() {
         val intent = Intent(requireActivity(), NaviActivity::class.java)

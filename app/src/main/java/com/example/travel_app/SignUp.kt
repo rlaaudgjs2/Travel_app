@@ -35,17 +35,16 @@ class SignUp : Fragment() {
         signUpButton = view.findViewById(R.id.signUp_commit)
 
         signUpButton.setOnClickListener {
-            val user_id = signUpIdEditText.text.toString()
-            val user_password = signUpPasswordEditText.text.toString()
+            val userID = signUpIdEditText.text.toString()
+            val userPassword = signUpPasswordEditText.text.toString()
 
             // 회원가입 요청을 서버로 전송
-            sendSignUpRequest(user_id, user_password)
-            navigateToNaviActivity()
+            sendSignUpRequest(userID, userPassword)
         }
         return view
     }
 
-    private fun sendSignUpRequest(user_id: String, user_password: String) {
+    private fun sendSignUpRequest(userID: String, userPassword: String) {
         val url = "http://10.0.2.2/User_Info.php"
 
         val request = object : StringRequest(
@@ -59,8 +58,8 @@ class SignUp : Fragment() {
 
             override fun getParams(): Map<String, String> {
                 val params = HashMap<String, String>()
-                params["user_id"] = user_id
-                params["user_password"] = user_password
+                params["userID"] = userID
+                params["userPassword"] = userPassword
                 return params
             }
         }

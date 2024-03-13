@@ -10,20 +10,29 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.RecyclerView
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import com.example.travel_app.databinding.FragmentWriteBulletinBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import java.text.SimpleDateFormat
+import java.util.Calendar
 
-
-class WriteBulletinFragment : Fragment() {
+@Suppress("UNREACHABLE_CODE")
+class WriteBulletinFragment : Fragment() , View.OnClickListener{
     // TODO: Rename and change types of parameters
 
     private var _binding: FragmentWriteBulletinBinding? = null
     private val binding get() = _binding!!
+    private lateinit var edt_title : EditText
+
 
     private data class ImageData(val index: Int, val uri: Uri)
 
@@ -40,6 +49,7 @@ class WriteBulletinFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         _binding = FragmentWriteBulletinBinding.inflate(inflater, container, false)
+        edt_title = binding.root.findViewById(R.id.edt_title)
         return binding.root
     }
 
@@ -51,6 +61,7 @@ class WriteBulletinFragment : Fragment() {
         val title = placeViewModel.getTitle()
         val imgUri = placeViewModel.getImageUri()
         val content = placeViewModel.getContent()
+
 
         if (title != null && imgUri != null && content != null) {
             val newPlace = Place(title, imgUri, content)
@@ -85,9 +96,15 @@ class WriteBulletinFragment : Fragment() {
 
         binding.btnRegisterBulletin.setOnClickListener{
             parentFragmentManager.beginTransaction().apply {
-                replace(R.id.mainFrameLayout, WriteHashTagFragment())
-                addToBackStack(null)
-                commit()
+                val WriteTitle = edt_title.text.toString()
+                val userID = getUserInfo()
+//                replace(R.id.mainFrameLayout, WriteHashTagFragment())
+//                addToBackStack(null)
+//                commit()
+                if (userID != null) {
+                    resister(WriteTitle, userID)
+                }
+
             }
         }
     }
@@ -141,4 +158,50 @@ class WriteBulletinFragment : Fragment() {
         }
     }
 
+    override fun onClick(v: View?) {
+        TODO("Not yet implemented")
+        val edt_title = edt_title.text.toString()
+        val userID = getUserInfo()
+
+        if(view?.id == R.id.btn_register_bulletin){
+            if (userID != null) {
+                resister(edt_title, userID)
+            }
+        }
+    }
+
+    private fun resister(title: String, userID: String) {
+
+
+        val calendar = Calendar.getInstance()
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        val writeDate = dateFormat.format(calendar.time)
+        val url = "http://10.0.2.2/bulletin.php"
+
+        val request = object : StringRequest(
+            Request.Method.POST, url,
+            Response.Listener { response ->
+                Log.d("Bulletin", "Server Response: $response")
+            },
+            Response.ErrorListener { error ->
+                Log.e("Bulletin", "Server Error: ${error.toString()}")
+            }) {
+
+            override fun getParams(): Map<String, String> {
+                val params = HashMap<String, String>()
+                params["title"] = title
+                params["writeDate"] = writeDate
+                params["for_ID"] = userID
+                return params
+            }
+        }
+        Volley.newRequestQueue(requireContext()).add(request)
+    }
+
+    private fun getUserInfo(): String? {
+        val sharedPreferences = requireContext().getSharedPreferences("user_info", Context.MODE_PRIVATE)
+        return sharedPreferences.getString("user_id"," ")
+    }
+
 }
+
