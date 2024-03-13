@@ -81,6 +81,7 @@ class WriteBulletinFragment : Fragment() {
         }
         binding.btnBackspace.setOnClickListener{
             parentFragmentManager.popBackStack()
+            showBottomNavigationView()
         }
 //        binding.txtWrite.setOnClickListener{
 //            parentFragmentManager.beginTransaction().apply {
