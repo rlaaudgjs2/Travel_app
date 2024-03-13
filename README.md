@@ -8,4 +8,9 @@
 
   Kotlin 코드는 커밋한 것 확인. 
   bulletin.php파일 htdocs에 넣기( 카카오톡 방에 올림)
+
+
   
+![image](https://github.com/rlaaudgjs2/Travel_app/assets/68803644/66f6f73c-8f3b-42d0-a5a3-8e2f836c1157)
+
+   이렇게 작성하고 등록한뒤, 다시 글쓰기를 들어가면 전에 작성한 내용이 그대로 있음
