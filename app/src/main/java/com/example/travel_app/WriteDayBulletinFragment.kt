@@ -13,9 +13,12 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import com.example.travel_app.databinding.FragmentWriteDayBulletinBinding
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 
 class WriteDayBulletinFragment : Fragment() {
@@ -40,6 +43,11 @@ class WriteDayBulletinFragment : Fragment() {
         }
     }
 
+    companion object {
+        const val BASE_URL = "https://dapi.kakao.com/"
+        const val API_KEY = "KakaoAK 4ce71f70a48456620bfc596e5b538bd1"  // REST API 키
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -57,6 +65,10 @@ class WriteDayBulletinFragment : Fragment() {
 
         binding.btnBackspace.setOnClickListener{
             parentFragmentManager.popBackStack()
+        }
+        binding.btnSearchKakao.setOnClickListener{
+            val keyword = binding.edtTestKakao.text.toString()
+            searchKeyword(keyword)
         }
         binding.btnWriteDayBulletin.setOnClickListener{
 
@@ -78,5 +90,31 @@ class WriteDayBulletinFragment : Fragment() {
         getContent.launch(intent)
     }
 
+    private fun searchKeyword(keyword: String) {
+        val retrofit = Retrofit.Builder()   // Retrofit 구성
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+        val api = retrofit.create(KakaoAPI::class.java)   // 통신 인터페이스를 객체로 생성
+
+        val call = api.getSearchKeyword(API_KEY, keyword)   // 검색 조건 입력
+
+        // API 서버에 요청
+        call.enqueue(object: Callback<ResultSearchKeyword> {
+            override fun onResponse(
+                call: Call<ResultSearchKeyword>,
+                response: Response<ResultSearchKeyword>
+            ) {
+                // 통신 성공 (검색 결과는 response.body()에 담겨있음)
+                Log.d("Test", "Raw: ${response.raw()}")
+                Log.d("Test", "Body: ${response.body()}")
+            }
+
+            override fun onFailure(call: Call<ResultSearchKeyword>, t: Throwable) {
+                // 통신 실패
+                Log.w("MainActivity", "통신 실패: ${t.message}")
+            }
+        })
+    }
 
 }
