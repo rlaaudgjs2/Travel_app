@@ -19,7 +19,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.example.travel_app.databinding.ActivityNaviBinding
 
-private const val TAG_PLANNER = "planner_fragment"
+private const val TAG_PLANNER = "my_schedule"
 private const val TAG_HOME = "home_fragment"
 private const val TAG_MORE = "more_fragment"
 private lateinit var homeBulletinAdapter: HomeBulletinAdapter
@@ -106,7 +106,7 @@ class NaviActivity : AppCompatActivity() {
             when(item.itemId){
                 R.id.homeFragment -> setFragment(HomeFragment())
                 R.id.moreFragment -> setFragment(MoreFragment())
-                R.id.plannerFragment -> setFragment(PlannerFragment())
+                R.id.plannerFragment -> setFragment(MySchedule())
             }
             true
         }

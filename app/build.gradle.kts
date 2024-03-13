@@ -73,4 +73,10 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.1.0")
     debugImplementation("androidx.compose.ui:ui-tooling:1.1.0")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.1.0")
+
+    implementation ("com.github.prolificinteractive:material-calendarview:2.0.1")
+    implementation("com.jakewharton.threetenabp:threetenabp:1.3.0")
+
+
+
 }
