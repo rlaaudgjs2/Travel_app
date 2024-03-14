@@ -14,3 +14,13 @@
 ![image](https://github.com/rlaaudgjs2/Travel_app/assets/68803644/66f6f73c-8f3b-42d0-a5a3-8e2f836c1157)
 
    이렇게 작성하고 등록한뒤, 다시 글쓰기를 들어가면 전에 작성한 내용이 그대로 있음
+
+
+ # 상세 게시판(Day Table 구축)
+ ![image](https://github.com/rlaaudgjs2/Travel_app/assets/68803644/cbe954b0-93b3-4128-a6da-f4277e2b0934)
+  - 테이블 이름 : day
+  - 깃허브에 올린 부분(상세 게시판 데이터베이스 구축) 확인
+  - 위의 사진과 같이 키 설정
+  - 이미지 파일 인코딩 하여 BLOB에 저장.
+  - 추후 게시판 가져올 때 디코딩해야 사진 확인 가능
+  - day.php는 톡방 공유 예정  
