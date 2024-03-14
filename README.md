@@ -29,7 +29,25 @@
  - 아직 해시태그는 기능 추가중
 
 
+
+
 hashtag 작성 fragment 추가
 1. WriteBulletinFragment의 btnRegisterBulletin(게시글 등록) 버튼을 누르면 hashtag 작성 fragment로 이동.
 2. WriteHashTagFragment에서 hashtagList에 사용자가 작성한 해시태그들이 담기게 됨
 3. binding.btnRegisterHashtag.setOnClickListener에 있는 Log를 통해 해시태그 목록을 확인할 수 있음
+
+
+------------------------------------------------------------------------------------------------------
+0314 버그 수정
+
+
+<img width="435" alt="스크린샷 2024-03-14 오후 5 27 38" src="https://github.com/rlaaudgjs2/Travel_app/assets/81517768/2cfbe50a-583b-4d73-a78d-bd6b73ae7b9c">
+
+1. PlaceVieModel.kt에 resetPlaceData() 함수 추가
+
+
+<img width="551" alt="스크린샷 2024-03-14 오후 5 29 37" src="https://github.com/rlaaudgjs2/Travel_app/assets/81517768/c15644c4-5066-4792-aea3-4770b2496c14">
+<img width="390" alt="스크린샷 2024-03-14 오후 5 28 38" src="https://github.com/rlaaudgjs2/Travel_app/assets/81517768/0fcb8a5c-3f15-43f1-b94b-57af865f8e5c">
+
+2. HomeFragment에 onResume() 오버라이드 하고 안에 placeViewModel.resetPlaceData() 추가
+
