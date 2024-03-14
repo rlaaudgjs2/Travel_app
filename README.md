@@ -1,4 +1,4 @@
-
+# 게시판(bulletin Table 구축)
 ![image](https://github.com/rlaaudgjs2/Travel_app/assets/68803644/54895f10-c724-4833-941d-1a70eb7d2cc7)
 
   bulletin테이블을 다음과 같이 만듬
