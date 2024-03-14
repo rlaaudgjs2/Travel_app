@@ -158,8 +158,8 @@ class SignIn : Fragment() , View.OnClickListener {
 
                 val outputStream: OutputStream = connection.outputStream
                 val writer = BufferedWriter(OutputStreamWriter(outputStream, "UTF-8"))
-                val postData = URLEncoder.encode("user_id", "UTF-8") + "=" + URLEncoder.encode(user_id, "UTF-8") + "&" +
-                        URLEncoder.encode("user_password", "UTF-8") + "=" + URLEncoder.encode(user_password, "UTF-8")
+                val postData = URLEncoder.encode("userID", "UTF-8") + "=" + URLEncoder.encode(user_id, "UTF-8") + "&" +
+                        URLEncoder.encode("userPassword", "UTF-8") + "=" + URLEncoder.encode(user_password, "UTF-8")
                 writer.write(postData)
                 writer.flush()
                 writer.close()

@@ -42,4 +42,13 @@ class PlaceViewModel : ViewModel() {
     fun getContent(): String? {
         return content
     }
+
+    fun resetPlaceData() {
+        this.title = null
+        this.imageUri = null
+        this.content = null
+        _placesLiveData.value = emptyList()
+//        placesLiveData.value = emptyList()
+    }
+
 }
