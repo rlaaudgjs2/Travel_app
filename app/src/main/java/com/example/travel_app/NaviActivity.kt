@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
+import android.util.Log
 import android.widget.Button
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,6 +19,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.example.travel_app.databinding.ActivityNaviBinding
+import com.google.android.libraries.places.api.Places
+import com.example.travel_app.BuildConfig
 
 private const val TAG_PLANNER = "my_schedule"
 private const val TAG_HOME = "home_fragment"
@@ -96,6 +99,24 @@ class NaviActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityNaviBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Define a variable to hold the Places API key.
+        val apiKey = BuildConfig.PLACES_API_KEY
+
+        // Log an error if apiKey is not set.
+        if (apiKey.isEmpty() || apiKey == "DEFAULT_API_KEY") {
+            Log.e("Places test", "No api key")
+            finish()
+            return
+        }
+
+        // Initialize the SDK
+        Places.initializeWithNewPlacesApiEnabled(applicationContext, apiKey)
+
+        // Create a new PlacesClient instance
+        val placesClient = Places.createClient(this)
+
+
 
         //하단탭에서 홈 탭이 눌린 것으로 초기화
         binding.navigationView.menu.findItem(R.id.homeFragment)?.isChecked = true
