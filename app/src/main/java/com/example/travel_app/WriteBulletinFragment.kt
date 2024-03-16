@@ -40,10 +40,10 @@ class WriteBulletinFragment : Fragment() {
 
     private val imageList = mutableListOf<ImageData>()
 
-    private val placeViewModel: PlaceViewModel by activityViewModels()
+    private val detailBulletinViewModel: DetailBulletinViewModel by activityViewModels()
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: PlaceAdapter
-    private val placesList = mutableListOf<Place>()
+    private lateinit var adapter: DetailBulletinAdapter
+    private val placesList = mutableListOf<DetailBulletin>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -60,29 +60,29 @@ class WriteBulletinFragment : Fragment() {
 
         hideBottomNavigationView()
 
-        val title = placeViewModel.getTitle()
-        val imgUri = placeViewModel.getImageUri()
-        val content = placeViewModel.getContent()
+        val title = detailBulletinViewModel.getTitle()
+        val imgUri = detailBulletinViewModel.getImageUri()
+        val content = detailBulletinViewModel.getContent()
 
 
         if (title != null && imgUri != null && content != null) {
-            val newPlace = Place(title, imgUri, content)
+            val newDetailBulletin = DetailBulletin(title, imgUri, content)
 //            day()
-            placeViewModel.addPlace(newPlace)
+            detailBulletinViewModel.addPlace(newDetailBulletin)
         }
 
-        Log.e("뷰 모델 내용 확인", placeViewModel.getTitle().toString())
+        Log.e("뷰 모델 내용 확인", detailBulletinViewModel.getTitle().toString())
 
         recyclerView = binding.placeRecycler
 
 
-        placeViewModel.placesLiveData.observe(viewLifecycleOwner) { places ->
+        detailBulletinViewModel.detailBulletinLiveData.observe(viewLifecycleOwner) { places ->
             placesList.clear()
             placesList.addAll(places)
 //            Log.e("장소 리스트 확인", placesList.toString())
             adapter.notifyDataSetChanged()
         }
-        adapter = PlaceAdapter(requireContext(), placesList)
+        adapter = DetailBulletinAdapter(requireContext(), placesList)
         recyclerView.adapter = adapter
 
         binding.btnAddPlace.setOnClickListener{
@@ -135,35 +135,35 @@ class WriteBulletinFragment : Fragment() {
     }
 
 
-    class PlaceAdapter(
+    class DetailBulletinAdapter(
         private val context: Context,
-        private val places: List<Place>
-    ) : RecyclerView.Adapter<PlaceAdapter.PlaceViewHolder>() {
+        private val detailBulletins: List<DetailBulletin>
+    ) : RecyclerView.Adapter<DetailBulletinAdapter.DetailBulletinViewHolder>() {
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PlaceViewHolder {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DetailBulletinViewHolder {
             val view = LayoutInflater.from(context).inflate(R.layout.place_data_item_list, parent, false)
-            return PlaceViewHolder(view)
+            return DetailBulletinViewHolder(view)
         }
 
-        override fun onBindViewHolder(holder: PlaceViewHolder, position: Int) {
-            val place = places[position]
+        override fun onBindViewHolder(holder: DetailBulletinViewHolder, position: Int) {
+            val place = detailBulletins[position]
             holder.bind(place)
         }
 
         override fun getItemCount(): Int {
-            return places.size
+            return detailBulletins.size
         }
 
-        inner class PlaceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        inner class DetailBulletinViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             private val titleTextView: TextView = itemView.findViewById(R.id.txt_place_title)
             private val imageView: ImageView = itemView.findViewById(R.id.img_place_image)
             private val descriptionTextView: TextView = itemView.findViewById(R.id.txt_place_content)
 
-            fun bind(place: Place) {
-                titleTextView.text = place.title
+            fun bind(detailBulletin: DetailBulletin) {
+                titleTextView.text = detailBulletin.title
                 // 이미지 설정 및 텍스트 설정
-                imageView.setImageURI(place.imageUri)
-                descriptionTextView.text = place.content
+                imageView.setImageURI(detailBulletin.imageUri)
+                descriptionTextView.text = detailBulletin.content
             }
         }
     }
@@ -216,7 +216,7 @@ class WriteBulletinFragment : Fragment() {
         Volley.newRequestQueue(requireContext()).add(request)
     }
 
-    private fun day(placesList: MutableList<Place>, bulletinId: Int) {
+    private fun day(placesList: MutableList<DetailBulletin>, bulletinId: Int) {
         val url = "http://10.0.2.2/day.php"
         val requestQueue = Volley.newRequestQueue(requireContext())
 

@@ -13,8 +13,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import com.example.travel_app.databinding.FragmentWriteDayBulletinBinding
 
 
@@ -25,7 +23,7 @@ class WriteDayBulletinFragment : Fragment() {
 
     private var selectedImageUri: Uri? = null
 
-    private val placeViewModel: PlaceViewModel by activityViewModels()
+    private val detailBulletinViewModel: DetailBulletinViewModel by activityViewModels()
     private val getContent = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val data: Intent? = result.data
@@ -64,7 +62,7 @@ class WriteDayBulletinFragment : Fragment() {
             val imgUri = selectedImageUri
             val content = binding.edtContents.text.toString()
 
-            placeViewModel.savePlace(title, imgUri, content)
+            detailBulletinViewModel.saveDetailBulletin(title, imgUri, content)
 
             Log.e("뷰 모델에 삽입", imgUri.toString())
             parentFragmentManager.popBackStack()
