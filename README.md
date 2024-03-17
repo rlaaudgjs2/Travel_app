@@ -25,4 +25,16 @@
   - 위의 사진과 같이 키 설정
   - 이미지 파일 인코딩 하여 BLOB에 저장.
   - 추후 게시판 가져올 때 디코딩해야 사진 확인 가능
-  - day.php는 톡방 공유 예정  
+  - day.php는 톡방 공유 예정
+
+
+
+
+# 규원 / 구글 플레이스 API를 이용해 장소 검색 후 장소 이름, id, 지역, 카테고리 가져오기
+
+TestAPIFragment 코드 하단에 fetchPlaceDetails() 함수에 val place, val placeName, val placeAddress, val placeTypes로 내용들 가져옴
+
+<img width="630" alt="스크린샷 2024-03-17 오후 4 07 44" src="https://github.com/rlaaudgjs2/Travel_app/assets/81517768/4dfc082f-4561-4ab5-aecd-f9b0cf1a8f99">
+
+## 구글 api 프로젝트 매니저 추가, api 키 추가하는 방법 등은 모였을 때 알려줌
+
