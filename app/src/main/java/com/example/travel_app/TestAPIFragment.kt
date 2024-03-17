@@ -13,10 +13,14 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.example.travel_app.BuildConfig
 import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.libraries.places.api.model.AddressComponent
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 import com.google.android.libraries.places.api.model.TypeFilter
+import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
+import com.google.android.libraries.places.api.net.PlacesClient
 
 class TestAPIFragment : Fragment() {
 
@@ -84,24 +88,8 @@ class TestAPIFragment : Fragment() {
                 // TODO: Get info about the selected place.
                 Log.i(TAG, "Place: ${place.name}, ${place.id}")
 
-                // Get info about the selected place.
-                val placeName = place.name
-                val placeId = place.id
-                val placeAddress = place.address // 장소의 주소
+                fetchPlaceDetails(place.id, placesClient)
 
-                // Check if place has categories
-                val placeTypes = place.placeTypes // 장소의 카테고리 리스트
-                val placeCategories = mutableListOf<String>()
-                placeTypes?.forEach { type ->
-                    val category = type.toUpperCase() // 카테고리 이름을 대문자로 변환
-                    placeCategories.add(category)
-                }
-                Log.i(TAG, "region: $placeTypes")
-                // Log the retrieved inf
-                // Log the retrieved information
-                Log.i(TAG, "Place: $placeName, $placeId, Address: $placeAddress")
-                Log.i(TAG, "Categories: $placeCategories")
-//                Log.i(TAG, "Locality: $placeLocality")
             }
 
             override fun onError(status: Status) {
@@ -109,5 +97,28 @@ class TestAPIFragment : Fragment() {
                 Log.i(TAG, "An error occurred: $status")
             }
         })
+    }
+
+    fun fetchPlaceDetails(placeId: String, placesClient: PlacesClient) {
+        // Place Details 요청을 생성
+        val placeRequest = FetchPlaceRequest.builder(placeId, listOf(Place.Field.NAME, Place.Field.ADDRESS, Place.Field.TYPES))
+            .build()
+
+        // Place Details 요청을 보냄
+        placesClient.fetchPlace(placeRequest)
+            .addOnSuccessListener(OnSuccessListener { response ->
+                val place = response.place
+                // 성공적으로 장소 정보를 가져온 경우
+                val placeName = place.name
+                val placeAddress = place.address
+                val placeTypes = place.placeTypes
+                // 장소 정보를 처리하거나 출력
+                // 예를 들어, Log에 출력
+                Log.i(TAG, "Place Details - Name: $placeName, Address: $placeAddress, Types: $placeTypes")
+            })
+            .addOnFailureListener(OnFailureListener { exception ->
+                // 장소 정보를 가져오는 데 실패한 경우
+                Log.e(TAG, "Place Details request failed: ${exception.message}")
+            })
     }
 }
