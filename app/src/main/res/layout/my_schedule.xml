@@ -18,6 +18,7 @@
         android:layout_marginEnd="40dp"
         android:layout_marginBottom="80dp">
         <TextView
+            android:id="@+id/textBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="내 여행 일정"
@@ -29,7 +30,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="편집"
-            android:layout_marginStart="200dp"
+            android:textSize="15dp"
+            android:clickable="true"
+            android:layout_marginStart="180dp"
             />
     </LinearLayout>
     <LinearLayout
@@ -54,7 +57,7 @@
         android:id="@+id/create_button"
         android:layout_width="230dp"
         android:layout_height="55dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="80dp"
         android:gravity="center"
         android:background="@drawable/btn_style"
         android:text="새 일정 만들기"

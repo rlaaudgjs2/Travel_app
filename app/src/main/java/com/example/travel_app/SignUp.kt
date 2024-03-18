@@ -46,7 +46,7 @@ class SignUp : Fragment() {
     }
 
     private fun sendSignUpRequest(user_id: String, user_password: String) {
-        val url = "http://10.0.2.2/User_Info.php"
+        val url = "http://10.0.2.2/UserInfo.php"
 
         val request = object : StringRequest(
             Request.Method.POST, url,

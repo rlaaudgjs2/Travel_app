@@ -8,6 +8,8 @@ import com.prolificinteractive.materialcalendarview.DayViewFacade
 import java.util.Calendar
 
 class CalendarDecorator {
+
+
     class SundayDecorator : DayViewDecorator {
         private val calendar = Calendar.getInstance()
         override fun shouldDecorate(day: CalendarDay?): Boolean {
