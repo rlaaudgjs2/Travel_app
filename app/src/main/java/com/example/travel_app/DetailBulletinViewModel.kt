@@ -5,15 +5,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class PlaceViewModel : ViewModel() {
-    private val _placesLiveData = MutableLiveData<List<Place>>()
-    val placesLiveData: LiveData<List<Place>> = _placesLiveData
+class DetailBulletinViewModel : ViewModel() {
+    private val _detailBulletinLiveData = MutableLiveData<List<DetailBulletin>>()
+    val detailBulletinLiveData: LiveData<List<DetailBulletin>> = _detailBulletinLiveData
 
-    fun addPlace(place: Place?) {
-        val currentList = _placesLiveData.value.orEmpty().toMutableList()
-        place?.let {
+    fun addPlace(detailBulletin: DetailBulletin?) {
+        val currentList = _detailBulletinLiveData.value.orEmpty().toMutableList()
+        detailBulletin?.let {
             currentList.add(it)
-            _placesLiveData.value = currentList
+            _detailBulletinLiveData.value = currentList
         }
     }
     // 소제목, 이미지 URI, 내용을 저장하는 변수들
@@ -22,7 +22,7 @@ class PlaceViewModel : ViewModel() {
     private var content: String? = null
 
     // 소제목, 이미지 URI, 내용을 저장하는 메서드
-    fun savePlace(title: String?, imageUri: Uri?, content: String?) {
+    fun saveDetailBulletin(title: String?, imageUri: Uri?, content: String?) {
         this.title = title
         this.imageUri = imageUri
         this.content = content
