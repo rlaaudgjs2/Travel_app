@@ -111,6 +111,11 @@ class TestAPIFragment : Fragment() {
                 // 성공적으로 장소 정보를 가져온 경우
                 val placeName = place.name
                 val placeAddress = place.address
+
+                val placeRegion = placeAddress.split(" ")
+
+                Log.e(TAG, "Region: ${placeRegion.get(1)}")
+                Log.e(TAG, "SmallRegion: ${placeRegion.get(2)}")
                 val placeTypes = place.placeTypes
                 // 장소 정보를 처리하거나 출력
                 // 예를 들어, Log에 출력
