@@ -36,7 +36,15 @@ TestAPIFragment 코드 하단에 fetchPlaceDetails() 함수에 val place, val pl
 
 <img width="630" alt="스크린샷 2024-03-17 오후 4 07 44" src="https://github.com/rlaaudgjs2/Travel_app/assets/81517768/4dfc082f-4561-4ab5-aecd-f9b0cf1a8f99">
 
+
 <img width="452" alt="image" src="https://github.com/rlaaudgjs2/Travel_app/assets/81517768/8ab6b42a-b11d-4648-bb00-54ebf4f8fd1e">
 
 ## 구글 api 프로젝트 매니저 추가, api 키 추가하는 방법 등은 모였을 때 알려줌
+
+# 명헌 / id값 정수값만 넘어가는 버그
+
+
+![image](https://github.com/rlaaudgjs2/Travel_app/assets/68803644/260cedde-9266-4b18-870f-681cdab28e34)
+## 현재 다음과 같이 iss로 값을 넘기게 되었는데, i는 Integer값으로 정수 값이라고 서버에 알려주는 것임. s는 String으로 문자열 값을 넘긴다는 뜻 즉 현재 정수 값을 데이터로 보낸다는 뜻이므로 i를 s로 변환해 문자열로 바꿔줄 것.
+
 
