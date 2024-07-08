@@ -42,4 +42,12 @@ class DetailBulletinViewModel : ViewModel() {
     fun getContent(): String? {
         return content
     }
+
+    //데이터 초기화
+    fun clearData() {
+        _detailBulletinLiveData.value = emptyList()  // 장소 목록 초기화
+        title = null
+        imageUri = null
+        content = null
+    }
 }
