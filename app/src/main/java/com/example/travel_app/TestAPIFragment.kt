@@ -44,16 +44,21 @@ class TestAPIFragment : Fragment() {
 
         // Log an error if apiKey is not set.
         if (apiKey.isEmpty() || apiKey == "DEFAULT_API_KEY") {
-            Log.e("Places test", "No api key")
+            Log.e("Places test", "No API key")
             activity?.finish()
             return
         }
 
         // Initialize the SDK
-        Places.initialize(requireContext(), apiKey)
+        try {
+            Places.initialize(requireContext(), apiKey)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error initializing Places SDK: ${e.message}")
+            return
+        }
 
         // Create a new PlacesClient instance
-        val placesClient = Places.createClient(requireActivity())
+        val placesClient = Places.createClient(requireContext())
 
         // Initialize the AutocompleteSupportFragment.
         val autocompleteFragment =
@@ -85,16 +90,15 @@ class TestAPIFragment : Fragment() {
         // Set up a PlaceSelectionListener to handle the response.
         autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
-                // TODO: Get info about the selected place.
+                // Get info about the selected place.
                 Log.i(TAG, "Place: ${place.name}, ${place.id}")
 
                 fetchPlaceDetails(place.id, placesClient)
-
             }
 
             override fun onError(status: Status) {
-                // TODO: Handle the error.
-                Log.i(TAG, "An error occurred: $status")
+                // Handle the error.
+                Log.e(TAG, "An error occurred: $status")
             }
         })
     }
@@ -106,24 +110,27 @@ class TestAPIFragment : Fragment() {
 
         // Place Details 요청을 보냄
         placesClient.fetchPlace(placeRequest)
-            .addOnSuccessListener(OnSuccessListener { response ->
+            .addOnSuccessListener { response ->
                 val place = response.place
                 // 성공적으로 장소 정보를 가져온 경우
                 val placeName = place.name
                 val placeAddress = place.address
 
-                val placeRegion = placeAddress.split(" ")
+                val placeRegion = placeAddress?.split(" ")
 
-                Log.e(TAG, "Region: ${placeRegion.get(1)}")
-                Log.e(TAG, "SmallRegion: ${placeRegion.get(2)}")
-                val placeTypes = place.placeTypes
+                if (placeRegion != null && placeRegion.size > 2) {
+                    Log.e(TAG, "Region: ${placeRegion[1]}")
+                    Log.e(TAG, "SmallRegion: ${placeRegion[2]}")
+                }
+
+                val placeTypes = place.types
                 // 장소 정보를 처리하거나 출력
                 // 예를 들어, Log에 출력
                 Log.i(TAG, "Place Details - Name: $placeName, Address: $placeAddress, Types: $placeTypes")
-            })
-            .addOnFailureListener(OnFailureListener { exception ->
+            }
+            .addOnFailureListener { exception ->
                 // 장소 정보를 가져오는 데 실패한 경우
                 Log.e(TAG, "Place Details request failed: ${exception.message}")
-            })
+            }
     }
 }
