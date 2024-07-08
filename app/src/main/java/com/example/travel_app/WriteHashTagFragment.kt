@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
 import com.example.travel_app.databinding.FragmentWriteBulletinBinding
 import com.example.travel_app.databinding.FragmentWriteHashTagBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -16,7 +17,7 @@ class WriteHashTagFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val hashtagList = mutableListOf<String>()
-
+    private val detailBulletinViewModel: DetailBulletinViewModel by activityViewModels()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -30,6 +31,9 @@ class WriteHashTagFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         hideBottomNavigationView()
+
+        //해시태그 작성 칸으로 넘어왔을 때 이전에 작성했던 내용들이 담긴 ViewModel 초기화
+        detailBulletinViewModel.clearData()
 
         hashtagList.clear()
         binding.txtShowHashtag.setText("")
