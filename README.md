@@ -48,3 +48,6 @@ TestAPIFragment 코드 하단에 fetchPlaceDetails() 함수에 val place, val pl
 ## 현재 다음과 같이 iss로 값을 넘기게 되었는데, i는 Integer값으로 정수 값이라고 서버에 알려주는 것임. s는 String으로 문자열 값을 넘긴다는 뜻 즉 현재 정수 값을 데이터로 보낸다는 뜻이므로 i를 s로 변환해 문자열로 바꿔줄 것.
 
 
+# 규원 (7월 9일 화요일) / WriteDayBulletinFragment에서 장소 검색, 찜한 장소 버튼 추가
+
+장소 검색을 클릭하면 구글맵 검색 창으로 이동, 검색 후 나온 장소를 클릭하면 다시 WriteDayBulletinFragment로 돌아와 해당 장소의 이름을 textview에 띄움
