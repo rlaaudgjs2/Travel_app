@@ -51,3 +51,9 @@ TestAPIFragment 코드 하단에 fetchPlaceDetails() 함수에 val place, val pl
 # 규원 (7월 9일 화요일) / WriteDayBulletinFragment에서 장소 검색, 찜한 장소 버튼 추가
 
 장소 검색을 클릭하면 구글맵 검색 창으로 이동, 검색 후 나온 장소를 클릭하면 다시 WriteDayBulletinFragment로 돌아와 해당 장소의 이름을 textview에 띄움
+
+# 명헌 (7월 9일 화요일) / 배포 생각 시 문제 점 발견 
+
+현재 db연동을 php문을 사용하여 데이터베이스에 저장하는 방식을 사용하고 있는데, 보안 및 성능 저하에 문제가 크다는 점을 알게 되었다. 그래서 현 json을 활용한 데이터베이스 저장을 springboot로 데이터 전송하는 방식으로 바꿔야 한다는 점을 인지. 현재 적용중
+![image](https://github.com/rlaaudgjs2/Travel_app/assets/68803644/ac6a2081-6b90-4628-8f04-7fe463837694)
+
