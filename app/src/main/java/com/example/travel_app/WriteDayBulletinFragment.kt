@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -13,6 +15,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.example.travel_app.databinding.FragmentWriteDayBulletinBinding
 
 
@@ -23,6 +27,7 @@ class WriteDayBulletinFragment : Fragment() {
 
     private var selectedImageUri: Uri? = null
 
+    private lateinit var tempPlaceViewModel: TempPlaceViewModel
     private val detailBulletinViewModel: DetailBulletinViewModel by activityViewModels()
     private val getContent = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -51,6 +56,11 @@ class WriteDayBulletinFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        tempPlaceViewModel = ViewModelProvider(requireActivity()).get(TempPlaceViewModel::class.java)
+
+        tempPlaceViewModel.placeName.observe(viewLifecycleOwner){ placeName ->
+            binding.txtPlace.text = placeName
+        }
         binding.txtWriteDayBulletinDay.text = "Day "
 
         binding.btnBackspace.setOnClickListener{
@@ -67,6 +77,20 @@ class WriteDayBulletinFragment : Fragment() {
             Log.e("뷰 모델에 삽입", imgUri.toString())
             parentFragmentManager.popBackStack()
         }
+        //구글맵 검색에서 가져온 장소 이름을 넣음
+//        arguments?.let {
+//            val placeName = it.getString("placeName")
+//            binding.txtPlace.text = placeName
+//        }
+
+        binding.btnPlaceSearch.setOnClickListener{
+            parentFragmentManager.beginTransaction().apply {
+                replace(R.id.mainFrameLayout, TestAPIFragment(), "TestAPIFragment")
+                addToBackStack(null)
+                commit()
+            }
+        }
+
         binding.btnUploadImage.setOnClickListener{
             openGallery()
         }
@@ -75,6 +99,10 @@ class WriteDayBulletinFragment : Fragment() {
         val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         getContent.launch(intent)
     }
+    fun updatePlaceInfo(placeName: String?){
+        binding.txtPlace.text = placeName
+    }
+
 
 
 }

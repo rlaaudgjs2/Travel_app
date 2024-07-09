@@ -87,7 +87,7 @@ class WriteBulletinFragment : Fragment() {
 
         binding.btnAddPlace.setOnClickListener{
             parentFragmentManager.beginTransaction().apply {
-                replace(R.id.mainFrameLayout, WriteDayBulletinFragment())
+                replace(R.id.mainFrameLayout, WriteDayBulletinFragment(), "WriteDayBulletinFragment")
                 addToBackStack(null)
                 commit()
             }

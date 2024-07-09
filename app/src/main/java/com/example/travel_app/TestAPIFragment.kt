@@ -1,11 +1,14 @@
 package com.example.travel_app
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.common.api.Status
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
@@ -26,6 +29,7 @@ class TestAPIFragment : Fragment() {
 
     private val TAG = "TestAPIFragment"
 
+    private lateinit var tempPlaceViewModel: TempPlaceViewModel
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -37,6 +41,7 @@ class TestAPIFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        tempPlaceViewModel = ViewModelProvider(requireActivity()).get(TempPlaceViewModel::class.java)
         // Define a variable to hold the Places API key.
         val apiKey = BuildConfig.PLACES_API_KEY
 
@@ -94,6 +99,7 @@ class TestAPIFragment : Fragment() {
                 Log.i(TAG, "Place: ${place.name}, ${place.id}")
 
                 fetchPlaceDetails(place.id, placesClient)
+
             }
 
             override fun onError(status: Status) {
@@ -125,6 +131,15 @@ class TestAPIFragment : Fragment() {
 
                 val placeTypes = place.types
                 // 장소 정보를 처리하거나 출력
+//                val fragment = WriteDayBulletinFragment().apply {
+//                    arguments = Bundle().apply{
+//                        putString("placeName", placeName)
+//                        putString("placeAddress", placeAddress)
+//                    }
+//                }
+                // WriteDayBulletinFragment를 찾고 데이터 전달
+                tempPlaceViewModel.setPlaceName(placeName ?: "")
+                requireActivity().supportFragmentManager.popBackStack()
                 // 예를 들어, Log에 출력
                 Log.i(TAG, "Place Details - Name: $placeName, Address: $placeAddress, Types: $placeTypes")
             }
@@ -132,5 +147,7 @@ class TestAPIFragment : Fragment() {
                 // 장소 정보를 가져오는 데 실패한 경우
                 Log.e(TAG, "Place Details request failed: ${exception.message}")
             }
+//        parentFragmentManager.popBackStack()
+
     }
 }
