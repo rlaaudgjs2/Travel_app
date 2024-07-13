@@ -96,5 +96,6 @@ dependencies {
     implementation("com.google.android.libraries.places:places:3.3.0")
 
 
+    implementation("squareup.retrofit2:retrofit:2.11.0")
 
 }
