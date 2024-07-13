@@ -5,6 +5,6 @@ import java.io.Serializable
 
 data class DetailBulletin(
     val title: String,
-    val imageUri: Uri,
+    val imageUri: Uri?,
     val content: String
 ) : Serializable
