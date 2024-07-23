@@ -30,7 +30,7 @@
 
 
 ## 언어
-- php
+- spring boot
 - kotlin
 
 ## 담당 분야
