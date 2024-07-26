@@ -21,6 +21,8 @@ import androidx.fragment.app.FragmentManager
 import com.example.travel_app.databinding.ActivityNaviBinding
 import com.google.android.libraries.places.api.Places
 import com.example.travel_app.BuildConfig
+import com.example.travel_app.retrofit.RetrofitAPI
+import com.example.travel_app.retrofit.RetrofitClient
 
 private const val TAG_PLANNER = "my_schedule"
 private const val TAG_HOME = "home_fragment"

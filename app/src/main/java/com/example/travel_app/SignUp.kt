@@ -8,16 +8,26 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
+//import com.android.volley.Request
+//import com.android.volley.Response
+//import com.android.volley.toolbox.StringRequest
+//import com.android.volley.toolbox.Volley
+import com.example.travel_app.retrofit.RetrofitAPI
+import com.example.travel_app.retrofit.RetrofitClient
+import com.example.travel_app.retrofit.SignUpData
+import com.example.travel_app.retrofit.SignUpResponse
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class SignUp : Fragment() {
     private lateinit var signUpIdEditText: EditText
     private lateinit var signUpPasswordEditText: EditText
     private lateinit var signUpButton: Button
+
+    private val service: RetrofitAPI by lazy { RetrofitClient.getClient().create(RetrofitAPI::class.java) }
 
     private fun navigateToNaviActivity() {
         val intent = Intent(requireActivity(), NaviActivity::class.java)
@@ -38,31 +48,52 @@ class SignUp : Fragment() {
             val userID = signUpIdEditText.text.toString()
             val userPassword = signUpPasswordEditText.text.toString()
 
-            // 회원가입 요청을 서버로 전송
-            sendSignUpRequest(userID, userPassword)
+//            // 회원가입 요청을 서버로 전송
+//            sendSignUpRequest(userID, userPassword)
+            startSignUp(SignUpData(userID, userPassword))
         }
         return view
     }
 
-    private fun sendSignUpRequest(userID: String, userPassword: String) {
-        val url = "http://10.0.2.2/User_Info.php"
-
-        val request = object : StringRequest(
-            Request.Method.POST, url,
-            Response.Listener { response ->
-                Log.d("SignUp", "Server Response: $response")
-            },
-            Response.ErrorListener { error ->
-                Log.e("SignUp", "Server Error: ${error.toString()}")
-            }) {
-
-            override fun getParams(): Map<String, String> {
-                val params = HashMap<String, String>()
-                params["userID"] = userID
-                params["userPassword"] = userPassword
-                return params
+    private fun startSignUp(data: SignUpData) {
+        service.userSignUp(data).enqueue(object : retrofit2.Callback<SignUpResponse> {
+            override fun onResponse(call: Call<SignUpResponse>, response: Response<SignUpResponse>) {
+                val result = response.body()
+                if (result != null) {
+                    Toast.makeText(requireContext(), result.message, Toast.LENGTH_SHORT).show()
+                    if (result.code == 200) {
+                        navigateToNaviActivity()
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "응답 본문이 없습니다.", Toast.LENGTH_SHORT).show()
+                }
             }
-        }
-        Volley.newRequestQueue(requireContext()).add(request)
+
+            override fun onFailure(call: Call<SignUpResponse>, t: Throwable) {
+                Toast.makeText(requireContext(), "회원가입 에러 발생", Toast.LENGTH_SHORT).show()
+                Log.e("회원가입 에러 발생", t.message ?: "Unknown error")
+            }
+        })
     }
+//    private fun sendSignUpRequest(userID: String, userPassword: String) {
+//        val url = "http://10.0.2.2/User_Info.php"
+//
+//        val request = object : StringRequest(
+//            Request.Method.POST, url,
+//            Response.Listener { response ->
+//                Log.d("SignUp", "Server Response: $response")
+//            },
+//            Response.ErrorListener { error ->
+//                Log.e("SignUp", "Server Error: ${error.toString()}")
+//            }) {
+//
+//            override fun getParams(): Map<String, String> {
+//                val params = HashMap<String, String>()
+//                params["userID"] = userID
+//                params["userPassword"] = userPassword
+//                return params
+//            }
+//        }
+//        Volley.newRequestQueue(requireContext()).add(request)
+//    }
 }

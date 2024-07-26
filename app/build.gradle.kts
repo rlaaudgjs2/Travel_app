@@ -96,6 +96,9 @@ dependencies {
     implementation("com.google.android.libraries.places:places:3.3.0")
 
 
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.google.code.gson:gson:2.8.8")
+    implementation("com.squareup.okhttp3:logging-interceptor:3.11.0")
 
 }
