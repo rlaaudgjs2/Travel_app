@@ -1,4 +1,5 @@
 package com.example.travel_app
+
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -7,17 +8,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
-import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class SignUp : Fragment() {
     private lateinit var signUpIdEditText: EditText
     private lateinit var signUpPasswordEditText: EditText
     private lateinit var signUpButton: Button
+    private val userInterface: UserInterface by lazy { ServerClient.instance }
 
     private fun navigateToNaviActivity() {
         val intent = Intent(requireActivity(), NaviActivity::class.java)
@@ -45,24 +46,79 @@ class SignUp : Fragment() {
     }
 
     private fun sendSignUpRequest(userID: String, userPassword: String) {
-        val url = "http://10.0.2.2/User_Info.php"
-
-        val request = object : StringRequest(
-            Request.Method.POST, url,
-            Response.Listener { response ->
-                Log.d("SignUp", "Server Response: $response")
-            },
-            Response.ErrorListener { error ->
-                Log.e("SignUp", "Server Error: ${error.toString()}")
-            }) {
-
-            override fun getParams(): Map<String, String> {
-                val params = HashMap<String, String>()
-                params["userID"] = userID
-                params["userPassword"] = userPassword
-                return params
-            }
+        if (!validateInput(userID, userPassword)) {
+            return
         }
-        Volley.newRequestQueue(requireContext()).add(request)
+
+        val registrationRequest = RegistrationRequest(userID, userPassword)
+        val call = userInterface.register(registrationRequest)
+        call.enqueue(object : Callback<UserRegistration> {
+            override fun onResponse(
+                call: Call<UserRegistration>,
+                response: Response<UserRegistration>
+            ) {
+                Log.d("SignUp", "Response Code: ${response.code()}")
+                Log.d("SignUp", "Response Body: ${response.body()}")
+                Log.d("SignUp", "Response Headers: ${response.headers()}")
+                Log.d("SignUp", "Response Message: ${response.message()}")
+
+                if (response.isSuccessful) {
+                    val user = response.body()
+                    if (user != null) {
+                        Log.d("SignUp", "Success: $user")
+                        showSuccess("회원가입에 성공했습니다.")
+                        navigateToNaviActivity()
+                    } else {
+                        showError("회원가입 실패: 서버 응답이 비어있습니다.")
+                    }
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    Log.e("SignUp", "Failed: $errorBody")
+                    showError("회원가입 실패: ${parseErrorMessage(errorBody)}")
+                }
+            }
+
+            override fun onFailure(call: Call<UserRegistration>, t: Throwable) {
+                Log.e("SignUp", "Network Error", t)
+                showError("네트워크 오류: ${t.message}")
+            }
+        })
+    }
+
+    private fun validateInput(userID: String, userPassword: String): Boolean {
+        if (userID.isEmpty() || userPassword.isEmpty()) {
+            showError("아이디와 비밀번호를 모두 입력해주세요.")
+            return false
+        }
+        if (userID.length < 4) {
+            showError("아이디는 4자 이상이어야 합니다.")
+            return false
+        }
+        if (userPassword.length < 6) {
+            showError("비밀번호는 6자 이상이어야 합니다.")
+            return false
+        }
+        return true
+    }
+
+    private fun parseErrorMessage(errorBody: String?): String {
+        return try {
+            // JSON 파싱 등을 통해 서버에서 전송한 에러 메시지를 추출
+            // 여기서는 간단히 전체 에러 바디를 반환
+            errorBody ?: "알 수 없는 오류가 발생했습니다."
+        } catch (e: Exception) {
+            "오류 메시지를 파싱하는 데 실패했습니다."
+        }
+    }
+
+    private fun showError(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun showSuccess(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 }
+
+data class RegistrationRequest(val userId: String, val password: String)
+data class UserRegistration(val id: Long, val userId: String)

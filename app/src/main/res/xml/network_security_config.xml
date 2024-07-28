@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
-        <!-- 특정 도메인에 대한 SSL 인증서 검증 무시 -->
         <domain includeSubdomains="true">10.0.2.2</domain>
     </domain-config>
 </network-security-config>
