@@ -21,10 +21,11 @@ class SignUp : Fragment() {
     private val userInterface: UserInterface by lazy { ServerClient.instance }
 
     private fun navigateToNaviActivity() {
-        val intent = Intent(requireActivity(), NaviActivity::class.java)
+        val intent = Intent(requireActivity(), MainActivity::class.java)
         startActivity(intent)
         // 현재 Fragment를 벗어나고, NaviActivity로 이동합니다.
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -57,10 +58,6 @@ class SignUp : Fragment() {
                 call: Call<UserRegistration>,
                 response: Response<UserRegistration>
             ) {
-                Log.d("SignUp", "Response Code: ${response.code()}")
-                Log.d("SignUp", "Response Body: ${response.body()}")
-                Log.d("SignUp", "Response Headers: ${response.headers()}")
-                Log.d("SignUp", "Response Message: ${response.message()}")
 
                 if (response.isSuccessful) {
                     val user = response.body()
@@ -120,5 +117,6 @@ class SignUp : Fragment() {
     }
 }
 
-data class RegistrationRequest(val userId: String, val password: String)
+data class RegistrationRequest(val username: String, val password: String)
+
 data class UserRegistration(val id: Long, val userId: String)
