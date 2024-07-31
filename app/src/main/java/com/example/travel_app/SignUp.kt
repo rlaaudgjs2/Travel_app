@@ -62,15 +62,15 @@ class SignUp : Fragment() {
                 if (result != null) {
                     Toast.makeText(requireContext(), result.message, Toast.LENGTH_SHORT).show()
                     if (result.code == 200) {
+                        Log.d("회원가입 이론상 돼야함","ㄹㅇ로")
                         navigateToNaviActivity()
                     }
                 } else {
-                    Toast.makeText(requireContext(), "응답 본문이 없습니다.", Toast.LENGTH_SHORT).show()
+                    Log.d("회원가입 응답","응답 없음")
                 }
             }
 
             override fun onFailure(call: Call<SignUpResponse>, t: Throwable) {
-                Toast.makeText(requireContext(), "회원가입 에러 발생", Toast.LENGTH_SHORT).show()
                 Log.e("회원가입 에러 발생", t.message ?: "Unknown error")
             }
         })
