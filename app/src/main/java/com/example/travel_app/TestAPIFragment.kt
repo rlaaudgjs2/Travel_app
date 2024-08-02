@@ -1,5 +1,7 @@
 package com.example.travel_app
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -18,6 +20,7 @@ import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.libraries.places.api.model.AddressComponent
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 import com.google.android.libraries.places.api.model.TypeFilter
+import com.google.android.libraries.places.api.net.FetchPhotoRequest
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
@@ -99,31 +102,48 @@ class TestAPIFragment : Fragment() {
         })
     }
 
-    fun fetchPlaceDetails(placeId: String, placesClient: PlacesClient) {
-        // Place Details 요청을 생성
-        val placeRequest = FetchPlaceRequest.builder(placeId, listOf(Place.Field.NAME, Place.Field.ADDRESS, Place.Field.TYPES))
+    private fun fetchPlaceDetails(placeId: String, placesClient: PlacesClient) {
+        val placeRequest = FetchPlaceRequest.builder(placeId, listOf(Place.Field.NAME, Place.Field.ADDRESS, Place.Field.TYPES, Place.Field.PHOTO_METADATAS))
             .build()
 
-        // Place Details 요청을 보냄
         placesClient.fetchPlace(placeRequest)
-            .addOnSuccessListener(OnSuccessListener { response ->
+            .addOnSuccessListener { response ->
                 val place = response.place
-                // 성공적으로 장소 정보를 가져온 경우
-                val placeName = place.name
-                val placeAddress = place.address
+                val placeName = place.name ?: ""
+                val placeCategory = place.types?.firstOrNull()?.toString() ?: "Unknown"
+                val photoMetadata = place.photoMetadatas?.firstOrNull()
 
-                val placeRegion = placeAddress.split(" ")
+                if (photoMetadata != null) {
+                    val photoRequest = FetchPhotoRequest.builder(photoMetadata)
+                        .setMaxWidth(500)
+                        .setMaxHeight(300)
+                        .build()
 
-                Log.e(TAG, "Region: ${placeRegion.get(1)}")
-                Log.e(TAG, "SmallRegion: ${placeRegion.get(2)}")
-                val placeTypes = place.placeTypes
-                // 장소 정보를 처리하거나 출력
-                // 예를 들어, Log에 출력
-                Log.i(TAG, "Place Details - Name: $placeName, Address: $placeAddress, Types: $placeTypes")
-            })
-            .addOnFailureListener(OnFailureListener { exception ->
-                // 장소 정보를 가져오는 데 실패한 경우
+                    placesClient.fetchPhoto(photoRequest).addOnSuccessListener { fetchPhotoResponse ->
+                        val photoBitmap = fetchPhotoResponse.bitmap
+
+                        // 결과를 FragmentResult API를 사용하여 전달
+                        parentFragmentManager.setFragmentResult("requestKey", Bundle().apply {
+                            putString("placeName", placeName)
+                            putString("placeCategory", placeCategory)
+                            putString("placePhoto", photoBitmap.toString()) // 실제 사용 시에는 더 적절한 방법으로 처리
+                        })
+                        parentFragmentManager.popBackStack() // 이전 Fragment로 돌아감
+                    }.addOnFailureListener { exception ->
+                        Log.e(TAG, "Photo request failed: ${exception.message}")
+                    }
+                } else {
+                    parentFragmentManager.setFragmentResult("requestKey", Bundle().apply {
+                        putString("placeName", placeName)
+                        putString("placeCategory", placeCategory)
+                        putString("placePhoto", "") // 기본값
+                    })
+                    parentFragmentManager.popBackStack() // 이전 Fragment로 돌아감
+                }
+            }
+            .addOnFailureListener { exception ->
                 Log.e(TAG, "Place Details request failed: ${exception.message}")
-            })
+            }
     }
+
 }

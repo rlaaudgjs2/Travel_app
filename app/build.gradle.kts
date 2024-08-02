@@ -95,6 +95,7 @@ dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.10"))
     implementation("com.google.android.libraries.places:places:3.3.0")
 
-
+    implementation ("com.github.bumptech.glide:glide:4.15.1")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1")
 
 }
