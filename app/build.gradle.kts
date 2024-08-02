@@ -63,9 +63,10 @@ android {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.10") // 변경된 부분
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1") // 변경된 부분
-    implementation("androidx.activity:activity-compose:1.4.0") // 변경된 부분
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.10")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
+    implementation("androidx.activity:activity-compose:1.4.0")
+    implementation ("com.google.cloud:google-cloud-storage:2.6.0")
     implementation("androidx.compose.ui:ui:1.1.0")
     implementation("androidx.compose.ui:ui-graphics:1.1.0")
     implementation("androidx.compose.ui:ui-tooling-preview:1.1.0")
