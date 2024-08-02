@@ -10,6 +10,8 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.example.travel_app.Spring.ServerClient
+import com.example.travel_app.Spring.User.UserInterface
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

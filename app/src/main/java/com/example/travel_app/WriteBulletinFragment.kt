@@ -4,6 +4,7 @@ import android.app.Activity
 import android.util.Base64
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -12,23 +13,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.fragment.app.activityViewModels
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
+import com.example.travel_app.Spring.Bulletin.PlaceRequest
+import com.example.travel_app.Spring.Bulletin.PostInterface
+import com.example.travel_app.Spring.Bulletin.PostRequest
+import com.example.travel_app.Spring.Bulletin.PostResponse
+import com.example.travel_app.Spring.ServerClient
 import com.example.travel_app.databinding.FragmentWriteBulletinBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import org.json.JSONException
-import org.json.JSONObject
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.Calendar
 
 @Suppress("UNREACHABLE_CODE")
 class WriteBulletinFragment : Fragment() {
@@ -142,6 +140,9 @@ class WriteBulletinFragment : Fragment() {
 //                if (userID != null) {
 //                    resister( edt_title, userID )
 //                }
+                if(userID != null){
+                    sendBulletinRequest(edt_title, placesList, userID)
+                }
                 replace(R.id.mainFrameLayout, WriteHashTagFragment())
                 addToBackStack(null)
                 commit()
@@ -187,6 +188,58 @@ class WriteBulletinFragment : Fragment() {
         return outputStream.toByteArray()
     }
 
+    private fun sendBulletinRequest(title: String, placesList: List<PlaceDetails>, userID: String) {
+        if (!validatePostInput(title, placesList)) {
+            return
+        }
+
+        val placeRequests = placesList.map { PlaceRequest(it.name) }
+        val postRequest = PostRequest(title, placeRequests, userID)
+        val call = ServerClient.postInstance.savePost(postRequest)
+        call.enqueue(object : Callback<PostResponse> {
+            override fun onResponse(
+                call: Call<PostResponse>,
+                response: Response<PostResponse>
+            ) {
+                if (response.isSuccessful) {
+                    val bulletin = response.body()
+                    if (bulletin != null) {
+                        Log.d("Bulletin", "Success: $bulletin")
+                        showSuccess("게시글 저장에 성공했습니다.")
+                        // 필요한 경우 다른 동작 추가
+                    } else {
+                        showError("게시글 저장 실패: 서버 응답이 비어있습니다.")
+                    }
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    Log.e("Bulletin", "Failed: $errorBody")
+                    showError("게시글 저장 실패: ${parseErrorMessage(errorBody)}")
+                }
+            }
+
+            override fun onFailure(call: Call<PostResponse>, t: Throwable) {
+                Log.e("Bulletin", "Network Error", t)
+                showError("네트워크 오류: ${t.message}")
+            }
+        })
+
+    }
+
+    private fun validatePostInput(title: String, placesList: List<PlaceDetails>): Boolean {
+        return title.isNotBlank() && placesList.isNotEmpty()
+    }
+
+    private fun showSuccess(message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showError(message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun parseErrorMessage(errorBody: String?): String {
+        return errorBody ?: "알 수 없는 오류 발생"
+    }
 }
 
 

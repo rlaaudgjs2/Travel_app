@@ -1,6 +1,5 @@
 package com.example.travel_app
 
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -12,12 +11,13 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import com.example.travel_app.Spring.ServerClient
+import com.example.travel_app.Spring.User.UserInterface
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
-import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
 import retrofit2.Call
 import retrofit2.Callback
@@ -107,6 +107,8 @@ class SignIn : Fragment(), View.OnClickListener {
             handleGoogleActivityResult(data)
         }
     }
+
+
 
     private fun handleGoogleActivityResult(data: Intent?) {
         val task = GoogleSignIn.getSignedInAccountFromIntent(data)
