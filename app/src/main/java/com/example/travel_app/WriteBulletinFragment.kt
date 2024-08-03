@@ -22,6 +22,7 @@ import com.example.travel_app.Spring.Bulletin.PostResponse
 import com.example.travel_app.Spring.ServerClient
 import com.example.travel_app.databinding.FragmentWriteBulletinBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.gson.Gson
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -196,6 +197,8 @@ class WriteBulletinFragment : Fragment() {
         val placeRequests = placesList.map { PlaceRequest(it.name) }
         val postRequest = PostRequest(title, placeRequests, userID)
         val call = ServerClient.postInstance.savePost(postRequest)
+
+        Log.e("Place 값", placesList.toString())
         call.enqueue(object : Callback<PostResponse> {
             override fun onResponse(
                 call: Call<PostResponse>,
@@ -208,11 +211,15 @@ class WriteBulletinFragment : Fragment() {
                         showSuccess("게시글 저장에 성공했습니다.")
                         // 필요한 경우 다른 동작 추가
                     } else {
+
                         showError("게시글 저장 실패: 서버 응답이 비어있습니다.")
                     }
                 } else {
                     val errorBody = response.errorBody()?.string()
+                    Log.d("Bulletin", "PostRequest JSON: ${Gson().toJson(postRequest)}")
                     Log.e("Bulletin", "Failed: $errorBody")
+                    Log.e("Bulletin", "Headers: ${response.headers()}")
+                    Log.e("Bulletin", "Response code: ${response.code()}")
                     showError("게시글 저장 실패: ${parseErrorMessage(errorBody)}")
                 }
             }
