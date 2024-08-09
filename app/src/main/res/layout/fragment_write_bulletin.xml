@@ -69,6 +69,13 @@
                 android:layout_gravity="center"
                 android:text="장소 추가"
                 />
+
+            <Button
+                android:id="@+id/btn_picture"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="사진 추가" />
         </LinearLayout>
 
     </LinearLayout>

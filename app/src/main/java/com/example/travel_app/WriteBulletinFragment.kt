@@ -1,7 +1,11 @@
 package com.example.travel_app
 
+import CloudService
+import android.app.Activity
 import android.util.Base64
 import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -10,23 +14,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.fragment.app.activityViewModels
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
+import com.example.travel_app.Spring.Bulletin.PlaceRequest
+import com.example.travel_app.Spring.Bulletin.PostInterface
+import com.example.travel_app.Spring.Bulletin.PostRequest
+import com.example.travel_app.Spring.Bulletin.PostResponse
+import com.example.travel_app.Spring.ServerClient
 import com.example.travel_app.databinding.FragmentWriteBulletinBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import org.json.JSONException
-import org.json.JSONObject
+import com.google.gson.Gson
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.Calendar
 
+private lateinit var cloudService: CloudService
 @Suppress("UNREACHABLE_CODE")
 class WriteBulletinFragment : Fragment() {
     // TODO: Rename and change types of parameters
@@ -40,11 +44,26 @@ class WriteBulletinFragment : Fragment() {
 
     private val imageList = mutableListOf<ImageData>()
 
-    private val detailBulletinViewModel: DetailBulletinViewModel by activityViewModels()
+//    private val detailBulletinViewModel: DetailBulletinViewModel by activityViewModels()
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: DetailBulletinAdapter
-    private val placesList = mutableListOf<DetailBulletin>()
+    private lateinit var placeAdapter: PlaceAdapter
+    private val placesList = mutableListOf<PlaceDetails>()
 
+//    private val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+//        if (result.resultCode == Activity.RESULT_OK) {
+//            val data: Intent? = result.data
+//            val placeName = data?.getStringExtra("placeName")
+//            val placeCategory = data?.getStringExtra("placeCategory")
+//            val placePhoto = data?.getStringExtra("placePhoto")
+//
+//            // 장소 정보를 리스트에 추가하고 RecyclerView 업데이트
+//            if (placeName != null && placeCategory != null && placePhoto != null) {
+//                val placeDetails = PlaceDetails(placeName, placeCategory, placePhoto)
+//                placesList.add(placeDetails)
+//                placeAdapter.notifyDataSetChanged()
+//            }
+//        }
+//    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -55,39 +74,59 @@ class WriteBulletinFragment : Fragment() {
         return binding.root
     }
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        cloudService = CloudService()
         hideBottomNavigationView()
 
-        val title = detailBulletinViewModel.getTitle()
-        val imgUri = detailBulletinViewModel.getImageUri()
-        val content = detailBulletinViewModel.getContent()
-
-
-        if (title != null && imgUri != null && content != null) {
-            val newDetailBulletin = DetailBulletin(title, imgUri, content)
-//            day()
-            detailBulletinViewModel.addPlace(newDetailBulletin)
-        }
-
-        Log.e("뷰 모델 내용 확인", detailBulletinViewModel.getTitle().toString())
-
+        // RecyclerView 초기화 및 Adapter 설정
         recyclerView = binding.placeRecycler
+        placeAdapter = PlaceAdapter(requireContext(), placesList)
+        recyclerView.adapter = placeAdapter
 
+        // FragmentResultListener 설정
+        parentFragmentManager.setFragmentResultListener("requestKey", viewLifecycleOwner) { key, bundle ->
+            val placeName = bundle.getString("placeName")
+            val placeCategory = bundle.getString("placeCategory")
+            val placePhoto = bundle.getString("placePhoto")
 
-        detailBulletinViewModel.detailBulletinLiveData.observe(viewLifecycleOwner) { places ->
-            placesList.clear()
-            placesList.addAll(places)
-//            Log.e("장소 리스트 확인", placesList.toString())
-            adapter.notifyDataSetChanged()
+            // 장소 정보를 리스트에 추가하고 RecyclerView 업데이트
+            if (placeName != null && placeCategory != null && placePhoto != null) {
+                val placeDetails = PlaceDetails(placeName, placeCategory, placePhoto)
+                placesList.add(placeDetails)
+                placeAdapter.notifyDataSetChanged()
+            }
         }
-        adapter = DetailBulletinAdapter(requireContext(), placesList)
-        recyclerView.adapter = adapter
+
+//        val title = detailBulletinViewModel.getTitle()
+//        val imgUri = detailBulletinViewModel.getImageUri()
+//        val content = detailBulletinViewModel.getContent()
+
+
+//        if (title != null && imgUri != null && content != null) {
+//            val newDetailBulletin = DetailBulletin(title, imgUri, content)
+////            day()
+//            detailBulletinViewModel.addPlace(newDetailBulletin)
+//        }
+
+//        Log.e("뷰 모델 내용 확인", detailBulletinViewModel.getTitle().toString())
+
+//        recyclerView = binding.placeRecycler
+//
+//
+//        detailBulletinViewModel.detailBulletinLiveData.observe(viewLifecycleOwner) { places ->
+//            placesList.clear()
+//            placesList.addAll(places)
+////            Log.e("장소 리스트 확인", placesList.toString())
+//            adapter.notifyDataSetChanged()
+//        }
+//        adapter = PlaceAdapter(requireContext(), placesList)
+//        recyclerView.adapter = adapter
 
         binding.btnAddPlace.setOnClickListener{
             parentFragmentManager.beginTransaction().apply {
-                replace(R.id.mainFrameLayout, WriteDayBulletinFragment())
+                replace(R.id.mainFrameLayout, TestAPIFragment())
                 addToBackStack(null)
                 commit()
             }
@@ -101,29 +140,44 @@ class WriteBulletinFragment : Fragment() {
             val edt_title = edt_title.text.toString()
             val userID = getUserInfo()
             parentFragmentManager.beginTransaction().apply {
-                if (userID != null) {
-                    resister( edt_title, userID )
+//                if (userID != null) {
+//                    resister( edt_title, userID )
+//                }
+                if(userID != null){
+                    sendBulletinRequest(edt_title, placesList, userID)
                 }
                 replace(R.id.mainFrameLayout, WriteHashTagFragment())
                 addToBackStack(null)
                 commit()
-
-
-
-
             }
+        }
+        binding.btnPicture.setOnClickListener {
+            // 사진 선택 로직 추가
+            val selectedPhotoUri = TODO() // 선택한 사진의 Uri 가져오기
+            uploadPhotoAndSaveToDB(selectedPhotoUri)
+        }
+
+    }
+
+    private fun uploadPhotoAndSaveToDB(selectedPhotoUri: Nothing) {
+        val fileName = "${System.currentTimeMillis()}.jpg" // 파일 이름 생성
+        val downloadUrl = cloudService.uploadFileAndGetLink(photoUri, fileName)
+
+        saveDownloadUrlToDatabase(downloadUrl)
+    }
+
+    private fun saveDownloadUrlToDatabase(downloadUrl: Any) {
+        val title = binding.edtTitle.text.toString()
+
+        val connection = h2DatabaseHelper.getConnection()
+        connection.use { conn ->
+            val statement = conn.prepareStatement("INSERT INTO bulletin (title, imageUrl) VALUES (?, ?)")
+            statement.setString(1, title)
+            statement.setString(2, downloadUrl)
+            statement.executeUpdate()
         }
     }
 
-//    private fun day() {
-//        TODO("Not yet implemented")
-//    }
-
-//    override fun onDestroyView() {
-//        super.onDestroyView()
-//        showBottomNavigationView()
-//        _binding = null
-//    }
 
     private fun hideBottomNavigationView(){
         val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)
@@ -134,129 +188,6 @@ class WriteBulletinFragment : Fragment() {
         bottomNavigationView?.visibility = View.VISIBLE
     }
 
-
-    class DetailBulletinAdapter(
-        private val context: Context,
-        private val detailBulletins: List<DetailBulletin>
-    ) : RecyclerView.Adapter<DetailBulletinAdapter.DetailBulletinViewHolder>() {
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DetailBulletinViewHolder {
-            val view = LayoutInflater.from(context).inflate(R.layout.place_data_item_list, parent, false)
-            return DetailBulletinViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: DetailBulletinViewHolder, position: Int) {
-            val place = detailBulletins[position]
-            holder.bind(place)
-        }
-
-        override fun getItemCount(): Int {
-            return detailBulletins.size
-        }
-
-        inner class DetailBulletinViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            private val titleTextView: TextView = itemView.findViewById(R.id.txt_place_title)
-            private val imageView: ImageView = itemView.findViewById(R.id.img_place_image)
-            private val descriptionTextView: TextView = itemView.findViewById(R.id.txt_place_content)
-
-            fun bind(detailBulletin: DetailBulletin) {
-                titleTextView.text = detailBulletin.title
-                // 이미지 설정 및 텍스트 설정
-                imageView.setImageURI(detailBulletin.imageUri)
-                descriptionTextView.text = detailBulletin.content
-            }
-        }
-    }
-
-
-
-    private fun resister(title: String, userID: String) {
-        val calendar = Calendar.getInstance()
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        val writeDate = dateFormat.format(calendar.time)
-        val url = "http://10.0.2.2/bulletin.php"
-
-        val request = object : StringRequest(
-            Request.Method.POST, url,
-            Response.Listener { response ->
-                try {
-                    // 서버 응답을 JSON 객체로 변환
-                    val jsonResponse = JSONObject(response)
-
-                    // 응답에서 성공 여부 확인
-                    val success = jsonResponse.getBoolean("success")
-
-                    if (success) {
-                        // 게시물 등록 성공
-                        val bulletinId = jsonResponse.getInt("bulletin_id")
-                        day(placesList,bulletinId)
-
-                        // 여기서 새로운 게시물 ID를 사용하여 다른 작업을 수행할 수 있습니다.
-                    } else {
-                        // 게시물 등록 실패
-                        val message = jsonResponse.getString("message")
-                        Log.e("Bulletin", "게시물 등록 실패: $message")
-                    }
-                } catch (e: JSONException) {
-                    Log.e("Bulletin", "서버 응답 처리 중 오류 발생: ${e.message}")
-                }
-            },
-            Response.ErrorListener { error ->
-                Log.e("Bulletin", "서버 에러: ${error.toString()}")
-            }) {
-
-            override fun getParams(): Map<String, String> {
-                val params = HashMap<String, String>()
-                params["title"] = title
-                params["writeDate"] = writeDate
-                params["user_ID"] = userID
-                return params
-            }
-        }
-        Volley.newRequestQueue(requireContext()).add(request)
-    }
-
-    private fun day(placesList: MutableList<DetailBulletin>, bulletinId: Int) {
-        val url = "http://10.0.2.2/day.php"
-        val requestQueue = Volley.newRequestQueue(requireContext())
-
-        for (place in placesList) {
-            val title = place.title
-            val image_t = place.imageUri
-            val content = place.content
-
-            // 이미지를 바이트 배열로 변환
-            val imageBytes = convertImageToByteArray(image_t)
-
-            val image = Base64.encodeToString(imageBytes, Base64.DEFAULT)
-
-            // Volley를 사용하여 이미지를 PHP 서버로 전송
-            val stringRequest = object : StringRequest(
-                Method.POST, url,
-                Response.Listener { response ->
-                    // 이미지 업로드 성공
-                    Log.d("Upload Image", "Image uploaded successfully: $response")
-                    // 이후 작업 수행 가능 (예: 다음 정보 전송)
-                },
-                Response.ErrorListener { error ->
-                    // 이미지 업로드 실패
-                    Log.e("Upload Image", "Image upload failed: $error")
-                }) {
-
-                override fun getParams(): Map<String, String> {
-                    val params = HashMap<String, String>()
-                    params["bulletin_id"] = bulletinId.toString()
-                    params["small_title"] = title
-                    params["text"] = content
-                    params["image"] = image
-                    return params
-                }
-            }
-
-            // Request를 요청 큐에 추가
-            requestQueue.add(stringRequest)
-        }
-    }
 
 
     private fun getUserInfo(): String? {
@@ -281,6 +212,64 @@ class WriteBulletinFragment : Fragment() {
         return outputStream.toByteArray()
     }
 
+    private fun sendBulletinRequest(title: String, placesList: List<PlaceDetails>, userID: String) {
+        if (!validatePostInput(title, placesList)) {
+            return
+        }
+
+        val placeRequests = placesList.map { PlaceRequest(it.name) }
+        val postRequest = PostRequest(title, placeRequests, userID)
+        val call = ServerClient.postInstance.savePost(postRequest)
+
+        Log.e("Place 값", placesList.toString())
+        call.enqueue(object : Callback<PostResponse> {
+            override fun onResponse(
+                call: Call<PostResponse>,
+                response: Response<PostResponse>
+            ) {
+                if (response.isSuccessful) {
+                    val bulletin = response.body()
+                    if (bulletin != null) {
+                        Log.d("Bulletin", "Success: $bulletin")
+                        showSuccess("게시글 저장에 성공했습니다.")
+                        // 필요한 경우 다른 동작 추가
+                    } else {
+
+                        showError("게시글 저장 실패: 서버 응답이 비어있습니다.")
+                    }
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    Log.d("Bulletin", "PostRequest JSON: ${Gson().toJson(postRequest)}")
+                    Log.e("Bulletin", "Failed: $errorBody")
+                    Log.e("Bulletin", "Headers: ${response.headers()}")
+                    Log.e("Bulletin", "Response code: ${response.code()}")
+                    showError("게시글 저장 실패: ${parseErrorMessage(errorBody)}")
+                }
+            }
+
+            override fun onFailure(call: Call<PostResponse>, t: Throwable) {
+                Log.e("Bulletin", "Network Error", t)
+                showError("네트워크 오류: ${t.message}")
+            }
+        })
+
+    }
+
+    private fun validatePostInput(title: String, placesList: List<PlaceDetails>): Boolean {
+        return title.isNotBlank() && placesList.isNotEmpty()
+    }
+
+    private fun showSuccess(message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showError(message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun parseErrorMessage(errorBody: String?): String {
+        return errorBody ?: "알 수 없는 오류 발생"
+    }
 }
 
 
