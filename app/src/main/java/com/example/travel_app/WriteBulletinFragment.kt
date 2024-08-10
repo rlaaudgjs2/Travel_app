@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -15,6 +16,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
+import androidx.annotation.RequiresApi
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.example.travel_app.Spring.Bulletin.PlaceRequest
 import com.example.travel_app.Spring.Bulletin.PostInterface
@@ -24,16 +27,22 @@ import com.example.travel_app.Spring.ServerClient
 import com.example.travel_app.databinding.FragmentWriteBulletinBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.gson.Gson
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.IOException
 
 private lateinit var cloudService: CloudService
 @Suppress("UNREACHABLE_CODE")
 class WriteBulletinFragment : Fragment() {
     // TODO: Rename and change types of parameters
+    private lateinit var cloudService: CloudService
+    private val PICK_IMAGE_REQUEST = 1
 
     private var _binding: FragmentWriteBulletinBinding? = null
     private val binding get() = _binding!!
@@ -77,7 +86,7 @@ class WriteBulletinFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        cloudService = CloudService()
+        cloudService = CloudService(requireContext())
         hideBottomNavigationView()
 
         // RecyclerView 초기화 및 Adapter 설정
@@ -153,31 +162,58 @@ class WriteBulletinFragment : Fragment() {
         }
         binding.btnPicture.setOnClickListener {
             // 사진 선택 로직 추가
-            val selectedPhotoUri = TODO() // 선택한 사진의 Uri 가져오기
-            uploadPhotoAndSaveToDB(selectedPhotoUri)
+           openGallery()
+
         }
 
     }
-
-    private fun uploadPhotoAndSaveToDB(selectedPhotoUri: Nothing) {
-        val fileName = "${System.currentTimeMillis()}.jpg" // 파일 이름 생성
-        val downloadUrl = cloudService.uploadFileAndGetLink(photoUri, fileName)
-
-        saveDownloadUrlToDatabase(downloadUrl)
+    private fun openGallery() {
+        val intent = Intent()
+        intent.type = "image/*"
+        intent.action = Intent.ACTION_GET_CONTENT
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST)
     }
 
-    private fun saveDownloadUrlToDatabase(downloadUrl: Any) {
-        val title = binding.edtTitle.text.toString()
-
-        val connection = h2DatabaseHelper.getConnection()
-        connection.use { conn ->
-            val statement = conn.prepareStatement("INSERT INTO bulletin (title, imageUrl) VALUES (?, ?)")
-            statement.setString(1, title)
-            statement.setString(2, downloadUrl)
-            statement.executeUpdate()
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null && data.data != null) {
+            val imageUri = data.data
+            uploadImage(imageUri)
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun uploadImage(imageUri: Uri?) {
+        if (imageUri == null) return
+
+        val inputStream = requireContext().contentResolver.openInputStream(imageUri)
+        val file = File(requireContext().cacheDir, "temp_image")
+        inputStream?.use { input ->
+            file.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+
+        val objectName = "images/${System.currentTimeMillis()}_${file.name}"
+        Log.d("WriteBulletinFragment", "Attempting to upload image: ${file.absolutePath}")
+
+        lifecycleScope.launch {
+            try {
+                cloudService.uploadFile(file.absolutePath, objectName)
+                val imageUrl = cloudService.getFileUrl(objectName)
+                Log.d("WriteBulletinFragment", "Uploaded image URL: $imageUrl")
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, "Image uploaded successfully. URL: $imageUrl", Toast.LENGTH_LONG).show()
+                }
+            } catch (e: Exception) {
+                Log.e("WriteBulletinFragment", "Failed to upload image", e)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, "Failed to upload image: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     private fun hideBottomNavigationView(){
         val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)

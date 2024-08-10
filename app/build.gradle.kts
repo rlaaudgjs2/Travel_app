@@ -89,6 +89,8 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:20.1.0")
     implementation("com.kakao.sdk:v2-user:2.12.1")
     implementation("com.android.volley:volley:1.2.1")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
