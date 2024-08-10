@@ -5,18 +5,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:layout_gravity="center"
     tools:context=".MySchedule">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:id="@+id/layout_1"
         android:orientation="horizontal"
-        android:layout_marginTop="40dp"
         android:layout_marginStart="40dp"
         android:layout_marginEnd="40dp"
-        android:layout_marginBottom="80dp">
+
+        app:layout_constraintBottom_toTopOf="@id/layout_2"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        >
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -34,32 +37,40 @@
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="500dp"
         android:id="@+id/layout_2"
+
         app:layout_constraintTop_toBottomOf="@+id/layout_1"
-        app:layout_constraintBottom_toTopOf="@+id/create_button"
-        android:layout_marginTop="40dp"
-        android:layout_marginStart="40dp"
-        android:layout_marginEnd="40dp"
-        android:layout_marginBottom="80dp"
-        android:orientation="vertical">
+        app:layout_constraintBottom_toTopOf="@+id/layout_3"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent">
         <ListView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:id="@+id/schedule_list"
             />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/create_button"
-        android:layout_width="230dp"
-        android:layout_height="55dp"
-        android:layout_marginBottom="20dp"
-        android:gravity="center"
-        android:background="@drawable/btn_style"
-        android:text="새 일정 만들기"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/layout_3"
+        app:layout_constraintTop_toBottomOf="@id/layout_2"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:gravity="center"
+        android:layout_marginBottom="30dp"
+        >
+        <Button
+            android:id="@+id/create_button"
+            android:layout_width="230dp"
+            android:layout_height="55dp"
+            android:gravity="center"
+            android:background="@drawable/btn_style"
+            android:text="새 일정 만들기"
+             />
+    </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

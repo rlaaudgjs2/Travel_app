@@ -103,7 +103,7 @@
             android:id="@+id/btn_writeBulletin"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:backgroundTint="#6BE8FF"
+            app:backgroundTint="@color/maincolor"
             android:layout_marginRight="40dp"
             android:layout_marginBottom="80dp"
             android:src="@drawable/ic_write"/>

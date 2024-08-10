@@ -78,7 +78,7 @@
         android:id="@+id/create_button"
         android:layout_width="230dp"
         android:layout_height="55dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="60dp"
         android:gravity="center"
         android:text="선택 완료"
         android:background="@drawable/btn_style"

@@ -49,7 +49,7 @@
         </activity>
         <activity android:name=".NaviActivity"
             android:exported="true"
-            android:theme="@style/Theme.Travel_App1"
+            android:theme="@style/Theme.Travel_App"
             >
         </activity>
     </application>
