@@ -14,6 +14,9 @@ secrets {
 android {
     namespace = "com.example.travel_app"
     compileSdk = 34
+    buildFeatures {
+        viewBinding = true
+    }
 
     defaultConfig {
         applicationId = "com.example.travel_app"
@@ -90,6 +93,8 @@ dependencies {
     implementation("com.kakao.sdk:v2-user:2.12.1")
     implementation("com.android.volley:volley:1.2.1")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
 
     testImplementation("junit:junit:4.13.2")
@@ -106,6 +111,8 @@ dependencies {
         exclude(group = "org.threeten", module = "threetenbp")
 
     }
+    implementation ("com.github.bumptech.glide:glide:4.12.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.10"))
     implementation("com.google.android.libraries.places:places:3.3.0")
     implementation("com.github.bumptech.glide:glide:4.15.1")
