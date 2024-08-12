@@ -7,13 +7,13 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Parcelable
 import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
@@ -80,7 +80,7 @@ class WriteBulletinFragment : Fragment() {
             imagePreviewAdapter.notifyItemRemoved(position)
         }
         binding.imagePreviewRecycler.adapter = imagePreviewAdapter
-        // FragmentResultListener 설정
+        // FragmentResultListene 설정
         parentFragmentManager.setFragmentResultListener("requestKey", viewLifecycleOwner) { _, bundle ->
             val placeName = bundle.getString("placeName")
             val placeCategory = bundle.getString("placeCategory")
@@ -156,11 +156,24 @@ class WriteBulletinFragment : Fragment() {
             try {
                 val uploadedImageUrls = uploadImages(images)
                 val placeRequests = placesList.map { PlaceRequest(it.name) }
-                val postRequest = PostRequest(title, placeRequests, userID, uploadedImageUrls)
 
                 withContext(Dispatchers.Main) {
-                    sendPostToServer(postRequest)
+                    val bundle = Bundle().apply {
+                        putString("title", title)
+                        putString("userID", userID)
+                        putStringArrayList("imageUrls", ArrayList(uploadedImageUrls))
+                        putParcelableArrayList("placeRequests", ArrayList(placeRequests.map { it as Parcelable }))
+                    }
 
+                    val writeHashTagFragment = WriteHashTagFragment().apply {
+                        arguments = bundle
+                    }
+
+                    parentFragmentManager.beginTransaction().apply {
+                        replace(R.id.mainFrameLayout, writeHashTagFragment)
+                        addToBackStack(null)
+                        commit()
+                    }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
