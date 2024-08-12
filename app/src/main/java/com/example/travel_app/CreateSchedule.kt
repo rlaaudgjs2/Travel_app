@@ -1,16 +1,21 @@
 package com.example.travel_app
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.travel_app.databinding.CreateScheduleBinding
+import com.prolificinteractive.materialcalendarview.CalendarDay
+import com.prolificinteractive.materialcalendarview.OnRangeSelectedListener
 import com.prolificinteractive.materialcalendarview.format.ArrayWeekDayFormatter
 
 class CreateSchedule : Fragment(){
     private var _binding : CreateScheduleBinding?= null
     private val binding get() = _binding!!
+
+    private val selectedDays = mutableListOf<CalendarDay>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -50,13 +55,25 @@ class CreateSchedule : Fragment(){
             binding.calendarView.addDecorators(sundayDecorator, saturdayDecorator)
         }
 
+        binding.calendarView.setOnRangeSelectedListener(OnRangeSelectedListener { _, dates ->
+            selectedDays.clear()
+            selectedDays.addAll(dates)
+        })
         binding.createButton.setOnClickListener{
-            val fragment = SelectRegion()
+            if (selectedDays.isNotEmpty()) {
+                val selectedCount = selectedDays.size
 
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.mainFrameLayout, fragment)
-                .addToBackStack(null)
-                .commit()
+                // Save the selected count in SharedPreferences
+                val sharedPreferences = requireContext().getSharedPreferences("TravelAppPrefs", Context.MODE_PRIVATE)
+                sharedPreferences.edit().putInt("selectedDaysCount", selectedCount).apply()
+
+                // Navigate to the next fragment
+                val fragment = SelectRegion()
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.mainFrameLayout, fragment)
+                    .addToBackStack(null)
+                    .commit()
+            }
         }
     }
 
