@@ -123,11 +123,16 @@ class WriteBulletinFragment : Fragment() {
 //        recyclerView.adapter = adapter
 
         binding.btnAddPlace.setOnClickListener{
-            parentFragmentManager.beginTransaction().apply {
-                replace(R.id.mainFrameLayout, TestAPIFragment())
-                addToBackStack(null)
-                commit()
-            }
+//            parentFragmentManager.beginTransaction().apply {
+//                replace(R.id.mainFrameLayout, TestAPIFragment())
+//                addToBackStack(null)
+//                commit()
+//            }
+            val testAPIFragment = TestAPIFragment.newInstance("WriteBulletin")
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.mainFrameLayout, testAPIFragment)
+                .addToBackStack(null)
+                .commit()
         }
         binding.btnBackspace.setOnClickListener{
             parentFragmentManager.popBackStack()

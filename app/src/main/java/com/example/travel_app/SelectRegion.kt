@@ -1,5 +1,6 @@
 package com.example.travel_app
 
+import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -46,6 +47,14 @@ class SelectRegion : Fragment(){
                 onButtonClick(button)
             }
         }
+        binding.createButton.setOnClickListener {
+
+            parentFragmentManager.beginTransaction().apply {
+                replace(R.id.mainFrameLayout, WritePlannerFragment())
+                addToBackStack(null)
+                commit()
+            }
+        }
     }
     private fun onButtonClick(button: Button) {
         selectedButton?.let { previousButton ->
@@ -69,6 +78,9 @@ class SelectRegion : Fragment(){
 
         button.background = strokeDrawable
         selectedButton = button
+
+        val sharedPreferences = requireContext().getSharedPreferences("Region", Context.MODE_PRIVATE)
+        sharedPreferences.edit().putString("RegionName", button.text.toString()).apply()
     }
 
 
