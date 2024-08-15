@@ -103,6 +103,7 @@ dependencies {
     implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
     implementation ("androidx.paging:paging-runtime-ktx:3.1.1")
 
+    implementation ("androidx.fragment:fragment-ktx:1.5.5")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

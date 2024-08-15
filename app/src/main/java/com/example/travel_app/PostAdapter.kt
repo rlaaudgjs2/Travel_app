@@ -2,7 +2,8 @@ package com.example.travel_app
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.paging.PagingDataAdapter
+import android.widget.ImageView
+
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -10,7 +11,7 @@ import com.example.travel_app.Spring.Bulletin.PostRequest
 import com.google.android.material.chip.Chip
 import com.example.travel_app.databinding.ItemBulletinBinding
 
-class PostAdapter : PagingDataAdapter<PostRequest, PostAdapter.PostViewHolder>(POST_COMPARATOR) {
+class PostAdapter : androidx.paging.PagingDataAdapter<PostRequest, PostAdapter.PostViewHolder>(POST_COMPARATOR) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         return PostViewHolder(
@@ -31,26 +32,46 @@ class PostAdapter : PagingDataAdapter<PostRequest, PostAdapter.PostViewHolder>(P
 
     class PostViewHolder(private val binding: ItemBulletinBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(post: PostRequest) {
-            binding.title.text = post.title
-            binding.username.text = post.username
+            binding.titleTextView.text = post.title
+            binding.usernameTextView.text = post.username
 
-            // Load the first image (if available)
-            if (post.imageUrls.isNotEmpty()) {
-                Glide.with(binding.root.context)
-                    .load(post.imageUrls[0])
-                    .into(binding.postImage)
-            }
+            // Set up images
+            val imageAdapter = ImageAdapter(post.imageUrls)
+            binding.imagesRecyclerView.adapter = imageAdapter
 
             // Set up hashtags
-            binding.hashtagGroup.removeAllViews()
+            binding.hashtagChipGroup.removeAllViews()
             post.hashtagList.forEach { hashtag ->
                 val chip = Chip(binding.root.context)
                 chip.text = hashtag
-                binding.hashtagGroup.addView(chip)
+                binding.hashtagChipGroup.addView(chip)
             }
-
-            // You might want to add a click listener to show all places or images
         }
+    }
+
+    class ImageAdapter(private val imageUrls: List<String>) :
+        RecyclerView.Adapter<ImageAdapter.ImageViewHolder>() {
+
+        class ImageViewHolder(val imageView: ImageView) : RecyclerView.ViewHolder(imageView)
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
+            val imageView = ImageView(parent.context).apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                scaleType = ImageView.ScaleType.CENTER_CROP
+            }
+            return ImageViewHolder(imageView)
+        }
+
+        override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
+            Glide.with(holder.imageView)
+                .load(imageUrls[position])
+                .into(holder.imageView)
+        }
+
+        override fun getItemCount() = imageUrls.size
     }
 
     companion object {
