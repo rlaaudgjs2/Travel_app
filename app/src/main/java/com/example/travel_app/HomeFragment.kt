@@ -40,18 +40,6 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
 
-
-//        val dataBundle = requireActivity().intent?.extras
-//        val list: ArrayList<TestData>? = dataBundle?.getParcelableArrayList("DataList") ?: arrayListOf()
-//
-//        Log.e("HomeFragment", "Data List: $list")
-//        val rvBulletin: RecyclerView = view.findViewById(R.id.rvBulletin)
-//
-//        //Fragment에서 전달받은 list를 넘기면서 ListAdapter 생성
-//        homeBulletinAdapter = HomeBulletinAdapter(list?: arrayListOf())
-//        rvBulletin.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
-//        rvBulletin.adapter = homeBulletinAdapter
-
         binding.btnWriteBulletin.setOnClickListener{
             parentFragmentManager.beginTransaction().apply {
                 replace(R.id.mainFrameLayout, WriteBulletinFragment())
