@@ -1,65 +1,74 @@
-package com.example.travel_app
-
+import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import androidx.paging.PagingDataAdapter
-import androidx.recyclerview.widget.DiffUtil
+import android.widget.TextView
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.example.travel_app.Spring.Bulletin.PostRequest
+import com.example.travel_app.ImageAdapter
+import com.example.travel_app.R
+import com.example.travel_app.Spring.Bulletin.PostResponse
 import com.google.android.material.chip.Chip
-import com.example.travel_app.databinding.ItemBulletinBinding
+import com.google.android.material.chip.ChipGroup
+import java.text.SimpleDateFormat
+import java.util.*
 
-class PostAdapter : PagingDataAdapter<PostRequest, PostAdapter.PostViewHolder>(POST_COMPARATOR) {
+class PostAdapter(private var posts: List<PostResponse>) : RecyclerView.Adapter<PostAdapter.ViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
-        return PostViewHolder(
-            ItemBulletinBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false
-            )
-        )
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val titleTextView: TextView = view.findViewById(R.id.titleTextView)
+        val nickNameTextView: TextView = view.findViewById(R.id.nickNameTextView)
+        val dateTextView: TextView = view.findViewById(R.id.dateTextView)
+        val imagesRecyclerView: RecyclerView = view.findViewById(R.id.imagesRecyclerView)
+        val hashtagChipGroup: ChipGroup = view.findViewById(R.id.hashtagChipGroup)
     }
 
-    override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-        val post = getItem(position)
-        if (post != null) {
-            holder.bind(post)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_bulletin, parent, false)
+        return ViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val post = posts[position]
+        holder.titleTextView.text = post.title
+        holder.nickNameTextView.text = post.nickName
+        holder.dateTextView.text = formatDate(post.creationDate)
+
+        // 이미지 목록 바인딩
+        val imageAdapter = ImageAdapter(post.imageUrls)
+        holder.imagesRecyclerView.apply {
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+            adapter = imageAdapter
+        }
+
+        // 해시태그 목록 바인딩
+        holder.hashtagChipGroup.removeAllViews()
+        post.hashtagList.forEach { hashtag ->
+            val chip = Chip(holder.itemView.context)
+            chip.text = hashtag
+            holder.hashtagChipGroup.addView(chip)
         }
     }
 
-    class PostViewHolder(private val binding: ItemBulletinBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(post: PostRequest) {
-            binding.title.text = post.title
-            binding.username.text = post.username
+    override fun getItemCount() = posts.size
 
-            // Load the first image (if available)
-            if (post.imageUrls.isNotEmpty()) {
-                Glide.with(binding.root.context)
-                    .load(post.imageUrls[0])
-                    .into(binding.postImage)
-            }
-
-            // Set up hashtags
-            binding.hashtagGroup.removeAllViews()
-            post.hashtagList.forEach { hashtag ->
-                val chip = Chip(binding.root.context)
-                chip.text = hashtag
-                binding.hashtagGroup.addView(chip)
-            }
-
-            // You might want to add a click listener to show all places or images
-        }
+    fun updatePosts(newPosts: List<PostResponse>) {
+        posts = newPosts
+        notifyDataSetChanged()
     }
 
-    companion object {
-        private val POST_COMPARATOR = object : DiffUtil.ItemCallback<PostRequest>() {
-            override fun areItemsTheSame(oldItem: PostRequest, newItem: PostRequest): Boolean =
-                oldItem.title == newItem.title && oldItem.username == newItem.username
-
-            override fun areContentsTheSame(oldItem: PostRequest, newItem: PostRequest): Boolean =
-                oldItem == newItem
+    private fun formatDate(dateString: String?): String {
+        if (dateString.isNullOrEmpty()) {
+            return "날짜 없음"
+        }
+        return try {
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
+            val outputFormat = SimpleDateFormat("yyyy년 M월 d일 HH:mm", Locale.getDefault())
+            val date = inputFormat.parse(dateString)
+            outputFormat.format(date)
+        } catch (e: Exception) {
+            Log.e("PostAdapter", "Date parsing error", e)
+            "날짜 형식 오류"
         }
     }
 }
