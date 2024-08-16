@@ -72,11 +72,9 @@
                 android:layout_height="100dp"
                 android:layout_margin="2dp"
                 android:text="전북"
-                android:onClick="@{() -> selectRegion.onButtonClick(btn_1)}"
                 android:textColor="#000000"
-                android:background="@drawable/btn_pressed_check"
-                android:layout_weight="1"
-                style="?android:attr/buttonBarButtonStyle" />
+                android:backgroundTint="@color/white"
+                android:layout_weight="1"/>
             <Button
                 android:id="@+id/btn_2"
                 android:layout_width="0dp"
@@ -84,9 +82,8 @@
                 android:layout_margin="2dp"
                 android:text="전남"
                 android:textColor="#000000"
-                android:background="@drawable/btn_pressed_check"
-                android:layout_weight="1"
-                style="?android:attr/buttonBarButtonStyle"/>
+                android:backgroundTint="@color/white"
+                android:layout_weight="1"/>
             <Button
                 android:id="@+id/btn_3"
                 android:layout_width="0dp"
@@ -94,9 +91,8 @@
                 android:layout_margin="2dp"
                 android:text="경기"
                 android:textColor="#000000"
-                android:background="@drawable/btn_pressed_check"
-                android:layout_weight="1"
-                style="?android:attr/buttonBarButtonStyle"/>
+                android:backgroundTint="@color/white"
+                android:layout_weight="1"/>
         </TableRow>
         <TableRow tools:ignore="UselessParent">
             <Button
@@ -106,9 +102,8 @@
                 android:layout_margin="2dp"
                 android:text="강원"
                 android:textColor="#000000"
-                android:background="@drawable/btn_pressed_check"
-                android:layout_weight="1"
-                style="?android:attr/buttonBarButtonStyle" />
+                android:backgroundTint="@color/white"
+                android:layout_weight="1"/>
             <Button
                 android:id="@+id/btn_5"
                 android:layout_width="0dp"
@@ -116,9 +111,8 @@
                 android:layout_margin="2dp"
                 android:text="충남"
                 android:textColor="#000000"
-                android:background="@drawable/btn_pressed_check"
-                android:layout_weight="1"
-                style="?android:attr/buttonBarButtonStyle"/>
+                android:backgroundTint="@color/white"
+                android:layout_weight="1"/>
             <Button
                 android:id="@+id/btn_6"
                 android:layout_width="0dp"
@@ -126,9 +120,8 @@
                 android:layout_margin="2dp"
                 android:text="충북"
                 android:textColor="#000000"
-                android:background="@drawable/btn_pressed_check"
-                android:layout_weight="1"
-                style="?android:attr/buttonBarButtonStyle"/>
+                android:backgroundTint="@color/white"
+                android:layout_weight="1"/>
         </TableRow>
         <TableRow tools:ignore="UselessParent">
             <Button
@@ -138,9 +131,8 @@
                 android:layout_margin="2dp"
                 android:text="경북"
                 android:textColor="#000000"
-                android:background="@drawable/btn_pressed_check"
-                android:layout_weight="1"
-                style="?android:attr/buttonBarButtonStyle" />
+                android:backgroundTint="@color/white"
+                android:layout_weight="1"/>
             <Button
                 android:id="@+id/btn_8"
                 android:layout_width="0dp"
@@ -148,9 +140,8 @@
                 android:layout_margin="2dp"
                 android:text="경남"
                 android:textColor="#000000"
-                android:background="@drawable/btn_pressed_check"
-                android:layout_weight="1"
-                style="?android:attr/buttonBarButtonStyle"/>
+                android:backgroundTint="@color/white"
+                android:layout_weight="1"/>
             <Button
                 android:id="@+id/btn_9"
                 android:layout_width="0dp"
@@ -158,9 +149,8 @@
                 android:layout_margin="2dp"
                 android:text="제주"
                 android:textColor="#000000"
-                android:background="@drawable/btn_pressed_check"
-                android:layout_weight="1"
-                style="?android:attr/buttonBarButtonStyle"/>
+                android:backgroundTint="@color/white"
+                android:layout_weight="1"/>
         </TableRow>
     </TableLayout>
 
@@ -172,7 +162,7 @@
         android:gravity="center"
         android:text="선택 완료"
         android:textSize="12dp"
-        android:background="@drawable/btn_style"
+        android:backgroundTint="@color/maincolor"
         app:layout_constraintTop_toBottomOf="@id/layout_3"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

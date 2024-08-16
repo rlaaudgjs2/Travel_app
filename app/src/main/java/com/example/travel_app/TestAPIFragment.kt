@@ -29,6 +29,24 @@ class TestAPIFragment : Fragment() {
 
     private val TAG = "TestAPIFragment"
 
+    // Fragment 생성시 사용될 메소드
+    companion object {
+        private const val ARG_FRAGMENT_TYPE = "fragment_type"
+
+        fun newInstance(fragmentType: String): TestAPIFragment {
+            val fragment = TestAPIFragment()
+            val args = Bundle().apply {
+                putString(ARG_FRAGMENT_TYPE, fragmentType)
+            }
+            fragment.arguments = args
+            return fragment
+        }
+    }
+
+    private fun getFragmentType(): String? {
+        return arguments?.getString(ARG_FRAGMENT_TYPE)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -91,8 +109,13 @@ class TestAPIFragment : Fragment() {
                 // TODO: Get info about the selected place.
                 Log.i(TAG, "Place: ${place.name}, ${place.id}")
 
-                fetchPlaceDetails(place.id, placesClient)
-
+                when (getFragmentType()) {
+                    "WriteBulletin" -> fetchPlaceDetails(place.id, placesClient)
+                    "WritePlanner" -> {
+                        val dayNumber = arguments?.getInt("dayNumber") ?: 0
+                        fetchPlanPlaceDetails(dayNumber, place.id, placesClient)
+                    }
+                }
             }
 
             override fun onError(status: Status) {
@@ -100,6 +123,52 @@ class TestAPIFragment : Fragment() {
                 Log.i(TAG, "An error occurred: $status")
             }
         })
+    }
+
+    private fun fetchPlanPlaceDetails(dayNumber: Int, placeId: String, placesClient: PlacesClient) {
+        val placeRequest = FetchPlaceRequest.builder(placeId, listOf(Place.Field.NAME, Place.Field.ADDRESS, Place.Field.TYPES, Place.Field.PHOTO_METADATAS))
+            .build()
+
+        placesClient.fetchPlace(placeRequest)
+            .addOnSuccessListener { response ->
+                val place = response.place
+                val placeName = place.name ?: ""
+                val placeCategory = place.types?.firstOrNull()?.toString() ?: "Unknown"
+                val photoMetadata = place.photoMetadatas?.firstOrNull()
+
+                if (photoMetadata != null) {
+                    val photoRequest = FetchPhotoRequest.builder(photoMetadata)
+                        .setMaxWidth(500)
+                        .setMaxHeight(300)
+                        .build()
+
+                    placesClient.fetchPhoto(photoRequest).addOnSuccessListener { fetchPhotoResponse ->
+                        val photoBitmap = fetchPhotoResponse.bitmap
+
+                        // 결과를 FragmentResult API를 사용하여 전달
+                        parentFragmentManager.setFragmentResult("requestKey", Bundle().apply {
+                            putInt("dayNumber", dayNumber) // dayNumber를 포함
+                            putString("placeName", placeName)
+                            putString("placeCategory", placeCategory)
+                            putString("placePhoto", photoBitmap.toString()) // 실제 사용 시에는 더 적절한 방법으로 처리
+                        })
+                        parentFragmentManager.popBackStack() // 이전 Fragment로 돌아감
+                    }.addOnFailureListener { exception ->
+                        Log.e(TAG, "Photo request failed: ${exception.message}")
+                    }
+                } else {
+                    parentFragmentManager.setFragmentResult("requestKey", Bundle().apply {
+                        putInt("dayNumber", dayNumber) // dayNumber를 포함
+                        putString("placeName", placeName)
+                        putString("placeCategory", placeCategory)
+                        putString("placePhoto", "") // 기본값
+                    })
+                    parentFragmentManager.popBackStack() // 이전 Fragment로 돌아감
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e(TAG, "Place Details request failed: ${exception.message}")
+            }
     }
 
     private fun fetchPlaceDetails(placeId: String, placesClient: PlacesClient) {
@@ -112,7 +181,6 @@ class TestAPIFragment : Fragment() {
                 val placeName = place.name ?: ""
                 val placeCategory = place.types?.firstOrNull()?.toString() ?: "Unknown"
                 val photoMetadata = place.photoMetadatas?.firstOrNull()
-
                 if (photoMetadata != null) {
                     val photoRequest = FetchPhotoRequest.builder(photoMetadata)
                         .setMaxWidth(500)
