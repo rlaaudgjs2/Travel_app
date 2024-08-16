@@ -56,11 +56,16 @@
                 />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:layout_width="match_parent"
-                android:layout_height="400dp"
                 android:id="@+id/place_recycler"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                />
+                android:layout_width="391dp"
+                android:layout_height="wrap_content"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/image_preview_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp" />
 
             <Button
                 android:layout_width="wrap_content"
@@ -69,6 +74,13 @@
                 android:layout_gravity="center"
                 android:text="장소 추가"
                 />
+
+            <Button
+                android:id="@+id/btn_picture"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="사진 추가" />
         </LinearLayout>
 
     </LinearLayout>

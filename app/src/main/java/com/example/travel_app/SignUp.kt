@@ -2,6 +2,7 @@ package com.example.travel_app
 
 import android.content.Intent
 import android.os.Bundle
+import android.provider.ContactsContract.CommonDataKinds.Nickname
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -20,6 +21,10 @@ class SignUp : Fragment() {
     private lateinit var signUpIdEditText: EditText
     private lateinit var signUpPasswordEditText: EditText
     private lateinit var signUpButton: Button
+    private lateinit var nickNameEditText: EditText
+    private lateinit var checkNicknameButton: Button
+    private var isNicknameChecked = false
+
     private val userInterface: UserInterface by lazy { ServerClient.instance }
 
     private fun navigateToNaviActivity() {
@@ -37,23 +42,66 @@ class SignUp : Fragment() {
         signUpIdEditText = view.findViewById(R.id.sign_id)
         signUpPasswordEditText = view.findViewById(R.id.sign_password)
         signUpButton = view.findViewById(R.id.signUp_commit)
+        nickNameEditText  = view.findViewById(R.id.nickName)
+        checkNicknameButton = view.findViewById(R.id.checkNick)
+
+        checkNicknameButton.setOnClickListener {
+            val nickname = nickNameEditText.text.toString()
+            if (nickname.isNotEmpty()) {
+                checkNicknameDuplication(nickname)
+            } else {
+                showError("닉네임을 입력해주세요.")
+            }
+        }
+
 
         signUpButton.setOnClickListener {
-            val userID = signUpIdEditText.text.toString()
-            val userPassword = signUpPasswordEditText.text.toString()
-
-            // 회원가입 요청을 서버로 전송
-            sendSignUpRequest(userID, userPassword)
+            if (isNicknameChecked) {
+                val userID = signUpIdEditText.text.toString()
+                val userPassword = signUpPasswordEditText.text.toString()
+                val nickName = nickNameEditText.text.toString()
+                sendSignUpRequest(userID, userPassword, nickName)
+            } else {
+                showError("닉네임 중복 확인을 먼저 해주세요.")
+            }
         }
+
         return view
     }
 
-    private fun sendSignUpRequest(userID: String, userPassword: String) {
-        if (!validateInput(userID, userPassword)) {
+    private fun checkNicknameDuplication(nickname: String) {
+        val call = userInterface.checkNickname(nickname)
+        call.enqueue(object : Callback<Map<String, Boolean>> {
+            override fun onResponse(call: Call<Map<String, Boolean>>, response: Response<Map<String, Boolean>>) {
+                if (response.isSuccessful) {
+                    val isAvailable = response.body()?.get("available") ?: false
+                    if (isAvailable) {
+                        isNicknameChecked = true
+                        showSuccess("사용 가능한 닉네임입니다.")
+                    } else {
+                        isNicknameChecked = false
+                        showError("이미 사용 중인 닉네임입니다.")
+                    }
+                } else {
+                    showError("닉네임 중복 확인 중 오류가 발생했습니다.")
+                    showError("닉네임 중복 확인 중 오류가 발생했습니다. (코드: ${response.code()})")
+                    Log.d("error", "${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: Call<Map<String, Boolean>>, t: Throwable) {
+                showError("네트워크 오류: ${t.message}")
+            }
+        })
+    }
+
+    private fun sendSignUpRequest(userID: String, userPassword: String, nickName: String) {
+        if (!validateInput(userID, userPassword, nickName)) {
             return
         }
 
-        val registrationRequest = RegistrationRequest(userID, userPassword)
+        val registrationRequest = RegistrationRequest(userID, userPassword,nickName)
+
         val call = userInterface.register(registrationRequest)
         call.enqueue(object : Callback<UserRegistration> {
             override fun onResponse(
@@ -84,9 +132,9 @@ class SignUp : Fragment() {
         })
     }
 
-    private fun validateInput(userID: String, userPassword: String): Boolean {
-        if (userID.isEmpty() || userPassword.isEmpty()) {
-            showError("아이디와 비밀번호를 모두 입력해주세요.")
+    private fun validateInput(userID: String, userPassword: String, nickName: String): Boolean {
+        if (userID.isEmpty() || userPassword.isEmpty()||nickName.isEmpty()) {
+            showError("입력하지 않은 칸이 있습니다")
             return false
         }
         if (userID.length < 4) {
@@ -119,6 +167,6 @@ class SignUp : Fragment() {
     }
 }
 
-data class RegistrationRequest(val username: String, val password: String)
+data class RegistrationRequest(val username: String, val password: String, val nickname: String)
 
-data class UserRegistration(val id: Long, val userId: String)
+data class UserRegistration(val id: Long, val userId: String, val nickname: String)

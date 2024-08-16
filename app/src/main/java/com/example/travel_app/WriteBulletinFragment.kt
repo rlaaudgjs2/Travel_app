@@ -1,95 +1,91 @@
 package com.example.travel_app
 
+import CloudService
 import android.app.Activity
-import android.util.Base64
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Parcelable
+import android.provider.MediaStore
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
+import androidx.annotation.RequiresApi
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.travel_app.Spring.Bulletin.PlaceRequest
-import com.example.travel_app.Spring.Bulletin.PostInterface
 import com.example.travel_app.Spring.Bulletin.PostRequest
 import com.example.travel_app.Spring.Bulletin.PostResponse
 import com.example.travel_app.Spring.ServerClient
 import com.example.travel_app.databinding.FragmentWriteBulletinBinding
+import com.example.travel_app.databinding.ItemImagePreviewBinding
+
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.gson.Gson
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.IOException
 
-@Suppress("UNREACHABLE_CODE")
 class WriteBulletinFragment : Fragment() {
-    // TODO: Rename and change types of parameters
+    private lateinit var cloudService: CloudService
+    private val PICK_IMAGE_REQUEST = 1
 
     private var _binding: FragmentWriteBulletinBinding? = null
     private val binding get() = _binding!!
-    private lateinit var edt_title : EditText
+    private lateinit var edt_title: EditText
 
+    private val selectedImages = mutableListOf<Uri>()
+    private lateinit var imagePreviewAdapter: ImagePreviewAdapter
 
-    private data class ImageData(val index: Int, val uri: Uri)
-
-    private val imageList = mutableListOf<ImageData>()
-
-//    private val detailBulletinViewModel: DetailBulletinViewModel by activityViewModels()
     private lateinit var recyclerView: RecyclerView
     private lateinit var placeAdapter: PlaceAdapter
     private val placesList = mutableListOf<PlaceDetails>()
 
-//    private val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-//        if (result.resultCode == Activity.RESULT_OK) {
-//            val data: Intent? = result.data
-//            val placeName = data?.getStringExtra("placeName")
-//            val placeCategory = data?.getStringExtra("placeCategory")
-//            val placePhoto = data?.getStringExtra("placePhoto")
-//
-//            // 장소 정보를 리스트에 추가하고 RecyclerView 업데이트
-//            if (placeName != null && placeCategory != null && placePhoto != null) {
-//                val placeDetails = PlaceDetails(placeName, placeCategory, placePhoto)
-//                placesList.add(placeDetails)
-//                placeAdapter.notifyDataSetChanged()
-//            }
-//        }
-//    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         _binding = FragmentWriteBulletinBinding.inflate(inflater, container, false)
         edt_title = binding.root.findViewById(R.id.edt_title)
         return binding.root
     }
 
-
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        cloudService = CloudService(requireContext())
         hideBottomNavigationView()
 
-        // RecyclerView 초기화 및 Adapter 설정
+        // 장소 RecyclerView 초기화
         recyclerView = binding.placeRecycler
         placeAdapter = PlaceAdapter(requireContext(), placesList)
         recyclerView.adapter = placeAdapter
 
-        // FragmentResultListener 설정
-        parentFragmentManager.setFragmentResultListener("requestKey", viewLifecycleOwner) { key, bundle ->
+        // 이미지 미리보기 RecyclerView 초기화
+        binding.imagePreviewRecycler.layoutManager = GridLayoutManager(context, 3)
+        imagePreviewAdapter = ImagePreviewAdapter(selectedImages) { position ->
+            selectedImages.removeAt(position)
+            imagePreviewAdapter.notifyItemRemoved(position)
+        }
+        binding.imagePreviewRecycler.adapter = imagePreviewAdapter
+        // FragmentResultListene 설정
+        parentFragmentManager.setFragmentResultListener("requestKey", viewLifecycleOwner) { _, bundle ->
             val placeName = bundle.getString("placeName")
             val placeCategory = bundle.getString("placeCategory")
             val placePhoto = bundle.getString("placePhoto")
 
-            // 장소 정보를 리스트에 추가하고 RecyclerView 업데이트
             if (placeName != null && placeCategory != null && placePhoto != null) {
                 val placeDetails = PlaceDetails(placeName, placeCategory, placePhoto)
                 placesList.add(placeDetails)
@@ -133,95 +129,144 @@ class WriteBulletinFragment : Fragment() {
                 .replace(R.id.mainFrameLayout, testAPIFragment)
                 .addToBackStack(null)
                 .commit()
+
         }
-        binding.btnBackspace.setOnClickListener{
+
+        binding.btnBackspace.setOnClickListener {
             parentFragmentManager.popBackStack()
             showBottomNavigationView()
         }
 
-        binding.btnRegisterBulletin.setOnClickListener{
+        binding.btnRegisterBulletin.setOnClickListener {
             val edt_title = edt_title.text.toString()
             val userID = getUserInfo()
-            parentFragmentManager.beginTransaction().apply {
-//                if (userID != null) {
-//                    resister( edt_title, userID )
-//                }
-                if(userID != null){
-                    sendBulletinRequest(edt_title, placesList, userID)
-                }
-                replace(R.id.mainFrameLayout, WriteHashTagFragment())
-                addToBackStack(null)
-                commit()
+
+            if (userID != null) {
+                sendBulletinRequestWithImages(edt_title, placesList, userID, selectedImages)
             }
+
+        }
+
+        binding.btnPicture.setOnClickListener {
+            openGallery()
+        }
+    }
+
+    private fun openGallery() {
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+        intent.type = "image/*"
+        startActivityForResult(Intent.createChooser(intent, "Select Pictures"), PICK_IMAGE_REQUEST)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
+            if (data.clipData != null) {
+                val count = data.clipData!!.itemCount
+                for (i in 0 until count) {
+                    val imageUri = data.clipData!!.getItemAt(i).uri
+                    selectedImages.add(imageUri)
+                }
+            } else if (data.data != null) {
+                val imageUri = data.data!!
+                selectedImages.add(imageUri)
+
+            }
+            imagePreviewAdapter.notifyDataSetChanged()
         }
     }
 
 
-    private fun hideBottomNavigationView(){
-        val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)
-        bottomNavigationView?.visibility = View.GONE
-    }
-    private fun showBottomNavigationView(){
-        val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)
-        bottomNavigationView?.visibility = View.VISIBLE
-    }
-
-
-
-    private fun getUserInfo(): String? {
-        val sharedPreferences = requireContext().getSharedPreferences("user_info", Context.MODE_PRIVATE)
-        return sharedPreferences.getString("user_id"," ")
-    }
-
-    private fun convertImageToByteArray(imageUri: Uri): ByteArray {
-        val inputStream = context?.contentResolver?.openInputStream(imageUri)
-        val outputStream = ByteArrayOutputStream()
-        try {
-            inputStream?.use { input ->
-                val buffer = ByteArray(1024)
-                var bytesRead: Int
-                while (input.read(buffer).also { bytesRead = it } != -1) {
-                    outputStream.write(buffer, 0, bytesRead)
-                }
-            }
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-        return outputStream.toByteArray()
-    }
-
-    private fun sendBulletinRequest(title: String, placesList: List<PlaceDetails>, userID: String) {
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun sendBulletinRequestWithImages(title: String, placesList: List<PlaceDetails>, userID: String, images: List<Uri>) {
         if (!validatePostInput(title, placesList)) {
             return
         }
 
-        val placeRequests = placesList.map { PlaceRequest(it.name) }
-        val postRequest = PostRequest(title, placeRequests, userID)
-        val call = ServerClient.postInstance.savePost(postRequest)
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val uploadedImageUrls = uploadImages(images)
+                val placeRequests = placesList.map { PlaceRequest(it.name) }
 
-        Log.e("Place 값", placesList.toString())
+                withContext(Dispatchers.Main) {
+                    val bundle = Bundle().apply {
+                        putString("title", title)
+                        putString("userID", userID)
+                        putStringArrayList("imageUrls", ArrayList(uploadedImageUrls))
+                        putParcelableArrayList("placeRequests", ArrayList(placeRequests.map { it as Parcelable }))
+                    }
+
+                    val writeHashTagFragment = WriteHashTagFragment().apply {
+                        arguments = bundle
+                    }
+
+                    parentFragmentManager.beginTransaction().apply {
+                        replace(R.id.mainFrameLayout, writeHashTagFragment)
+                        addToBackStack(null)
+                        commit()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    showError("이미지 업로드 실패: ${e.message}")
+                }
+            }
+        }
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private suspend fun uploadImages(images: List<Uri>): List<String> = withContext(Dispatchers.IO) {
+        val uploadedUrls = mutableListOf<String>()
+        for (imageUri in images) {
+            val file = createTempFileFromUri(imageUri)
+            val objectName = "images/${System.currentTimeMillis()}_${file.name}"
+            cloudService.uploadFile(file.absolutePath, objectName)
+            val imageUrl = cloudService.getFileUrl(objectName)
+            uploadedUrls.add(imageUrl)
+            file.delete() // 임시 파일 삭제
+        }
+        uploadedUrls
+    }
+
+    private fun createTempFileFromUri(uri: Uri): File {
+        val inputStream = requireContext().contentResolver.openInputStream(uri)
+        val file = File.createTempFile("temp_image", null, requireContext().cacheDir)
+        inputStream?.use { input ->
+            file.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+        return file
+    }
+
+    private fun sendPostToServer(postRequest: PostRequest) {
+        val call = ServerClient.postInstance.savePost(postRequest)
         call.enqueue(object : Callback<PostResponse> {
-            override fun onResponse(
-                call: Call<PostResponse>,
-                response: Response<PostResponse>
-            ) {
+            override fun onResponse(call: Call<PostResponse>, response: Response<PostResponse>) {
                 if (response.isSuccessful) {
                     val bulletin = response.body()
                     if (bulletin != null) {
                         Log.d("Bulletin", "Success: $bulletin")
                         showSuccess("게시글 저장에 성공했습니다.")
-                        // 필요한 경우 다른 동작 추가
+                        navigateToWriteHashTagFragment()
                     } else {
-
                         showError("게시글 저장 실패: 서버 응답이 비어있습니다.")
                     }
                 } else {
                     val errorBody = response.errorBody()?.string()
-                    Log.d("Bulletin", "PostRequest JSON: ${Gson().toJson(postRequest)}")
                     Log.e("Bulletin", "Failed: $errorBody")
-                    Log.e("Bulletin", "Headers: ${response.headers()}")
-                    Log.e("Bulletin", "Response code: ${response.code()}")
                     showError("게시글 저장 실패: ${parseErrorMessage(errorBody)}")
+                }
+            }
+
+            private fun navigateToWriteHashTagFragment() {
+                parentFragmentManager.beginTransaction().apply {
+                    replace(R.id.mainFrameLayout, WriteHashTagFragment())
+                    addToBackStack(null)
+                    commit()
                 }
             }
 
@@ -230,7 +275,21 @@ class WriteBulletinFragment : Fragment() {
                 showError("네트워크 오류: ${t.message}")
             }
         })
+    }
 
+    private fun hideBottomNavigationView() {
+        val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)
+        bottomNavigationView?.visibility = View.GONE
+    }
+
+    private fun showBottomNavigationView() {
+        val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)
+        bottomNavigationView?.visibility = View.VISIBLE
+    }
+
+    private fun getUserInfo(): String? {
+        val sharedPreferences = requireContext().getSharedPreferences("user_info", Context.MODE_PRIVATE)
+        return sharedPreferences.getString("user_id", "")
     }
 
     private fun validatePostInput(title: String, placesList: List<PlaceDetails>): Boolean {
@@ -248,8 +307,39 @@ class WriteBulletinFragment : Fragment() {
     private fun parseErrorMessage(errorBody: String?): String {
         return errorBody ?: "알 수 없는 오류 발생"
     }
-}
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+}
+class ImagePreviewAdapter(
+private val images: List<Uri>,
+private val onDeleteClick: (Int) -> Unit
+) : RecyclerView.Adapter<ImagePreviewAdapter.ImageViewHolder>() {
+
+    class ImageViewHolder(val binding: ItemImagePreviewBinding) : RecyclerView.ViewHolder(binding.root)
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
+        val binding = ItemImagePreviewBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ImageViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
+        val uri = images[position]
+
+        Glide.with(holder.itemView.context)
+            .load(uri)
+            .centerCrop()
+            .into(holder.binding.imagePreview)
+
+        holder.binding.btnDelete.setOnClickListener { onDeleteClick(position) }
+    }
+
+    override fun getItemCount() = images.size
+
+}
 
 
 
