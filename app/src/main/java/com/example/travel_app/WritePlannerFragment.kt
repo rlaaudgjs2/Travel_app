@@ -11,8 +11,18 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.travel_app.Spring.Planner.DayRequest
+import com.example.travel_app.Spring.Planner.PlanInterface
+import com.example.travel_app.Spring.Planner.PlanPlaceRequest
+import com.example.travel_app.Spring.Planner.PlanRequest
+import com.example.travel_app.Spring.Planner.PlanResponse
 import com.example.travel_app.databinding.FragmentWritePlannerBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class WritePlannerFragment : Fragment() {
 
@@ -75,6 +85,9 @@ class WritePlannerFragment : Fragment() {
             }
         }
 
+        binding.btnRegisterPlanner.setOnClickListener {
+            sendPlanRequest()
+        }
     }
     // 초기 DayPlans 설정
     private fun initializeDayPlans(selectedDaysCount: Int) {
@@ -83,25 +96,6 @@ class WritePlannerFragment : Fragment() {
         }
     }
 
-//    // 특정 일차에 새로운 장소 추가
-//    private fun addPlaceToDay(dayNumber: Int, newPlace: PlaceDetails) {
-//        val dayPlan = dayPlans.find { it.dayNumber == dayNumber }
-//
-//        if (dayPlan != null) {
-//            // 기존 일차에 장소 추가
-//            dayPlan.places.add(newPlace)
-//        } else {
-//            // 새로운 일차 생성 후 장소 추가
-//            dayPlans.add(DayPlan(dayNumber, mutableListOf(newPlace)))
-//            dayPlanAdapter.notifyItemInserted(dayPlans.size - 1)
-//        }
-//
-//
-//        // 어댑터에 변경 사항 통보
-////        dayPlanAdapter.notifyDataSetChanged()
-//        //Recycler가 중복이 되어 생성되는 현상 발생
-//        //1일차 2일차 3일차 3가지만 있어야하는데 장소 추가 하고 다시 돌아오면 1일차 2일차 3일차 1일차 2일차 3일차 중복됨
-//    }
     private fun addPlaceToDay(dayNumber: Int, newPlace: PlaceDetails) {
         val dayPlanIndex = dayPlans.indexOfFirst { it.dayNumber == dayNumber }
 
@@ -115,6 +109,61 @@ class WritePlannerFragment : Fragment() {
             dayPlanAdapter.notifyItemInserted(dayPlans.size - 1) // 새 항목 삽입
         }
     }
+
+    private fun getUserInfo(): String? {
+        val sharedPreferences = requireContext().getSharedPreferences("user_info", Context.MODE_PRIVATE)
+        return sharedPreferences.getString("user_id"," ")
+    }
+
+    private fun sendPlanRequest() {
+        // PlanRequest 객체 생성
+        val planRequest = PlanRequest(
+            authorId = getUserInfo(), // 사용자 ID를 가져옴
+//            title = binding.txtRegion.text.toString(), // 여행 계획 제목
+            days = dayPlans.map { dayPlan ->
+                DayRequest(
+                    dayNumber = dayPlan.dayNumber,
+                    places = dayPlan.places.map { placeDetails ->
+                        PlanPlaceRequest(
+                            placeName = placeDetails.name, // Place ID는 서버에서 자동 생성되므로 클라이언트에서 전송할 필요 없음
+                            planDayId = dayPlan.dayNumber
+                        )
+                    }
+                )
+            }
+        )
+
+        // 요청 데이터 로깅
+        Log.d("WritePlannerFragment", "Sending PlanRequest: $planRequest")
+
+        // Retrofit을 사용하여 API 호출
+        val retrofit = Retrofit.Builder()
+            .baseUrl("http://10.0.2.2:8080/") // 서버 주소로 변경
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val api = retrofit.create(PlanInterface::class.java)
+        val call = api.savePlan(planRequest)
+
+        call.enqueue(object : Callback<PlanResponse> {
+            override fun onResponse(call: Call<PlanResponse>, response: Response<PlanResponse>) {
+                // 응답 상태 코드와 본문 로깅
+                Log.d("WritePlannerFragment", "Response code: ${response.code()}")
+                if (response.isSuccessful) {
+                    val planResponse = response.body()
+                    Log.d("WritePlannerFragment", "Plan saved: $planResponse")
+                } else {
+                    Log.e("WritePlannerFragment", "Failed to save plan: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: Call<PlanResponse>, t: Throwable) {
+                Log.e("WritePlannerFragment", "Error saving plan", t)
+            }
+        })
+    }
+
+
 
     private fun hideBottomNavigationView(){
         val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)

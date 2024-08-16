@@ -152,10 +152,6 @@ class WriteBulletinFragment : Fragment() {
                 replace(R.id.mainFrameLayout, WriteHashTagFragment())
                 addToBackStack(null)
                 commit()
-
-
-
-
             }
         }
     }
