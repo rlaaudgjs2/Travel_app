@@ -2,6 +2,7 @@ package com.example.travel_app
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,9 @@ import com.example.travel_app.databinding.CreateScheduleBinding
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.OnRangeSelectedListener
 import com.prolificinteractive.materialcalendarview.format.ArrayWeekDayFormatter
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 class CreateSchedule : Fragment(){
     private var _binding : CreateScheduleBinding?= null
@@ -63,9 +67,35 @@ class CreateSchedule : Fragment(){
             if (selectedDays.isNotEmpty()) {
                 val selectedCount = selectedDays.size
 
+                val calendar = Calendar.getInstance()
+                val dateFormat = SimpleDateFormat("M.d", Locale.getDefault())
+
+                // 첫 번째 날짜를 Date로 변환
+                val startDay = selectedDays.first()
+                calendar.set(Calendar.YEAR, startDay.year) // `year`를 설정
+                calendar.set(Calendar.MONTH, startDay.month -1) // `month`를 설정
+                calendar.set(Calendar.DAY_OF_MONTH, startDay.day) // `day`를 설정
+
+                val startDayString = dateFormat.format(calendar.time)
+
+                // 마지막 날짜를 Date로 변환
+                val endDay = selectedDays.last()
+                calendar.set(Calendar.YEAR, endDay.year) // `year`를 설정
+                calendar.set(Calendar.MONTH, endDay.month -1) // `month`를 설정
+                calendar.set(Calendar.DAY_OF_MONTH, endDay.day) // `day`를 설정
+
+                val endDayString = dateFormat.format(calendar.time)
                 // Save the selected count in SharedPreferences
                 val sharedPreferences = requireContext().getSharedPreferences("TravelAppPrefs", Context.MODE_PRIVATE)
-                sharedPreferences.edit().putInt("selectedDaysCount", selectedCount).apply()
+
+
+                with(sharedPreferences.edit()){
+                    putInt("selectedDaysCount", selectedCount)
+                    putString("startDay", startDayString)
+                    putString("endDay", endDayString)
+                    apply()
+                }
+                Log.e("넘겨줄때 startDay", startDayString)
 
                 // Navigate to the next fragment
                 val fragment = SelectRegion()
@@ -73,6 +103,7 @@ class CreateSchedule : Fragment(){
                     .replace(R.id.mainFrameLayout, fragment)
                     .addToBackStack(null)
                     .commit()
+
             }
         }
     }

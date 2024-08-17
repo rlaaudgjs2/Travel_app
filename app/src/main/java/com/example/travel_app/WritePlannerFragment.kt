@@ -51,6 +51,7 @@ class WritePlannerFragment : Fragment() {
         val sharedPreferences = requireContext().getSharedPreferences("TravelAppPrefs", Context.MODE_PRIVATE)
         val selectedDaysCount = sharedPreferences.getInt("selectedDaysCount",0)
 
+
         // dayPlans 초기화
         // dayPlans가 이미 초기화된 경우에는 재초기화하지 않도록 체크합니다.
         if (dayPlans.isEmpty()) {
@@ -116,9 +117,19 @@ class WritePlannerFragment : Fragment() {
     }
 
     private fun sendPlanRequest() {
+        val sharedPreferences = requireContext().getSharedPreferences("TravelAppPrefs", Context.MODE_PRIVATE)
+        val startDayString = sharedPreferences.getString("startDay", "")
+        val endDayString = sharedPreferences.getString("endDay", "")
+
+        val sharedPreferences_Region = requireContext().getSharedPreferences("Region", Context.MODE_PRIVATE)
+        val regionName = sharedPreferences_Region.getString("RegionName", "")
+        Log.e("받을때 startDay", startDayString.toString())
         // PlanRequest 객체 생성
         val planRequest = PlanRequest(
+            startDay = startDayString.toString(),
+            endDay = endDayString.toString(),
             authorId = getUserInfo(), // 사용자 ID를 가져옴
+            region = regionName.toString(),
 //            title = binding.txtRegion.text.toString(), // 여행 계획 제목
             days = dayPlans.map { dayPlan ->
                 DayRequest(
