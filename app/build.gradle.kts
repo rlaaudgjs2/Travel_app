@@ -18,6 +18,8 @@ android {
         viewBinding = true
     }
 
+
+
     defaultConfig {
         applicationId = "com.example.travel_app"
         minSdk = 24

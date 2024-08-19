@@ -1,4 +1,4 @@
-package com.example.travel_app
+package com.example.travel_app.Spring.User
 
 data class LoginResponse(
     val token: String,

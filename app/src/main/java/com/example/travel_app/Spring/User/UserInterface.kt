@@ -1,7 +1,5 @@
 package com.example.travel_app.Spring.User
 
-import com.example.travel_app.LoginResponse
-
 import com.example.travel_app.RegistrationRequest
 import com.example.travel_app.SignIn
 import com.example.travel_app.UserRegistration

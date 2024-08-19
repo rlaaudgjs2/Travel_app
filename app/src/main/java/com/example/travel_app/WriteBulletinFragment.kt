@@ -93,37 +93,8 @@ class WriteBulletinFragment : Fragment() {
             }
         }
 
-//        val title = detailBulletinViewModel.getTitle()
-//        val imgUri = detailBulletinViewModel.getImageUri()
-//        val content = detailBulletinViewModel.getContent()
-
-
-//        if (title != null && imgUri != null && content != null) {
-//            val newDetailBulletin = DetailBulletin(title, imgUri, content)
-////            day()
-//            detailBulletinViewModel.addPlace(newDetailBulletin)
-//        }
-
-//        Log.e("뷰 모델 내용 확인", detailBulletinViewModel.getTitle().toString())
-
-//        recyclerView = binding.placeRecycler
-//
-//
-//        detailBulletinViewModel.detailBulletinLiveData.observe(viewLifecycleOwner) { places ->
-//            placesList.clear()
-//            placesList.addAll(places)
-////            Log.e("장소 리스트 확인", placesList.toString())
-//            adapter.notifyDataSetChanged()
-//        }
-//        adapter = PlaceAdapter(requireContext(), placesList)
-//        recyclerView.adapter = adapter
-
         binding.btnAddPlace.setOnClickListener{
-//            parentFragmentManager.beginTransaction().apply {
-//                replace(R.id.mainFrameLayout, TestAPIFragment())
-//                addToBackStack(null)
-//                commit()
-//            }
+
             val testAPIFragment = TestAPIFragment.newInstance("WriteBulletin")
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.mainFrameLayout, testAPIFragment)

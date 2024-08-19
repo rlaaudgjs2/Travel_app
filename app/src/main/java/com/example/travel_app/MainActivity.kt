@@ -17,7 +17,6 @@ class MainActivity : AppCompatActivity() {
 
         val signInchange : Button = findViewById<Button>(R.id.signInChange)
         val signUpchange : Button = findViewById<Button>(R.id.signUpChange)
-//        val btn_test : Button = findViewById<Button>(R.id.btn_test)
 
         signInchange.setOnClickListener {
             val transaction = supportFragmentManager.beginTransaction()
@@ -36,15 +35,7 @@ class MainActivity : AppCompatActivity() {
             signInchange.visibility = View.GONE
             signUpchange.visibility = View.GONE
         }
-//        btn_test.setOnClickListener{
-//            val transaction = supportFragmentManager.beginTransaction()
-//            val testAPIFragment = TestAPIFragment()
-//            transaction.replace(R.id.fragmentContainer, testAPIFragment)
-//            transaction.commit()
-//            signInchange.visibility = View.GONE
-//            signUpchange.visibility = View.GONE
-//            btn_test.visibility = View.GONE
-//        }
+
     }
 
 }
