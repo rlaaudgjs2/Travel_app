@@ -75,4 +75,43 @@
   Retrofit
   장점 : 직관적이고 간결하다.
   단점 : 유연성이 떨어진다.
-  
+
+
+
+## 클래스 정리
+
+### Bulletin 
+#### -> PlaceRequest, PostInterface, PostRequest, PostResponse
+### Planner 
+#### -> DayRequest, Plan, PlanInterface, PlanPlaceRequest, PlanRequest, PlanResponse
+### User 
+#### -> LoginResponse, UserIdResponse, UserInterface
+### ServerClient
+### AuthCodeHandlerActivity
+### BigRegion
+#### 담당 : 
+#### 역할 : 
+### BigRegionAdapter
+### CalendarDecorator
+### CloudService
+### CreateSchedule
+### HomeFragment
+### ImageAdapter
+### KakaoApplication
+### MainActivity
+### MoreFragment
+### MySchedule
+### MyScheduleAdapter
+### NaviActivity
+### PlaceAdapter
+### PostAdapter
+### RegionSearchFragment
+### SelectRegion
+### SignIn
+### SignUp
+### SmallRegion
+### SmallRegionAdapter
+### TestAPIFragment
+### WriteBulletinFragment
+### WriteHashTagFragment
+### WritePlannerFragment
