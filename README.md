@@ -81,11 +81,21 @@
 ## 클래스 정리
 
 ### Bulletin 
-#### -> PlaceRequest, PostInterface, PostRequest, PostResponse
+#### PlaceRequest 
+#### PostInterface 
+#### PostRequest 
+#### PostResponse
 ### Planner 
-#### -> DayRequest, Plan, PlanInterface, PlanPlaceRequest, PlanRequest, PlanResponse
+#### DayRequest 
+#### Plan 
+#### PlanInterface 
+#### PlanPlaceRequest
+#### PlanRequest
+#### PlanResponse
 ### User 
-#### -> LoginResponse, UserIdResponse, UserInterface
+#### LoginResponse
+#### UserIdResponse
+#### UserInterface
 ### ServerClient
 ### AuthCodeHandlerActivity
 ### BigRegion
