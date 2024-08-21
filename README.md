@@ -80,11 +80,11 @@
 
 ## 클래스 정리
 
-### Bulletin 
-#### PlaceRequest 
-#### PostInterface 
-#### PostRequest 
-#### PostResponse
+### Bulletin : 게시판 작업 - 명헌
+#### PlaceRequest : 명헌 / 장소 데이터. 장소 이름 저장
+#### PostInterface : 명헌 / 게시판 데이터를 보내기 위한 인터페이스. 게시판 정보를 SpringBoot와 통신하기 위해 get,post 함수를 사용
+#### PostRequest  : 명헌 / 게시판 데이터에 대한 엔티티 집합소.
+#### PostResponse : 명헌 / 위와 같음. 현재 데이터 수정중
 ### Planner 
 #### DayRequest 
 #### Plan 
@@ -92,36 +92,36 @@
 #### PlanPlaceRequest
 #### PlanRequest
 #### PlanResponse
-### User 
-#### LoginResponse
-#### UserIdResponse
-#### UserInterface
-### ServerClient
-### AuthCodeHandlerActivity
+### User - 명헌
+#### LoginResponse : 명헌 / 로그인에 대한 정보
+#### UserIdResponse : 명헌 / 유저 아이디 정보 
+#### UserInterface : 명헌 / 로그인 정보를 보내기 위해 SpringBoot와 통신.
+### ServerClient : 명헌 / 안드로이드와 SpringBoot 통신을 위해 주소 및 규약을 작성
+### AuthCodeHandlerActivity : 명헌 / 카카오 로그인에 대한 클래스. 추후 수정 필요.
 ### BigRegion
 #### 담당 : 
 #### 역할 : 
 ### BigRegionAdapter
 ### CalendarDecorator
-### CloudService
+### CloudService : 명헌 / 구글 클라우드를 사용하여 사진 저장하기 위해 만든 클래스. 버킷에 대한 json, 사진 보내는 장소를 작성
 ### CreateSchedule
-### HomeFragment
-### ImageAdapter
-### KakaoApplication
+### HomeFragment : 명헌 / 게시판 보여주는 view Class. 현재 게시판 뷰, 검색, 글쓰기 페이지 및 하단 바를 보여주고 있음. 
+### ImageAdapter : 명헌 / 사진 이미지 개수, 이미지 표시, 사진 주소를 표시하는 클래스. 
+### KakaoApplication : 명헌 / 카카오 SDK에 대한 주소값을 저장하는 클래스 
 ### MainActivity
 ### MoreFragment
 ### MySchedule
 ### MyScheduleAdapter
 ### NaviActivity
 ### PlaceAdapter
-### PostAdapter
+### PostAdapter : 명헌 / 이미지, 닉네임, 해시태그, 현재 날짜, 저장 방식에 대해 적은 클래스. 현 adapter는 homefragment에서 사용해 저장된 게시판을 보여줄 수 있게함.  
 ### RegionSearchFragment
 ### SelectRegion
-### SignIn
-### SignUp
+### SignIn : 명헌 / 구글, 카카오톡, 일반 로그인 세개의 방식은 담은 클래스. 현 구글, 카카오는 애뮬레이터 사용 불가능으로 인해 기능 테스트를 진행x, 일반 로그인은 springboot와 통신을 통해 로그인 가능
+### SignUp ; 명헌 / 구글, 카카오톡, 일반 로그인 세개의 방식을 담아 회원가입 하는 클래스, 일반 로그인은 springboot와 통신하여 비밀번호는 해시값으로, csrf를 통해 통신규약 및 보안 설정
 ### SmallRegion
 ### SmallRegionAdapter
 ### TestAPIFragment
-### WriteBulletinFragment
-### WriteHashTagFragment
-### WritePlannerFragment
+### WriteBulletinFragment : 명헌 / 게시판 데이터를 저장하는 클래스, 제목, 장소, 사진을 저장함. 모든 데이터는 bundle에 담아 writehasgtagFragment에 보냄. 
+### WriteHashTagFragment : 명헌 / WriteBulletinFragment에서 받은 게시판 정보 및, 현 페이지에 작성된 해시태그를 담아 Postrequest에 보냄. 그 뒤, SpringBoot에 저장됨. 
+### WritePlannerFragment : 
