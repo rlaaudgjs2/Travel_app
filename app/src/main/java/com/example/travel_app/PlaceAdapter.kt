@@ -41,5 +41,6 @@ class PlaceAdapter(private val context: Context, private val placesList: List<Pl
 data class PlaceDetails(
     val name: String,
     val category: String,
-    val photoUrl: String?
+    val photoUrl: String?,
+    val address: String
 )

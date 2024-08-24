@@ -36,7 +36,6 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
-import java.io.IOException
 
 class WriteBulletinFragment : Fragment() {
     private lateinit var cloudService: CloudService
@@ -81,17 +80,22 @@ class WriteBulletinFragment : Fragment() {
         }
         binding.imagePreviewRecycler.adapter = imagePreviewAdapter
         // FragmentResultListene 설정
-        parentFragmentManager.setFragmentResultListener("requestKey", viewLifecycleOwner) { _, bundle ->
-            val placeName = bundle.getString("placeName")
-            val placeCategory = bundle.getString("placeCategory")
-            val placePhoto = bundle.getString("placePhoto")
-
-            if (placeName != null && placeCategory != null && placePhoto != null) {
-                val placeDetails = PlaceDetails(placeName, placeCategory, placePhoto)
-                placesList.add(placeDetails)
-                placeAdapter.notifyDataSetChanged()
-            }
-        }
+//        parentFragmentManager.setFragmentResultListener("requestKey", viewLifecycleOwner) { _, bundle ->
+//            val placeName = bundle.getString("placeName")
+//            val placeCategory = bundle.getString("placeCategory")
+//            val placePhoto = bundle.getString("placePhoto")
+//
+//            if (placeName != null && placeCategory != null && placePhoto != null) {
+//                val placeDetails = PlaceDetails(
+//                    placeName,
+//                    placeCategory,
+//                    placePhoto,
+//                    placeDetailsDto.placeAddress
+//                )
+//                placesList.add(placeDetails)
+//                placeAdapter.notifyDataSetChanged()
+//            }
+//        }
 
         binding.btnAddPlace.setOnClickListener{
 

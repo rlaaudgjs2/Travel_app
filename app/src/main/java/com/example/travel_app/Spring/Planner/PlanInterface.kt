@@ -14,5 +14,12 @@ interface PlanInterface {
     fun getPlansByAuthorId(@Path("author_id") authorId: Long): Call<List<PlanResponse>>
 
     @GET("api/plans/{planId}")
-    fun getPlanById(@Path("planId") planId: Long): Call<Plan>
+    fun getPlanById(@Path("planId") planId: Long): Call<PlanDto>
+
+
+    @GET("api/plans/{planId}/days")
+    fun getPlanDays(@Path("planId") planId: Long): Call<List<DayPlanDto>>
+
+    @GET("api/plans/{dayId}/places")
+    fun getDayPlaces(@Path("dayId") dayId: Long): Call<List<PlaceDetailsDto>>
 }

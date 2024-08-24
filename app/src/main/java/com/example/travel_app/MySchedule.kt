@@ -1,5 +1,6 @@
 package com.example.travel_app
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -11,10 +12,11 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.travel_app.Spring.Planner.Plan
+import com.example.travel_app.Spring.Planner.PlanDto
 import com.example.travel_app.Spring.Planner.PlanInterface
 import com.example.travel_app.Spring.Planner.PlanRequest
 import com.example.travel_app.Spring.Planner.PlanResponse
+import com.example.travel_app.Spring.Planner.toPlan
 import com.example.travel_app.Spring.ServerClient
 import com.example.travel_app.Spring.User.UserIdResponse
 import com.example.travel_app.Spring.User.UserInterface
@@ -132,7 +134,7 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
 
     private fun fetchPlanDetails(planIds: List<Long>) {
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8080/") // 서버 주소로 변경
+            .baseUrl("http://10.0.2.2:8080/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
@@ -141,31 +143,24 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
         val calls = planIds.map { planId ->
             apiService.getPlanById(planId)
         }
-        planIds.map { planId ->
-            Log.d("MySchedule", "Fetching plan details for ID: $planId")
-        }
 
-        // Use a list to keep track of the results
         val allPlans = mutableListOf<ScheduleItem>()
 
-        // Iterate over each call
-        calls.forEachIndexed { index, call ->
-            call.enqueue(object : Callback<Plan> {
-                override fun onResponse(call: Call<Plan>, response: Response<Plan>) {
-                    Log.d("MySchedule", "Response code: ${response.code()}")
-                    Log.d("MySchedule", "Response body: ${response.body()}")
+        calls.forEachIndexed { index, call: Call<PlanDto> ->
+            call.enqueue(object : Callback<PlanDto> {
+                override fun onResponse(call: Call<PlanDto>, response: Response<PlanDto>) {
                     if (response.isSuccessful) {
                         val plan = response.body()
                         plan?.let {
                             allPlans.add(
                                 ScheduleItem(
-                                    R.drawable.ic_more,  // You can use an actual drawable or placeholder
+                                    planId = it.id,  // Plan ID 추가
+                                    iconResId = R.drawable.ic_more,
                                     region = it.region,
-                                    travelPreriod = " ${it.startDay} ~ ${it.endDay}"
+                                    travelPreriod = "${it.startDay} ~ ${it.endDay}"
                                 )
                             )
 
-                            // Update RecyclerView once all responses have been received
                             if (allPlans.size == planIds.size) {
                                 myScheduleAdapter = MyScheduleAdapter(allPlans, this@MySchedule)
                                 binding.myScheduleRecycler.adapter = myScheduleAdapter
@@ -177,7 +172,7 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
                     }
                 }
 
-                override fun onFailure(call: Call<Plan>, t: Throwable) {
+                override fun onFailure(call: Call<PlanDto>, t: Throwable) {
                     Log.e("MySchedule", "Error fetching plan details", t)
                     Toast.makeText(context, "Error fetching plan details: ${t.message}", Toast.LENGTH_SHORT).show()
                 }
@@ -187,12 +182,82 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
 
 
 
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 
+    private fun openPlan(position: Int) {
+        // 선택된 아이템의 일정 정보를 가져옴
+        val selectedPlanId = myScheduleAdapter.getPlanIdAtPosition(position)
+
+        if (selectedPlanId != null) {
+            val retrofit = Retrofit.Builder()
+                .baseUrl("http://10.0.2.2:8080/") // 서버 주소로 변경
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+
+            val apiService = retrofit.create(PlanInterface::class.java)
+
+            // Plan ID로 일정을 가져오는 API 호출
+            apiService.getPlanById(selectedPlanId).enqueue(object : Callback<PlanDto> {
+                override fun onResponse(call: Call<PlanDto>, response: Response<PlanDto>) {
+                    if (response.isSuccessful) {
+                        val planDto = response.body()
+                        planDto?.let {
+                            // PlanDto를 Plan으로 변환
+                            val plan = it.toPlan()
+
+                            // WritePlannerFragment로 데이터를 전달하면서 이동
+                            val fragment = WritePlannerFragment().apply {
+                                arguments = Bundle().apply {
+                                    putParcelable("planData", plan)  // Parcelable로 전달
+                                }
+                            }
+                            requireActivity().supportFragmentManager.beginTransaction()
+                                .replace(R.id.mainFrameLayout, fragment)
+                                .addToBackStack(null)
+                                .commit()
+                        }
+                    } else {
+                        Log.e("MySchedule", "Failed to fetch plan: ${response.errorBody()?.string()}")
+                        Toast.makeText(context, "Failed to fetch plan", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onFailure(call: Call<PlanDto>, t: Throwable) {
+                    Log.e("MySchedule", "Error fetching plan", t)
+                    Toast.makeText(context, "Error fetching plan: ${t.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
+
+        } else {
+            Toast.makeText(context, "Invalid plan ID", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onActionClick(position: Int) {
-        Toast.makeText(context, "Action clicked at position $position", Toast.LENGTH_SHORT).show()
+
+        // Create and display an AlertDialog with options for Edit and Delete
+        val options = arrayOf("수정", "삭제")
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("일정 관리")
+            .setItems(options) { dialog, which ->
+                when (which) {
+                    0 -> {
+                        // Edit action
+//                        Toast.makeText(context, "Edit clicked for item at position $position", Toast.LENGTH_SHORT).show()
+                        // Here you can implement the logic to edit the selected item
+                        openPlan(position)
+                    }
+                    1 -> {
+                        // Delete action
+//                        Toast.makeText(context, "Delete clicked for item at position $position", Toast.LENGTH_SHORT).show()
+                        // Here you can implement the logic to delete the selected item
+                    }
+                }
+            }
+        builder.show()
     }
 }

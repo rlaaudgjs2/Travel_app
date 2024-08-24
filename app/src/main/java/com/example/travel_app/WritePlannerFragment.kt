@@ -1,5 +1,6 @@
 package com.example.travel_app
 
+import Plan
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
@@ -11,7 +12,10 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.travel_app.Spring.Planner.DayPlanDto
 import com.example.travel_app.Spring.Planner.DayRequest
+import com.example.travel_app.Spring.Planner.PlaceDetailsDto
+import com.example.travel_app.Spring.Planner.PlanDto
 import com.example.travel_app.Spring.Planner.PlanInterface
 import com.example.travel_app.Spring.Planner.PlanPlaceRequest
 import com.example.travel_app.Spring.Planner.PlanRequest
@@ -51,13 +55,6 @@ class WritePlannerFragment : Fragment() {
         val sharedPreferences = requireContext().getSharedPreferences("TravelAppPrefs", Context.MODE_PRIVATE)
         val selectedDaysCount = sharedPreferences.getInt("selectedDaysCount",0)
 
-
-        // dayPlans 초기화
-        // dayPlans가 이미 초기화된 경우에는 재초기화하지 않도록 체크합니다.
-        if (dayPlans.isEmpty()) {
-            initializeDayPlans(selectedDaysCount)
-        }
-
         val sharedPreferences_Region = requireContext().getSharedPreferences("Region", Context.MODE_PRIVATE)
         val regionName = sharedPreferences_Region.getString("RegionName", "")
         binding.txtRegion.setText(regionName + "여행")
@@ -66,6 +63,24 @@ class WritePlannerFragment : Fragment() {
         dayPlanAdapter = DayPlanAdapter(dayPlans)
         binding.dayRecycler.layoutManager = LinearLayoutManager(requireContext())
         binding.dayRecycler.adapter = dayPlanAdapter
+
+        val planData: Plan? = arguments?.getParcelable("planData")
+        Log.d("WritePlannerFragment", "PlanData received: $planData")
+
+        planData?.let { plan ->
+            Log.d("WritePlannerFragment", "Plan details: region=${plan.region}, days=${plan.days}")
+            binding.txtRegion.text = "${plan.region} 여행"
+
+            fetchPlanData(plan.planId)
+        }
+
+        // dayPlans 초기화
+        // dayPlans가 이미 초기화된 경우에는 재초기화하지 않도록 체크합니다.
+        if (dayPlans.isEmpty()) {
+            initializeDayPlans(selectedDaysCount)
+        }
+
+
 
 
         // FragmentResultListener 설정
@@ -78,16 +93,40 @@ class WritePlannerFragment : Fragment() {
             val placeCategory = bundle.getString("placeCategory")
             val placePhoto = bundle.getString("placePhoto")
             val dayNumber = bundle.getInt("dayNumber") // 일차를 받는 추가 설정
+            val placeAddress = bundle.getString("placeAddress")
 
             // 받아온 장소 정보를 해당 일자에 추가
-            if (placeName != null && placeCategory != null && placePhoto != null) {
-                val placeDetails = PlaceDetails(placeName, placeCategory, placePhoto)
+            if (placeName != null && placeCategory != null && placePhoto != null && placeAddress != null) {
+                val placeDetailsDto = PlaceDetailsDto(
+                    placeName = placeName,
+                    placeCategory = placeCategory,
+                    placePhoto = placePhoto,
+                    placeAddress = placeAddress
+                )
+
+                // PlaceDetails로 변환
+                val placeDetails = PlaceDetails(
+                    name = placeDetailsDto.placeName,
+                    category = placeDetailsDto.placeCategory,
+                    photoUrl = placeDetailsDto.placePhoto,
+                    address = placeDetailsDto.placeAddress
+                )
                 addPlaceToDay(dayNumber, placeDetails)
             }
+
         }
 
+        binding.btnBackspace.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
         binding.btnRegisterPlanner.setOnClickListener {
             sendPlanRequest()
+            showBottomNavigationView()
+            parentFragmentManager.beginTransaction().apply {
+                replace(R.id.mainFrameLayout, MySchedule())
+                addToBackStack(null)
+                commit()
+            }
         }
     }
     // 초기 DayPlans 설정
@@ -137,7 +176,9 @@ class WritePlannerFragment : Fragment() {
                     places = dayPlan.places.map { placeDetails ->
                         PlanPlaceRequest(
                             placeName = placeDetails.name, // Place ID는 서버에서 자동 생성되므로 클라이언트에서 전송할 필요 없음
-                            planDayId = dayPlan.dayNumber
+                            planDayId = dayPlan.dayNumber,
+                            placeCategory = placeDetails.category,
+                            placeAddress = placeDetails.address
                         )
                     }
                 )
@@ -174,6 +215,126 @@ class WritePlannerFragment : Fragment() {
         })
     }
 
+    private fun fetchPlanData(planId: Long) {
+        val retrofit = Retrofit.Builder()
+            .baseUrl("http://10.0.2.2:8080/") // 서버 주소로 변경
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val api = retrofit.create(PlanInterface::class.java)
+
+        // Plan 정보 가져오기
+        api.getPlanById(planId).enqueue(object : Callback<PlanDto> {
+            override fun onResponse(call: Call<PlanDto>, response: Response<PlanDto>) {
+                if (response.isSuccessful) {
+                    val planDto = response.body()
+                    planDto?.let { plan ->
+                        fetchPlanDays(plan.id)
+                    }
+                } else {
+                    Log.e("WritePlannerFragment", "Failed to fetch plan: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: Call<PlanDto>, t: Throwable) {
+                Log.e("WritePlannerFragment", "Error fetching plan", t)
+            }
+        })
+    }
+
+    private fun fetchPlanDays(planId: Long) {
+        val retrofit = Retrofit.Builder()
+            .baseUrl("http://10.0.2.2:8080/") // 서버 주소로 변경
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val api = retrofit.create(PlanInterface::class.java)
+
+        // Plan Days 정보 가져오기
+        api.getPlanDays(planId).enqueue(object : Callback<List<DayPlanDto>> {
+            override fun onResponse(call: Call<List<DayPlanDto>>, response: Response<List<DayPlanDto>>) {
+                if (response.isSuccessful) {
+                    val dayPlansDto = response.body() ?: emptyList()
+
+                    // 데이터를 dayNumber를 기준으로 정렬
+                    val sortedDayPlans = dayPlansDto.sortedBy { it.dayNumber }
+
+                    // 정렬된 데이터를 사용하여 DayPlan 객체를 생성
+                    val dayPlans = sortedDayPlans.map { dayPlanDto ->
+                        DayPlan(
+                            dayNumber = dayPlanDto.dayNumber,
+                            places = (dayPlanDto.places ?: emptyList()).map { placeDetailsDto ->
+                                PlaceDetails(
+                                    name = placeDetailsDto.placeName,
+                                    category = placeDetailsDto.placeCategory ?: "", // null 처리
+                                    photoUrl = placeDetailsDto.placePhoto ?: "", // null 처리
+                                    address = placeDetailsDto.placeAddress ?: "" // null 처리
+                                )
+                            }.toMutableList()
+                        )
+                    }.toMutableList()
+
+                    // 리사이클러 뷰 어댑터에 정렬된 데이터 설정
+                    dayPlanAdapter.submitList(dayPlans)
+
+                } else {
+                    Log.e("WritePlannerFragment", "Failed to fetch plan days: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: Call<List<DayPlanDto>>, t: Throwable) {
+                Log.e("WritePlannerFragment", "Error fetching plan days", t)
+            }
+        })
+    }
+
+
+    private fun fetchDayPlaces(dayPlansDto: List<DayPlanDto>) {
+        val retrofit = Retrofit.Builder()
+            .baseUrl("http://10.0.2.2:8080/") // 서버 주소로 변경
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val api = retrofit.create(PlanInterface::class.java)
+
+        val dayPlacesCalls = dayPlansDto.map { dayPlanDto ->
+            api.getDayPlaces(dayPlanDto.dayNumber.toLong()) // dayNumber를 PlanDay ID로 사용
+        }
+
+        dayPlacesCalls.forEachIndexed { index, call ->
+            call.enqueue(object : Callback<List<PlaceDetailsDto>> {
+                override fun onResponse(call: Call<List<PlaceDetailsDto>>, response: Response<List<PlaceDetailsDto>>) {
+                    if (response.isSuccessful) {
+                        val placesDto = response.body() ?: emptyList()
+                        val dayPlan = dayPlansDto[index]
+
+                        // PlaceDetails 변환
+                        val places = placesDto.map { placeDetailsDto ->
+                            PlaceDetails(
+                                name = placeDetailsDto.placeName,
+                                category = placeDetailsDto.placeCategory,
+                                photoUrl = placeDetailsDto.placePhoto,
+                                address = placeDetailsDto.placeAddress
+                            )
+                        }.toMutableList()
+
+                        // DayPlan 업데이트
+                        dayPlans.add(DayPlan(dayNumber = dayPlan.dayNumber, places = places))
+
+                        // Adapter 갱신
+                        dayPlanAdapter.notifyDataSetChanged()
+                    } else {
+                        Log.e("WritePlannerFragment", "Failed to fetch day places: ${response.errorBody()?.string()}")
+                    }
+                }
+
+                override fun onFailure(call: Call<List<PlaceDetailsDto>>, t: Throwable) {
+                    Log.e("WritePlannerFragment", "Error fetching day places", t)
+                }
+            })
+        }
+    }
+
 
 
     private fun hideBottomNavigationView(){
@@ -181,6 +342,10 @@ class WritePlannerFragment : Fragment() {
         bottomNavigationView?.visibility = View.GONE
     }
 
+    private fun showBottomNavigationView(){
+        val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)
+        bottomNavigationView?.visibility = View.VISIBLE
+    }
 
     inner class DayPlanAdapter(private val dayPlans: MutableList<DayPlan>) : RecyclerView.Adapter<DayPlanAdapter.DayViewHolder>() {
 
@@ -195,6 +360,13 @@ class WritePlannerFragment : Fragment() {
 
         override fun getItemCount(): Int {
             return dayPlans.size
+        }
+
+        fun submitList(newDayPlans: List<DayPlan>) {
+            // 기존의 dayPlans를 비우고 새로운 리스트로 업데이트
+            dayPlans.clear()
+            dayPlans.addAll(newDayPlans)
+            notifyDataSetChanged() // 데이터가 변경되었음을 어댑터에 알림
         }
 
         inner class DayViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

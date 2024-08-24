@@ -134,6 +134,7 @@ class TestAPIFragment : Fragment() {
                 val place = response.place
                 val placeName = place.name ?: ""
                 val placeCategory = place.types?.firstOrNull()?.toString() ?: "Unknown"
+                val placeAddress = place.address ?: "Unknown" // 주소 추가
                 val photoMetadata = place.photoMetadatas?.firstOrNull()
 
                 if (photoMetadata != null) {
@@ -147,23 +148,25 @@ class TestAPIFragment : Fragment() {
 
                         // 결과를 FragmentResult API를 사용하여 전달
                         parentFragmentManager.setFragmentResult("requestKey", Bundle().apply {
-                            putInt("dayNumber", dayNumber) // dayNumber를 포함
+                            putInt("dayNumber", dayNumber)
                             putString("placeName", placeName)
                             putString("placeCategory", placeCategory)
-                            putString("placePhoto", photoBitmap.toString()) // 실제 사용 시에는 더 적절한 방법으로 처리
+                            putString("placeAddress", placeAddress) // 주소 추가
+                            putString("placePhoto", photoBitmap.toString())
                         })
-                        parentFragmentManager.popBackStack() // 이전 Fragment로 돌아감
+                        parentFragmentManager.popBackStack()
                     }.addOnFailureListener { exception ->
                         Log.e(TAG, "Photo request failed: ${exception.message}")
                     }
                 } else {
                     parentFragmentManager.setFragmentResult("requestKey", Bundle().apply {
-                        putInt("dayNumber", dayNumber) // dayNumber를 포함
+                        putInt("dayNumber", dayNumber)
                         putString("placeName", placeName)
                         putString("placeCategory", placeCategory)
-                        putString("placePhoto", "") // 기본값
+                        putString("placeAddress", placeAddress) // 주소 추가
+                        putString("placePhoto", "")
                     })
-                    parentFragmentManager.popBackStack() // 이전 Fragment로 돌아감
+                    parentFragmentManager.popBackStack()
                 }
             }
             .addOnFailureListener { exception ->
@@ -180,7 +183,9 @@ class TestAPIFragment : Fragment() {
                 val place = response.place
                 val placeName = place.name ?: ""
                 val placeCategory = place.types?.firstOrNull()?.toString() ?: "Unknown"
+                val placeAddress = place.address ?: "Unknown" // 주소 추가
                 val photoMetadata = place.photoMetadatas?.firstOrNull()
+
                 if (photoMetadata != null) {
                     val photoRequest = FetchPhotoRequest.builder(photoMetadata)
                         .setMaxWidth(500)
@@ -194,9 +199,10 @@ class TestAPIFragment : Fragment() {
                         parentFragmentManager.setFragmentResult("requestKey", Bundle().apply {
                             putString("placeName", placeName)
                             putString("placeCategory", placeCategory)
-                            putString("placePhoto", photoBitmap.toString()) // 실제 사용 시에는 더 적절한 방법으로 처리
+                            putString("placeAddress", placeAddress) // 주소 추가
+                            putString("placePhoto", photoBitmap.toString())
                         })
-                        parentFragmentManager.popBackStack() // 이전 Fragment로 돌아감
+                        parentFragmentManager.popBackStack()
                     }.addOnFailureListener { exception ->
                         Log.e(TAG, "Photo request failed: ${exception.message}")
                     }
@@ -204,9 +210,10 @@ class TestAPIFragment : Fragment() {
                     parentFragmentManager.setFragmentResult("requestKey", Bundle().apply {
                         putString("placeName", placeName)
                         putString("placeCategory", placeCategory)
-                        putString("placePhoto", "") // 기본값
+                        putString("placeAddress", placeAddress) // 주소 추가
+                        putString("placePhoto", "")
                     })
-                    parentFragmentManager.popBackStack() // 이전 Fragment로 돌아감
+                    parentFragmentManager.popBackStack()
                 }
             }
             .addOnFailureListener { exception ->

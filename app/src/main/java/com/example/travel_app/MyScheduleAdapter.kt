@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 class MyScheduleAdapter(private val items: List<ScheduleItem>, private val listener: OnItemClickListener) :
     RecyclerView.Adapter<MyScheduleAdapter.ViewHolder>() {
 
+
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imgRegion: ImageView = itemView.findViewById(R.id.img_region)
         val txtRegion: TextView = itemView.findViewById(R.id.txt_region)
@@ -42,8 +43,12 @@ class MyScheduleAdapter(private val items: List<ScheduleItem>, private val liste
     interface OnItemClickListener {
         fun onActionClick(position: Int)
     }
+    fun getPlanIdAtPosition(position: Int): Long? {
+        return items.getOrNull(position)?.planId
+    }
 }
 data class ScheduleItem(
+    val planId: Long,
     val iconResId: Int, // Drawable resource ID for the icon
     val region: String,
     val travelPreriod: String
