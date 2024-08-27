@@ -85,43 +85,42 @@
 #### PostInterface : 명헌 / 게시판 데이터를 보내기 위한 인터페이스. 게시판 정보를 SpringBoot와 통신하기 위해 get,post 함수를 사용
 #### PostRequest  : 명헌 / 게시판 데이터에 대한 엔티티 집합소.
 #### PostResponse : 명헌 / 위와 같음. 현재 데이터 수정중
-### Planner 
-#### DayRequest 
-#### Plan 
-#### PlanInterface 
-#### PlanPlaceRequest
-#### PlanRequest
-#### PlanResponse
+### Planner : 플래너 작업 - 규원
+#### DayRequest : 규원 / 플래너 중 1일차/2일차에 해당하는 Day 부분이며 이 안에 장소들을 담아 스프링 서버와 통신함.
+#### Plan : 규원 / 플래너 중 플랜 자체에 해당하는 데이터 클래스이며 Parcelable 형태로 변경함. Parcelable 형태로 변경한 이유는 번들이나 인텐트를 통해 객체를 전달하기 위함이고, 스프링과 통신하는 부분은 PlanDTO 형태로 두어 DTO는 서버와 통신만을 위한 것으로 역할 분담
+#### PlanInterface : 규원 / 플래너 데이터를 서버로 전송하기 위한 인터페이스. POST, GET과 같은 형태로 서버와 통신
+#### PlanPlaceRequest : 규원 / 플래너 중 Day 아래에 저장된 Place에 해당하는 부분으로 장소 정보를 서버로 넘겨줌
+#### PlanRequest : 규원 / 플래너 중 플랜 자체에 해당하는 클래스로 스프링 서버와 요청을 주고받기 위한 클래스
+#### PlanResponse : 규원 / 플래너 중 플랜을 서버와 주고받을 때 전송 성공여부와 에러코드를 담기 위한 응답 클래스
 ### User - 명헌
 #### LoginResponse : 명헌 / 로그인에 대한 정보
 #### UserIdResponse : 명헌 / 유저 아이디 정보 
 #### UserInterface : 명헌 / 로그인 정보를 보내기 위해 SpringBoot와 통신.
 ### ServerClient : 명헌 / 안드로이드와 SpringBoot 통신을 위해 주소 및 규약을 작성
 ### AuthCodeHandlerActivity : 명헌 / 카카오 로그인에 대한 클래스. 추후 수정 필요.
-### BigRegion
-#### 담당 : 
-#### 역할 : 
-### BigRegionAdapter
-### CalendarDecorator
+
+### BigRegion : 규원 / 홈 화면에서 검색 창을 눌렀을 때 검색어를 통한 검색을 제외하고 지역 별로 검색을 처리하기 위한 클래스. BigRegion의 범위는 서울 / 경기 / 전북 / 전남 등 특별/광역시와 '도'의 지역.
+### BigRegionAdapter : 규원 / BigRegion 안에 있는 지역 정보들 (서울,경기,전남 등)을 recycler에 담고, 사용자가 취하는 액션을 처리하기 위한 클래스.
+### CalendarDecorator : 성민 / 플래너에 여행 일정을 지도에서 표시할 때, 토요일/일요일을 구분하기 위해 토요일/일요일 색을 다르게 하는 처리를 담당하는 클래스.
 ### CloudService : 명헌 / 구글 클라우드를 사용하여 사진 저장하기 위해 만든 클래스. 버킷에 대한 json, 사진 보내는 장소를 작성
-### CreateSchedule
+### CreateSchedule : 규원 / 플래너에서 사용자가 여행 일정 (며칠부터 며칠까지인지, 8/13~8/15)을 선택하기 위해 달력을 띄워주는 클래스.
 ### HomeFragment : 명헌 / 게시판 보여주는 view Class. 현재 게시판 뷰, 검색, 글쓰기 페이지 및 하단 바를 보여주고 있음. 
 ### ImageAdapter : 명헌 / 사진 이미지 개수, 이미지 표시, 사진 주소를 표시하는 클래스. 
 ### KakaoApplication : 명헌 / 카카오 SDK에 대한 주소값을 저장하는 클래스 
-### MainActivity
-### MoreFragment
-### MySchedule
-### MyScheduleAdapter
-### NaviActivity
-### PlaceAdapter
+### MainActivity : 명헌 / 로그인, 회원가입으로 넘어가는 버튼만 존재하는 클래스.
+### MoreFragment : 
+### MySchedule : 규원 / 플래너 클릭시 가장 먼저 등장하는 클래스, 사용자가 저장한 일정을 recycler에 담고 이를 보여줌.
+### MyScheduleAdapter : 규원 / 사용자가 저장한 일정을 담은 recycler에 대한 액션들을 처리하는 클래스.
+### NaviActivity : 규원 / 사용자의 모든 화면 전환 처리(Navigation)를 위한 클래스로, 로그인/회원가입 화면을 제외한 모든 프래그먼트는 NaviActivity 아래에서 전환됨.
+### PlaceAdapter : 규원, 명헌 / 게시글 작성 시 장소들을 저장하고 보여줄 recycler 처리를 담당하는 클래스.
 ### PostAdapter : 명헌 / 이미지, 닉네임, 해시태그, 현재 날짜, 저장 방식에 대해 적은 클래스. 현 adapter는 homefragment에서 사용해 저장된 게시판을 보여줄 수 있게함.  
-### RegionSearchFragment
-### SelectRegion
+### RegionSearchFragment : 규원 / 사용자가 홈 화면에서 검색 창을 눌렀을 때 이동되는 클래스로, 사용자가 서울/경기/전남 등 (BigRegion) 중 서울을 선택하면 그 아래의 강남/강북/홍대 등 (SmallRegion)을 표시할 수 있는 기능이 존재함.
+ ### SelectRegion : 규원 / 플래너에서 사용자가 일정을 선택한 뒤 여행 할 지역을 선택하기 위한 클래스. 현재 서울/경기/전남 등 큰 지역들만 존재하고 자세한 지역은 추후 추가 예정
 ### SignIn : 명헌 / 구글, 카카오톡, 일반 로그인 세개의 방식은 담은 클래스. 현 구글, 카카오는 애뮬레이터 사용 불가능으로 인해 기능 테스트를 진행x, 일반 로그인은 springboot와 통신을 통해 로그인 가능
 ### SignUp ; 명헌 / 구글, 카카오톡, 일반 로그인 세개의 방식을 담아 회원가입 하는 클래스, 일반 로그인은 springboot와 통신하여 비밀번호는 해시값으로, csrf를 통해 통신규약 및 보안 설정
-### SmallRegion
-### SmallRegionAdapter
-### TestAPIFragment
+### SmallRegion : 규원 /  홈 화면에서 검색 창을 눌렀을 때 검색어를 통한 검색을 제외하고 지역 별로 검색을 처리하기 위한 클래스. SmallRegion 의 범위는 강남 / 강북 / 홍대 등 '구' 나 '동' 단위로 존재.
+### SmallRegionAdapter : 규원 / SmallRegion 안에 있는 지역 정보들 (강남, 강북, 홍대 등)을 recycler에 담고, 사용자가 취하는 액션을 처리하기 위한 클래스.
+### TestAPIFragment : 규원 / 사용자가 게시판이나 플래너에서 장소 정보를 추가할 때 이동되는 클래스. 구글 플레이스 API를 취급하며 사용자가 장소를 선택 시 필요한 정보(장소 이름, 장소 주소, 장소 카테고리 등)를 필요한 클래스로 넘겨줌.
 ### WriteBulletinFragment : 명헌 / 게시판 데이터를 저장하는 클래스, 제목, 장소, 사진을 저장함. 모든 데이터는 bundle에 담아 writehasgtagFragment에 보냄. 
 ### WriteHashTagFragment : 명헌 / WriteBulletinFragment에서 받은 게시판 정보 및, 현 페이지에 작성된 해시태그를 담아 Postrequest에 보냄. 그 뒤, SpringBoot에 저장됨. 
-### WritePlannerFragment : 
+### WritePlannerFragment : 규원 / 플래너를 작성하는 클래스, 사용자는 1일차 ... n일차에 해당하는 일정대로 장소를 추가하고, 등록 버튼을 누르면 스프링을 통해 데이터베이스에 저장.
