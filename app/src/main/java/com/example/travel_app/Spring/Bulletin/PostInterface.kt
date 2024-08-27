@@ -8,6 +8,9 @@ interface PostInterface {
     @POST("api/bulletins/register")
     fun savePost(@Body postRequest: PostRequest): Call<PostResponse>
 
+    @POST("api/answer/register")
+    fun createPost(@Body answerResponse: AnswerResponse): Call<AnswerResponse>
+
     // 모든 게시물 조회
     @GET("api/bulletins")
     fun getAllPosts(): Call<List<PostResponse>>
@@ -31,4 +34,5 @@ interface PostInterface {
     // 해시태그로 게시물 검색
     @GET("api/bulletins/search/hashtag")
     fun searchPostsByHashtag(@Query("hashtag") hashtag: String): Call<List<PostResponse>>
+
 }

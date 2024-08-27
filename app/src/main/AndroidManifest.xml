@@ -27,6 +27,9 @@
         android:windowSoftInputMode="stateVisible|adjustResize"
         tools:targetApi="31" >
         <activity
+            android:name=".AfterWritePlanner"
+            android:exported="false" />
+        <activity
             android:name=".ImagePreviewAdapter"
             android:exported="false" />
 
@@ -60,9 +63,7 @@
         <activity
             android:name=".NaviActivity"
             android:exported="true"
-            android:theme="@style/Theme.Travel_App"
-            >
-
+            android:theme="@style/Theme.Travel_App" >
         </activity>
     </application>
 
