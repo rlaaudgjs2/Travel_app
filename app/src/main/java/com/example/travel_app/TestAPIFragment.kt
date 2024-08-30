@@ -24,6 +24,7 @@ import com.google.android.libraries.places.api.net.FetchPhotoRequest
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
+import java.util.Locale
 
 class TestAPIFragment : Fragment() {
 
@@ -126,6 +127,12 @@ class TestAPIFragment : Fragment() {
     }
 
     private fun fetchPlanPlaceDetails(dayNumber: Int, placeId: String, placesClient: PlacesClient) {
+        // 한국어 Locale 설정
+        val koreanLocale = Locale("ko")
+        val defaultLocale = Locale.getDefault()
+
+        // Locale 설정 변경
+        Locale.setDefault(koreanLocale)
         val placeRequest = FetchPlaceRequest.builder(placeId, listOf(Place.Field.NAME, Place.Field.ADDRESS, Place.Field.TYPES, Place.Field.PHOTO_METADATAS))
             .build()
 
@@ -134,8 +141,12 @@ class TestAPIFragment : Fragment() {
                 val place = response.place
                 val placeName = place.name ?: ""
                 val placeCategory = place.types?.firstOrNull()?.toString() ?: "Unknown"
-                val placeAddress = place.address ?: "Unknown" // 주소 추가
+                var placeAddress = place.address ?: "Unknown" // 주소 추가
                 val photoMetadata = place.photoMetadatas?.firstOrNull()
+
+                if (placeAddress.startsWith("대한민국")) {
+                    placeAddress = placeAddress.replaceFirst("대한민국", "").trim()
+                }
 
                 if (photoMetadata != null) {
                     val photoRequest = FetchPhotoRequest.builder(photoMetadata)
@@ -175,6 +186,12 @@ class TestAPIFragment : Fragment() {
     }
 
     private fun fetchPlaceDetails(placeId: String, placesClient: PlacesClient) {
+        // 한국어 Locale 설정
+        val koreanLocale = Locale("ko")
+        val defaultLocale = Locale.getDefault()
+
+        // Locale 설정 변경
+        Locale.setDefault(koreanLocale)
         val placeRequest = FetchPlaceRequest.builder(placeId, listOf(Place.Field.NAME, Place.Field.ADDRESS, Place.Field.TYPES, Place.Field.PHOTO_METADATAS))
             .build()
 

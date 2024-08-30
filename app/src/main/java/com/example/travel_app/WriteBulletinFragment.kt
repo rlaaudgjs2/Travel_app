@@ -79,23 +79,24 @@ class WriteBulletinFragment : Fragment() {
             imagePreviewAdapter.notifyItemRemoved(position)
         }
         binding.imagePreviewRecycler.adapter = imagePreviewAdapter
-        // FragmentResultListene 설정
-//        parentFragmentManager.setFragmentResultListener("requestKey", viewLifecycleOwner) { _, bundle ->
-//            val placeName = bundle.getString("placeName")
-//            val placeCategory = bundle.getString("placeCategory")
-//            val placePhoto = bundle.getString("placePhoto")
-//
-//            if (placeName != null && placeCategory != null && placePhoto != null) {
-//                val placeDetails = PlaceDetails(
-//                    placeName,
-//                    placeCategory,
-//                    placePhoto,
-//                    placeDetailsDto.placeAddress
-//                )
-//                placesList.add(placeDetails)
-//                placeAdapter.notifyDataSetChanged()
-//            }
-//        }
+//         FragmentResultListene 설정
+        parentFragmentManager.setFragmentResultListener("requestKey", viewLifecycleOwner) { _, bundle ->
+            val placeName = bundle.getString("placeName")
+            val placeCategory = bundle.getString("placeCategory")
+            val placePhoto = bundle.getString("placePhoto")
+            val placeAddress = bundle.getString("placeAddress")
+
+            if (placeName != null && placeCategory != null && placePhoto != null && placeAddress != null) {
+                val placeDetails = PlaceDetails(
+                    placeName,
+                    placeCategory,
+                    placePhoto,
+                    placeAddress
+                )
+                placesList.add(placeDetails)
+                placeAdapter.notifyDataSetChanged()
+            }
+        }
 
         binding.btnAddPlace.setOnClickListener{
 

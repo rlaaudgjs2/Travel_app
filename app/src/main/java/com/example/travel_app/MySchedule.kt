@@ -237,6 +237,33 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
         }
     }
 
+    private fun deletePlan(planId: Long, position: Int) {
+        val retrofit = Retrofit.Builder()
+            .baseUrl("http://10.0.2.2:8080/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val apiService = retrofit.create(PlanInterface::class.java)
+
+        apiService.deletePlan(planId).enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    Toast.makeText(context, "Plan deleted successfully", Toast.LENGTH_SHORT).show()
+
+                    // RecyclerView에서 아이템 삭제
+                    myScheduleAdapter.removeItemAtPosition(position)
+                } else {
+                    Log.e("MySchedule", "Failed to delete plan: ${response.errorBody()?.string()}")
+                    Toast.makeText(context, "Failed to delete plan", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Log.e("MySchedule", "Error deleting plan", t)
+                Toast.makeText(context, "Error deleting plan: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
     override fun onActionClick(position: Int) {
 
         // Create and display an AlertDialog with options for Edit and Delete
@@ -254,6 +281,13 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
                     1 -> {
                         // Delete action
 //                        Toast.makeText(context, "Delete clicked for item at position $position", Toast.LENGTH_SHORT).show()
+
+                        val selectedPlanId = myScheduleAdapter.getPlanIdAtPosition(position)
+                        if (selectedPlanId != null) {
+                            deletePlan(selectedPlanId, position)
+                        } else {
+                            Toast.makeText(context, "Invalid plan ID", Toast.LENGTH_SHORT).show()
+                        }
                         // Here you can implement the logic to delete the selected item
                     }
                 }

@@ -31,5 +31,12 @@
             android:layout_gravity="center"
             />
     </LinearLayout>
+    <ImageButton
+        android:id="@+id/btn_delete"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="top|end"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@android:drawable/ic_delete" />
 
 </LinearLayout>
