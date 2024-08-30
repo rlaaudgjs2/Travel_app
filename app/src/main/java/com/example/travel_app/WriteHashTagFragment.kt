@@ -10,6 +10,7 @@ import retrofit2.Response
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import com.example.travel_app.Spring.Bulletin.AnswerResponse
 import com.example.travel_app.Spring.Bulletin.PlaceRequest
 import com.example.travel_app.Spring.Bulletin.PostRequest
 import com.example.travel_app.Spring.Bulletin.PostResponse
@@ -22,18 +23,20 @@ class WriteHashTagFragment : Fragment() {
     private val binding get() = _binding!!
     private val hashtagList = mutableListOf<String>()
 
-    private lateinit var title: String
+    private lateinit var AnswerTitle: String
     private lateinit var userID: String
-    private lateinit var imageUrls: ArrayList<String>
-    private lateinit var placeRequests: ArrayList<PlaceRequest>
+    private lateinit var selectedRegion: String
+    private lateinit var answer: String
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            title = it.getString("title", "")
+
+            AnswerTitle = it.getString("title", "")
             userID = it.getString("userID", "")
-            imageUrls = it.getStringArrayList("imageUrls") ?: arrayListOf()
-            placeRequests = it.getParcelableArrayList("placeRequests") ?: arrayListOf()
+            selectedRegion = it.getString("selectedRegion","")
+            answer = it.getString("answer", "")
         }
     }
     override fun onCreateView( //oncreate에서 요소를 가져오고 view를 만들어 기존 화면 보여주기
@@ -65,10 +68,19 @@ class WriteHashTagFragment : Fragment() {
     }
 
     private fun saveFinalPost() {
-        val postRequest = PostRequest(title, placeRequests, userID, imageUrls, hashtagList)
-        val call = ServerClient.postInstance.savePost(postRequest)
-        call.enqueue(object : Callback<PostResponse> {
-            override fun onResponse(call: Call<PostResponse>, response: Response<PostResponse>) {
+        val currentTime = DateUtility.getCurrentFormattedDate()
+        val answerResponse = AnswerResponse(
+            answerTitle = AnswerTitle,
+            username = userID,
+            answer = answer,
+            region = selectedRegion,
+            hashtagList = hashtagList,
+            currentTime = currentTime,
+            like = 0  // 초기 좋아요 수를 0으로 설정
+        )
+        val call = ServerClient.postInstance.createPost(answerResponse)
+        call.enqueue(object : Callback<AnswerResponse> {
+            override fun onResponse(call: Call<AnswerResponse>, response: Response<AnswerResponse>) {
                 if (response.isSuccessful) {
                     Toast.makeText(context, "게시글이 성공적으로 저장되었습니다.", Toast.LENGTH_SHORT).show()
                     navigateToHomeFragment()
@@ -76,8 +88,7 @@ class WriteHashTagFragment : Fragment() {
                     Toast.makeText(context, "게시글 저장에 실패했습니다: ${response.errorBody()?.string()}", Toast.LENGTH_SHORT).show()
                 }
             }
-
-            override fun onFailure(call: Call<PostResponse>, t: Throwable) {
+            override fun onFailure(call: Call<AnswerResponse>, t: Throwable) {
                 Toast.makeText(context, "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })

@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,6 +19,7 @@ import com.example.travel_app.Spring.Planner.toPlan
 import com.example.travel_app.Spring.User.UserIdResponse
 import com.example.travel_app.Spring.User.UserInterface
 import com.example.travel_app.databinding.FragmentAfterWritePlannerBinding
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -48,6 +50,12 @@ class AfterWritePlanner : Fragment(), MyScheduleAdapter.OnItemClickListener {
 
         val sharedPreferences = requireContext().getSharedPreferences("user_info", Context.MODE_PRIVATE)
         val username = sharedPreferences.getString("user_id", "")
+
+        // View Binding을 사용한 버튼 설정
+        binding.btnBackspace?.setOnClickListener {
+            parentFragmentManager.popBackStack()
+            showBottomNavigationView()
+        }
 
         if (!username.isNullOrEmpty()) {
             fetchUserIdByUsername(username)
@@ -221,5 +229,8 @@ class AfterWritePlanner : Fragment(), MyScheduleAdapter.OnItemClickListener {
     override fun onActionClick(position: Int) {
 
     }
-
+    private fun showBottomNavigationView() {
+        val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)
+        bottomNavigationView?.visibility = View.VISIBLE
+    }
 }

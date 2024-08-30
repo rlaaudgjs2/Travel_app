@@ -27,7 +27,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     android:src="@drawable/ic_backspace"
                     android:layout_margin="20dp"
-                    android:id="@+id/btn_backspace"
+                    android:id="@+id/btn_backspace_answer"
                     android:contentDescription="뒤로가기 버튼" />
 
                 <Button

@@ -217,40 +217,7 @@ class WriteBulletinFragment : Fragment() {
         return file
     }
 
-    private fun sendPostToServer(postRequest: PostRequest) {
-        val call = ServerClient.postInstance.savePost(postRequest)
-        call.enqueue(object : Callback<PostResponse> {
-            override fun onResponse(call: Call<PostResponse>, response: Response<PostResponse>) {
-                if (response.isSuccessful) {
-                    val bulletin = response.body()
-                    if (bulletin != null) {
-                        Log.d("Bulletin", "Success: $bulletin")
-                        showSuccess("게시글 저장에 성공했습니다.")
-                        navigateToWriteHashTagFragment()
-                    } else {
-                        showError("게시글 저장 실패: 서버 응답이 비어있습니다.")
-                    }
-                } else {
-                    val errorBody = response.errorBody()?.string()
-                    Log.e("Bulletin", "Failed: $errorBody")
-                    showError("게시글 저장 실패: ${parseErrorMessage(errorBody)}")
-                }
-            }
 
-            private fun navigateToWriteHashTagFragment() {
-                parentFragmentManager.beginTransaction().apply {
-                    replace(R.id.mainFrameLayout, WriteHashTagFragment())
-                    addToBackStack(null)
-                    commit()
-                }
-            }
-
-            override fun onFailure(call: Call<PostResponse>, t: Throwable) {
-                Log.e("Bulletin", "Network Error", t)
-                showError("네트워크 오류: ${t.message}")
-            }
-        })
-    }
 
     private fun hideBottomNavigationView() {
         val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)

@@ -111,10 +111,7 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
                 Log.d("MySchedule", "Response code: ${response.code()}")
                 Log.d("MySchedule", "Response body: ${response.body()}")
                 if (response.isSuccessful) {
-//                    val planIds = response.body()?.map { it.planId } ?: emptyList()
-//                    Log.e("MySchedule", "planid 가져오는거 : $planIds")
-//                    fetchPlanDetails(planIds)  // Plan ID를 이용해 상세 정보 요청
-                    // Null 값을 제거하고 나서 fetchPlanDetails 호출
+
                     val planIds = response.body()?.mapNotNull { it.planId } ?: emptyList()
                     Log.e("MySchedule", "planid 가져오는거 : $planIds")
                     fetchPlanDetails(planIds)

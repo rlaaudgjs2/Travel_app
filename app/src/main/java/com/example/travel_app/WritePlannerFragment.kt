@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.travel_app.Spring.Planner.DayPlanDto
@@ -20,6 +21,7 @@ import com.example.travel_app.Spring.Planner.PlanInterface
 import com.example.travel_app.Spring.Planner.PlanPlaceRequest
 import com.example.travel_app.Spring.Planner.PlanRequest
 import com.example.travel_app.Spring.Planner.PlanResponse
+import com.example.travel_app.Spring.ServerClient
 import com.example.travel_app.databinding.FragmentWritePlannerBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import retrofit2.Call
@@ -36,7 +38,7 @@ class WritePlannerFragment : Fragment() {
     private val dayPlans = mutableListOf<DayPlan>()
     private lateinit var dayPlanAdapter: DayPlanAdapter
     private val placesList = mutableListOf<PlaceDetails>()
-
+    private var planId: Long? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -65,12 +67,9 @@ class WritePlannerFragment : Fragment() {
         binding.dayRecycler.adapter = dayPlanAdapter
 
         val planData: Plan? = arguments?.getParcelable("planData")
-        Log.d("WritePlannerFragment", "PlanData received: $planData")
-
         planData?.let { plan ->
-            Log.d("WritePlannerFragment", "Plan details: region=${plan.region}, days=${plan.days}")
+            planId = plan.planId
             binding.txtRegion.text = "${plan.region} 여행"
-
             fetchPlanData(plan.planId)
         }
 
@@ -120,7 +119,11 @@ class WritePlannerFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
         binding.btnRegisterPlanner.setOnClickListener {
-            sendPlanRequest()
+            if (planId != null) {
+                updatePlan()
+            } else {
+                sendPlanRequest()
+            }
             showBottomNavigationView()
             parentFragmentManager.beginTransaction().apply {
                 replace(R.id.mainFrameLayout, MySchedule())
@@ -129,6 +132,56 @@ class WritePlannerFragment : Fragment() {
             }
         }
     }
+
+    private fun updatePlan() {
+        val sharedPreferences = requireContext().getSharedPreferences("TravelAppPrefs", Context.MODE_PRIVATE)
+        val startDayString = sharedPreferences.getString("startDay", "")
+        val endDayString = sharedPreferences.getString("endDay", "")
+
+        val sharedPreferences_Region = requireContext().getSharedPreferences("Region", Context.MODE_PRIVATE)
+        val regionName = sharedPreferences_Region.getString("RegionName", "")
+
+        val planRequest = PlanRequest(
+            startDay = startDayString.toString(),
+            endDay = endDayString.toString(),
+            authorId = getUserInfo(),
+            region = regionName.toString(),
+            days = dayPlans.map { dayPlan ->
+                DayRequest(
+                    dayNumber = dayPlan.dayNumber,
+                    places = dayPlan.places.map { placeDetails ->
+                        PlanPlaceRequest(
+                            placeName = placeDetails.name,
+                            planDayId = dayPlan.dayNumber,
+                            placeCategory = placeDetails.category,
+                            placeAddress = placeDetails.address
+                        )
+                    }
+                )
+            }
+        )
+
+        val call = ServerClient.planInstance.updatePlan(planId!!, planRequest)
+
+        call.enqueue(object : Callback<Plan> {
+            override fun onResponse(call: Call<Plan>, response: Response<Plan>) {
+                if (response.isSuccessful) {
+                    val planResponse = response.body()
+                    Log.d("WritePlannerFragment", "Plan updated: $planResponse")
+                    Toast.makeText(context, "플랜이 업데이트되었습니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Log.e("WritePlannerFragment", "Failed to update plan: ${response.errorBody()?.string()}")
+                    Toast.makeText(context, "플랜 업데이트에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Plan>, t: Throwable) {
+                Log.e("WritePlannerFragment", "Error updating plan", t)
+                Toast.makeText(context, "플랜 업데이트 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
     // 초기 DayPlans 설정
     private fun initializeDayPlans(selectedDaysCount: Int) {
         for (i in 1..selectedDaysCount) {
@@ -156,12 +209,14 @@ class WritePlannerFragment : Fragment() {
     }
 
     private fun sendPlanRequest() {
+
         val sharedPreferences = requireContext().getSharedPreferences("TravelAppPrefs", Context.MODE_PRIVATE)
         val startDayString = sharedPreferences.getString("startDay", "")
         val endDayString = sharedPreferences.getString("endDay", "")
 
         val sharedPreferences_Region = requireContext().getSharedPreferences("Region", Context.MODE_PRIVATE)
         val regionName = sharedPreferences_Region.getString("RegionName", "")
+
         Log.e("받을때 startDay", startDayString.toString())
         // PlanRequest 객체 생성
         val planRequest = PlanRequest(
@@ -195,7 +250,7 @@ class WritePlannerFragment : Fragment() {
             .build()
 
         val api = retrofit.create(PlanInterface::class.java)
-        val call = api.savePlan(planRequest)
+        val call = ServerClient.planInstance.savePlan(planRequest)
 
         call.enqueue(object : Callback<PlanResponse> {
             override fun onResponse(call: Call<PlanResponse>, response: Response<PlanResponse>) {
@@ -216,15 +271,8 @@ class WritePlannerFragment : Fragment() {
     }
 
     private fun fetchPlanData(planId: Long) {
-        val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8080/") // 서버 주소로 변경
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        val api = retrofit.create(PlanInterface::class.java)
-
         // Plan 정보 가져오기
-        api.getPlanById(planId).enqueue(object : Callback<PlanDto> {
+        ServerClient.planInstance.getPlanById(planId).enqueue(object : Callback<PlanDto> {
             override fun onResponse(call: Call<PlanDto>, response: Response<PlanDto>) {
                 if (response.isSuccessful) {
                     val planDto = response.body()
@@ -243,15 +291,9 @@ class WritePlannerFragment : Fragment() {
     }
 
     private fun fetchPlanDays(planId: Long) {
-        val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8080/") // 서버 주소로 변경
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        val api = retrofit.create(PlanInterface::class.java)
 
         // Plan Days 정보 가져오기
-        api.getPlanDays(planId).enqueue(object : Callback<List<DayPlanDto>> {
+        ServerClient.planInstance.getPlanDays(planId).enqueue(object : Callback<List<DayPlanDto>> {
             override fun onResponse(call: Call<List<DayPlanDto>>, response: Response<List<DayPlanDto>>) {
                 if (response.isSuccessful) {
                     val dayPlansDto = response.body() ?: emptyList()
@@ -290,15 +332,8 @@ class WritePlannerFragment : Fragment() {
 
 
     private fun fetchDayPlaces(dayPlansDto: List<DayPlanDto>) {
-        val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8080/") // 서버 주소로 변경
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        val api = retrofit.create(PlanInterface::class.java)
-
         val dayPlacesCalls = dayPlansDto.map { dayPlanDto ->
-            api.getDayPlaces(dayPlanDto.dayNumber.toLong()) // dayNumber를 PlanDay ID로 사용
+            ServerClient.planInstance.getDayPlaces(dayPlanDto.dayNumber.toLong())
         }
 
         dayPlacesCalls.forEachIndexed { index, call ->
