@@ -99,7 +99,6 @@ class WritePlannerFragment : Fragment() {
                 val placeDetailsDto = PlaceDetailsDto(
                     placeName = placeName,
                     placeCategory = placeCategory,
-                    placePhoto = placePhoto,
                     placeAddress = placeAddress
                 )
 
@@ -107,9 +106,9 @@ class WritePlannerFragment : Fragment() {
                 val placeDetails = PlaceDetails(
                     name = placeDetailsDto.placeName,
                     category = placeDetailsDto.placeCategory,
-                    photoUrl = placeDetailsDto.placePhoto,
                     address = placeDetailsDto.placeAddress
                 )
+
                 addPlaceToDay(dayNumber, placeDetails)
             }
 
@@ -160,6 +159,7 @@ class WritePlannerFragment : Fragment() {
                 )
             }
         )
+        Log.d("WritePlannerFragment", "Updating plan with request: $planRequest")
 
         val call = ServerClient.planInstance.updatePlan(planId!!, planRequest)
 
@@ -169,9 +169,20 @@ class WritePlannerFragment : Fragment() {
                     val planResponse = response.body()
                     Log.d("WritePlannerFragment", "Plan updated: $planResponse")
                     Toast.makeText(context, "플랜이 업데이트되었습니다.", Toast.LENGTH_SHORT).show()
+                    updateUI(planResponse)
                 } else {
                     Log.e("WritePlannerFragment", "Failed to update plan: ${response.errorBody()?.string()}")
                     Toast.makeText(context, "플랜 업데이트에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+
+            private fun updateUI(plan: Plan?) {
+                plan?.let {
+                    Log.d("WritePlannerFragment", "Updating UI with plan: $it")
+                    // UI 업데이트 로직 구현
+                    binding.txtRegion.text = "${it.region} 여행"
+                    fetchPlanData(it.planId)
                 }
             }
 
@@ -271,7 +282,7 @@ class WritePlannerFragment : Fragment() {
     }
 
     private fun fetchPlanData(planId: Long) {
-        // Plan 정보 가져오기
+        Log.d("WritePlannerFragment", "Fetching plan data for planId: $planId")
         ServerClient.planInstance.getPlanById(planId).enqueue(object : Callback<PlanDto> {
             override fun onResponse(call: Call<PlanDto>, response: Response<PlanDto>) {
                 if (response.isSuccessful) {
@@ -291,8 +302,7 @@ class WritePlannerFragment : Fragment() {
     }
 
     private fun fetchPlanDays(planId: Long) {
-
-        // Plan Days 정보 가져오기
+        Log.d("WritePlannerFragment", "Fetching plan days for planId: $planId")
         ServerClient.planInstance.getPlanDays(planId).enqueue(object : Callback<List<DayPlanDto>> {
             override fun onResponse(call: Call<List<DayPlanDto>>, response: Response<List<DayPlanDto>>) {
                 if (response.isSuccessful) {
@@ -309,7 +319,6 @@ class WritePlannerFragment : Fragment() {
                                 PlaceDetails(
                                     name = placeDetailsDto.placeName,
                                     category = placeDetailsDto.placeCategory ?: "", // null 처리
-                                    photoUrl = placeDetailsDto.placePhoto ?: "", // null 처리
                                     address = placeDetailsDto.placeAddress ?: "" // null 처리
                                 )
                             }.toMutableList()
@@ -348,7 +357,6 @@ class WritePlannerFragment : Fragment() {
                             PlaceDetails(
                                 name = placeDetailsDto.placeName,
                                 category = placeDetailsDto.placeCategory,
-                                photoUrl = placeDetailsDto.placePhoto,
                                 address = placeDetailsDto.placeAddress
                             )
                         }.toMutableList()
@@ -398,10 +406,11 @@ class WritePlannerFragment : Fragment() {
         }
 
         fun submitList(newDayPlans: List<DayPlan>) {
-            // 기존의 dayPlans를 비우고 새로운 리스트로 업데이트
+            Log.d("DayPlanAdapter", "Submitting new list of day plans: $newDayPlans")
             dayPlans.clear()
             dayPlans.addAll(newDayPlans)
-            notifyDataSetChanged() // 데이터가 변경되었음을 어댑터에 알림
+            notifyDataSetChanged()
+            Log.d("DayPlanAdapter", "Adapter data set changed")
         }
 
         inner class DayViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
