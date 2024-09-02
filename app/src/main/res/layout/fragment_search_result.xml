@@ -15,6 +15,7 @@
             android:layout_height="50dp"
             android:textSize="40dp"
             android:text="검색 결과"
+            android:id="@+id/txt_search_word"
             />
 
     </LinearLayout>

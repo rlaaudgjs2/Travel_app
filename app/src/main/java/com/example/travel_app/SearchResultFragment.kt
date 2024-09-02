@@ -1,5 +1,6 @@
 package com.example.travel_app
 
+import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.Log
@@ -32,6 +33,10 @@ class SearchResultFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val sharedPreferences = requireContext().getSharedPreferences("MyApp", Context.MODE_PRIVATE)
+        val searchWord = sharedPreferences.getString("search_word", "")
+
+        binding.txtSearchWord.text = "#$searchWord 검색 결과"
         // 검색 결과를 Bundle에서 받아옴
         arguments?.let {
             answerList = it.getParcelableArrayList("answerList") ?: emptyList()

@@ -1,5 +1,7 @@
 package com.example.travel_app
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -136,6 +138,8 @@ class RegionSearchFragment : Fragment(), BigRegionAdapter.BigRegionClickListener
             override fun onQueryTextSubmit(query: String?): Boolean {
                 query?.let {
                     performSearch(it)
+                    val sharedPreferences = requireActivity().getSharedPreferences("MyApp", Context.MODE_PRIVATE)
+                    sharedPreferences.edit().putString("search_word", it).apply()
                 }
                 return false
             }
