@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("kotlin-parcelize")
 }
 
 secrets {
@@ -126,4 +127,6 @@ dependencies {
     implementation("com.google.android.libraries.places:places:3.3.0")
     implementation("com.github.bumptech.glide:glide:4.15.1")
     annotationProcessor("com.github.bumptech.glide:compiler:4.15.1")
+
+    implementation("org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.0")
 }
