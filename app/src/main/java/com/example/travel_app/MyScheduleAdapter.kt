@@ -8,10 +8,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class MyScheduleAdapter(
-    private val items: List<ScheduleItem>,
-    private val listener: OnItemClickListener
-) : RecyclerView.Adapter<MyScheduleAdapter.ViewHolder>() {
+class MyScheduleAdapter(private val items: MutableList<ScheduleItem>, private val listener: OnItemClickListener) :
+    RecyclerView.Adapter<MyScheduleAdapter.ViewHolder>() {
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imgRegion: ImageView = itemView.findViewById(R.id.img_region)
@@ -60,6 +58,10 @@ class MyScheduleAdapter(
 
     fun getPlanIdAtPosition(position: Int): Long? {
         return items.getOrNull(position)?.planId
+    }
+    fun removeItemAtPosition(position: Int) {
+        items.removeAt(position)
+        notifyItemRemoved(position)
     }
 }
 
