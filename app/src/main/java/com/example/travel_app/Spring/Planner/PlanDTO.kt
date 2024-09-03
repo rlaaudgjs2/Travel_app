@@ -20,7 +20,6 @@ data class DayPlanDto(
 data class PlaceDetailsDto(
     val placeName: String,
     val placeCategory: String,
-    val placePhoto: String,
     val placeAddress: String
 )
 
@@ -37,7 +36,6 @@ fun PlanDto.toPlan(): Plan {
                     PlaceDetails(
                         name = placeDetailsDto.placeName,
                         category = placeDetailsDto.placeCategory,
-                        photoUrl = placeDetailsDto.placePhoto,
                         address = placeDetailsDto.placeAddress
                     )
                 }.toMutableList() // MutableList로 변환

@@ -8,6 +8,21 @@ interface PostInterface {
     @POST("api/bulletins/register")
     fun savePost(@Body postRequest: PostRequest): Call<PostResponse>
 
+    //ANSWER 부분 -------------------------------------------
+
+    @POST("api/answer/register")
+    fun createPost(@Body answerResponse: AnswerResponse): Call<AnswerResponse>
+
+    // 해시태그로 게시물 검색
+    @GET("api/answer/hashtag/search")
+    fun searchAnswersByHashtag(@Query("hashtag") hashtag: String): Call<List<Answer>>
+
+    // 게시물 ID들로 게시물 정보 검색
+    @GET("api/answer/multiple")
+    fun getAnswersByIds(@Query("ids") ids: List<Long>): Call<List<Answer>>
+
+    //ANSWER 부분 -------------------------------------------
+
     // 모든 게시물 조회
     @GET("api/bulletins")
     fun getAllPosts(): Call<List<PostResponse>>
@@ -29,6 +44,9 @@ interface PostInterface {
     fun searchPostsByTitle(@Query("title") title: String): Call<List<PostResponse>>
 
     // 해시태그로 게시물 검색
-    @GET("api/bulletins/search/hashtag")
-    fun searchPostsByHashtag(@Query("hashtag") hashtag: String): Call<List<PostResponse>>
+    @GET("api/hashtags/search")
+    fun searchPostsByHashtag(@Query("hashtag") hashtag: String): Call<List<Bulletin>>
+
+    @GET("api/bulletins/search/ids")
+    fun getBulletinsByIds(@Query("ids") ids: List<Long>): Call<List<Bulletin>>
 }

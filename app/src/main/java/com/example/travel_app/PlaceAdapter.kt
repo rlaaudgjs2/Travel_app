@@ -16,9 +16,9 @@ class PlaceAdapter(private val context: Context, private val placesList: Mutable
     inner class PlaceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val placeName: TextView = itemView.findViewById(R.id.txt_place_title)
         val placeCategory: TextView = itemView.findViewById(R.id.txt_place_content)
-        val placePhoto: ImageView = itemView.findViewById(R.id.img_place_image)
         val deleteButton: ImageButton = itemView.findViewById(R.id.btn_delete)
     }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PlaceViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.place_data_item_list, parent, false)
@@ -30,14 +30,6 @@ class PlaceAdapter(private val context: Context, private val placesList: Mutable
         holder.placeName.text = place.name
         holder.placeCategory.text = place.category
 
-        // 사진을 Glide 라이브러리를 사용하여 로드
-        Glide.with(holder.itemView.context)
-            .load(place.photoUrl)
-            .into(holder.placePhoto)
-
-        holder.deleteButton.setOnClickListener {
-            removeAt(position)
-        }
     }
 
     override fun getItemCount(): Int {
@@ -52,6 +44,5 @@ class PlaceAdapter(private val context: Context, private val placesList: Mutable
 data class PlaceDetails(
     val name: String,
     val category: String,
-    val photoUrl: String?,
     val address: String
 )

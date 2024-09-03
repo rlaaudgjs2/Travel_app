@@ -1,6 +1,7 @@
 package com.example.travel_app.Spring
 
 import com.example.travel_app.Spring.Bulletin.PostInterface
+import com.example.travel_app.Spring.Planner.PlanInterface
 import com.example.travel_app.Spring.User.UserInterface
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -22,4 +23,12 @@ object ServerClient {
             .build()
             .create(PostInterface::class.java)
     }
+    val planInstance: PlanInterface by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(PlanInterface::class.java)
+    }
+
 }

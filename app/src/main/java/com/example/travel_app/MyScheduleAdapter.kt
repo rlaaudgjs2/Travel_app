@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView
 class MyScheduleAdapter(private val items: MutableList<ScheduleItem>, private val listener: OnItemClickListener) :
     RecyclerView.Adapter<MyScheduleAdapter.ViewHolder>() {
 
-
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imgRegion: ImageView = itemView.findViewById(R.id.img_region)
         val txtRegion: TextView = itemView.findViewById(R.id.txt_region)
@@ -19,8 +18,20 @@ class MyScheduleAdapter(private val items: MutableList<ScheduleItem>, private va
         val btnMore: ImageButton = itemView.findViewById(R.id.btn_more)
 
         init {
+            // 전체 아이템 클릭 리스너
+            itemView.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    listener.onItemClick(position)
+                }
+            }
+
+            // "더보기" 버튼 클릭 리스너
             btnMore.setOnClickListener {
-                listener.onActionClick(adapterPosition)
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    listener.onActionClick(position)
+                }
             }
         }
     }
@@ -33,7 +44,7 @@ class MyScheduleAdapter(private val items: MutableList<ScheduleItem>, private va
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
-        holder.imgRegion.setImageResource(item.iconResId) // Assume ScheduleItem has this field
+        holder.imgRegion.setImageResource(item.iconResId)
         holder.txtRegion.text = item.region
         holder.txtTravelPreiod.text = item.travelPreriod
     }
@@ -41,8 +52,10 @@ class MyScheduleAdapter(private val items: MutableList<ScheduleItem>, private va
     override fun getItemCount(): Int = items.size
 
     interface OnItemClickListener {
+        fun onItemClick(position: Int)
         fun onActionClick(position: Int)
     }
+
     fun getPlanIdAtPosition(position: Int): Long? {
         return items.getOrNull(position)?.planId
     }
@@ -51,9 +64,10 @@ class MyScheduleAdapter(private val items: MutableList<ScheduleItem>, private va
         notifyItemRemoved(position)
     }
 }
+
 data class ScheduleItem(
     val planId: Long,
-    val iconResId: Int, // Drawable resource ID for the icon
+    val iconResId: Int,
     val region: String,
     val travelPreriod: String
 )
