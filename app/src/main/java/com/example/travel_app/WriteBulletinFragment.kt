@@ -83,14 +83,12 @@ class WriteBulletinFragment : Fragment() {
         parentFragmentManager.setFragmentResultListener("requestKey", viewLifecycleOwner) { _, bundle ->
             val placeName = bundle.getString("placeName")
             val placeCategory = bundle.getString("placeCategory")
-            val placePhoto = bundle.getString("placePhoto")
             val placeAddress = bundle.getString("placeAddress")
 
-            if (placeName != null && placeCategory != null && placePhoto != null && placeAddress != null) {
+            if (placeName != null && placeCategory != null && placeAddress != null) {
                 val placeDetails = PlaceDetails(
                     placeName,
                     placeCategory,
-                    placePhoto,
                     placeAddress
                 )
                 placesList.add(placeDetails)
