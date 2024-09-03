@@ -30,6 +30,9 @@ class PlaceAdapter(private val context: Context, private val placesList: Mutable
         holder.placeName.text = place.name
         holder.placeCategory.text = place.category
 
+        holder.deleteButton.setOnClickListener {
+            removeAt(holder.position) // 아이템 삭제
+        }
     }
 
     override fun getItemCount(): Int {
