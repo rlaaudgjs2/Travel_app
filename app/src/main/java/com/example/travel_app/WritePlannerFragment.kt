@@ -37,7 +37,6 @@ class WritePlannerFragment : Fragment() {
 
     private val dayPlans = mutableListOf<DayPlan>()
     private lateinit var dayPlanAdapter: DayPlanAdapter
-    private val placesList = mutableListOf<PlaceDetails>()
     private var planId: Long? = null
 
     override fun onCreateView(
@@ -147,6 +146,7 @@ class WritePlannerFragment : Fragment() {
             region = regionName.toString(),
             days = dayPlans.map { dayPlan ->
                 DayRequest(
+
                     dayNumber = dayPlan.dayNumber,
                     places = dayPlan.places.map { placeDetails ->
                         PlanPlaceRequest(
@@ -155,6 +155,7 @@ class WritePlannerFragment : Fragment() {
                             placeCategory = placeDetails.category,
                             placeAddress = placeDetails.address
                         )
+
                     }
                 )
             }
@@ -307,29 +308,35 @@ class WritePlannerFragment : Fragment() {
             override fun onResponse(call: Call<List<DayPlanDto>>, response: Response<List<DayPlanDto>>) {
                 if (response.isSuccessful) {
                     val dayPlansDto = response.body() ?: emptyList()
-
-                    // 데이터를 dayNumber를 기준으로 정렬
-                    val sortedDayPlans = dayPlansDto.sortedBy { it.dayNumber }
-
-                    // 정렬된 데이터를 사용하여 DayPlan 객체를 생성
-                    val dayPlans = sortedDayPlans.map { dayPlanDto ->
-                        DayPlan(
-                            dayNumber = dayPlanDto.dayNumber,
-                            places = (dayPlanDto.places ?: emptyList()).map { placeDetailsDto ->
-                                PlaceDetails(
-                                    name = placeDetailsDto.placeName,
-                                    category = placeDetailsDto.placeCategory ?: "", // null 처리
-                                    address = placeDetailsDto.placeAddress ?: "" // null 처리
-                                )
-                            }.toMutableList()
-                        )
-                    }.toMutableList()
-
-                    // 리사이클러 뷰 어댑터에 정렬된 데이터 설정
-                    dayPlanAdapter.submitList(dayPlans)
-
+                    updateDayPlans(dayPlansDto)
                 } else {
                     Log.e("WritePlannerFragment", "Failed to fetch plan days: ${response.errorBody()?.string()}")
+                }
+            }
+
+            private fun updateDayPlans(dayPlansDto: List<DayPlanDto>) {
+                val updatedDayPlans = dayPlansDto.sortedBy { it.dayNumber }.map { dayPlanDto ->
+                    val existingDayPlan = dayPlans.find { it.dayNumber == dayPlanDto.dayNumber }
+                    DayPlan(
+                        dayNumber = dayPlanDto.dayNumber,
+                        places = (existingDayPlan?.places ?: mutableListOf()).apply {
+                            addAll((dayPlanDto.places ?: emptyList()).map { placeDetailsDto ->
+                                PlaceDetails(
+                                    name = placeDetailsDto.placeName,
+                                    category = placeDetailsDto.placeCategory ?: "",
+                                    address = placeDetailsDto.placeAddress ?: ""
+                                )
+                            })
+                        }.distinctBy { it.name }.toMutableList()  // 중복 제거
+                    )
+                }
+
+                dayPlans.clear()
+                dayPlans.addAll(updatedDayPlans)
+
+                activity?.runOnUiThread {
+                    dayPlanAdapter.notifyDataSetChanged()
+                    Log.d("WritePlannerFragment", "Day plans updated and notified: $dayPlans")
                 }
             }
 
@@ -338,46 +345,6 @@ class WritePlannerFragment : Fragment() {
             }
         })
     }
-
-
-    private fun fetchDayPlaces(dayPlansDto: List<DayPlanDto>) {
-        val dayPlacesCalls = dayPlansDto.map { dayPlanDto ->
-            ServerClient.planInstance.getDayPlaces(dayPlanDto.dayNumber.toLong())
-        }
-
-        dayPlacesCalls.forEachIndexed { index, call ->
-            call.enqueue(object : Callback<List<PlaceDetailsDto>> {
-                override fun onResponse(call: Call<List<PlaceDetailsDto>>, response: Response<List<PlaceDetailsDto>>) {
-                    if (response.isSuccessful) {
-                        val placesDto = response.body() ?: emptyList()
-                        val dayPlan = dayPlansDto[index]
-
-                        // PlaceDetails 변환
-                        val places = placesDto.map { placeDetailsDto ->
-                            PlaceDetails(
-                                name = placeDetailsDto.placeName,
-                                category = placeDetailsDto.placeCategory,
-                                address = placeDetailsDto.placeAddress
-                            )
-                        }.toMutableList()
-
-                        // DayPlan 업데이트
-                        dayPlans.add(DayPlan(dayNumber = dayPlan.dayNumber, places = places))
-
-                        // Adapter 갱신
-                        dayPlanAdapter.notifyDataSetChanged()
-                    } else {
-                        Log.e("WritePlannerFragment", "Failed to fetch day places: ${response.errorBody()?.string()}")
-                    }
-                }
-
-                override fun onFailure(call: Call<List<PlaceDetailsDto>>, t: Throwable) {
-                    Log.e("WritePlannerFragment", "Error fetching day places", t)
-                }
-            })
-        }
-    }
-
 
 
     private fun hideBottomNavigationView(){
@@ -427,9 +394,6 @@ class WritePlannerFragment : Fragment() {
 
                 // '장소 추가' 버튼 클릭 리스너
                 addButton.setOnClickListener {
-//                    val bundle = Bundle().apply {
-//                        putInt("dayNumber", dayPlan.dayNumber)
-//                    }
                     // TestAPIFragment로 이동
                     val testAPIFragment = TestAPIFragment.newInstance("WritePlanner").apply {
                         arguments = (arguments ?: Bundle()).apply {
