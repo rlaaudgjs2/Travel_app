@@ -62,6 +62,8 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/day_recycler"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                android:divider="@android:color/darker_gray"
+                android:dividerHeight="1dp"
                 />
         </LinearLayout>
 

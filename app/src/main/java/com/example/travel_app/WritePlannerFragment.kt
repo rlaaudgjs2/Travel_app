@@ -36,16 +36,15 @@ class WritePlannerFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val dayPlans = mutableListOf<DayPlan>()
-    private lateinit var dayPlanAdapter: DayPlanAdapter
+    private lateinit var placeAdapter: PlaceAdapter
+    private val items = mutableListOf<Any>() // DayHeader와 PlaceDetails를 저장하는 리스트
     private var planId: Long? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         _binding = FragmentWritePlannerBinding.inflate(inflater, container, false)
-
         return binding.root
     }
 
@@ -54,16 +53,16 @@ class WritePlannerFragment : Fragment() {
         hideBottomNavigationView()
 
         val sharedPreferences = requireContext().getSharedPreferences("TravelAppPrefs", Context.MODE_PRIVATE)
-        val selectedDaysCount = sharedPreferences.getInt("selectedDaysCount",0)
+        val selectedDaysCount = sharedPreferences.getInt("selectedDaysCount", 0)
 
-        val sharedPreferences_Region = requireContext().getSharedPreferences("Region", Context.MODE_PRIVATE)
-        val regionName = sharedPreferences_Region.getString("RegionName", "")
-        binding.txtRegion.setText(regionName + "여행")
+        val sharedPreferencesRegion = requireContext().getSharedPreferences("Region", Context.MODE_PRIVATE)
+        val regionName = sharedPreferencesRegion.getString("RegionName", "")
+        binding.txtRegion.text = "$regionName 여행"
 
-        // 초기 DayPlanAdapter 설정
-        dayPlanAdapter = DayPlanAdapter(dayPlans)
+        // 초기 PlaceAdapter 설정
+        placeAdapter = PlaceAdapter(requireContext(), items)
         binding.dayRecycler.layoutManager = LinearLayoutManager(requireContext())
-        binding.dayRecycler.adapter = dayPlanAdapter
+        binding.dayRecycler.adapter = placeAdapter
 
         val planData: Plan? = arguments?.getParcelable("planData")
         planData?.let { plan ->
@@ -72,17 +71,10 @@ class WritePlannerFragment : Fragment() {
             fetchPlanData(plan.planId)
         }
 
-        // dayPlans 초기화
-        // dayPlans가 이미 초기화된 경우에는 재초기화하지 않도록 체크합니다.
         if (dayPlans.isEmpty()) {
             initializeDayPlans(selectedDaysCount)
         }
 
-
-
-
-        // FragmentResultListener 설정
-        // 장소검색 프래그먼트로부터 결과를 받을 리스너 설정
         parentFragmentManager.setFragmentResultListener(
             "requestKey",
             viewLifecycleOwner
@@ -90,32 +82,23 @@ class WritePlannerFragment : Fragment() {
             val placeName = bundle.getString("placeName")
             val placeCategory = bundle.getString("placeCategory")
             val placePhoto = bundle.getString("placePhoto")
-            val dayNumber = bundle.getInt("dayNumber") // 일차를 받는 추가 설정
+            val dayNumber = bundle.getInt("dayNumber")
             val placeAddress = bundle.getString("placeAddress")
 
-            // 받아온 장소 정보를 해당 일자에 추가
             if (placeName != null && placeCategory != null && placePhoto != null && placeAddress != null) {
-                val placeDetailsDto = PlaceDetailsDto(
-                    placeName = placeName,
-                    placeCategory = placeCategory,
-                    placeAddress = placeAddress
-                )
-
-                // PlaceDetails로 변환
                 val placeDetails = PlaceDetails(
-                    name = placeDetailsDto.placeName,
-                    category = placeDetailsDto.placeCategory,
-                    address = placeDetailsDto.placeAddress
+                    name = placeName,
+                    category = placeCategory,
+                    address = placeAddress
                 )
-
                 addPlaceToDay(dayNumber, placeDetails)
             }
-
         }
 
         binding.btnBackspace.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
+
         binding.btnRegisterPlanner.setOnClickListener {
             if (planId != null) {
                 updatePlan()
@@ -131,155 +114,31 @@ class WritePlannerFragment : Fragment() {
         }
     }
 
-    private fun updatePlan() {
-        val sharedPreferences = requireContext().getSharedPreferences("TravelAppPrefs", Context.MODE_PRIVATE)
-        val startDayString = sharedPreferences.getString("startDay", "")
-        val endDayString = sharedPreferences.getString("endDay", "")
 
-        val sharedPreferences_Region = requireContext().getSharedPreferences("Region", Context.MODE_PRIVATE)
-        val regionName = sharedPreferences_Region.getString("RegionName", "")
-
-        val planRequest = PlanRequest(
-            startDay = startDayString.toString(),
-            endDay = endDayString.toString(),
-            authorId = getUserInfo(),
-            region = regionName.toString(),
-            days = dayPlans.map { dayPlan ->
-                DayRequest(
-
-                    dayNumber = dayPlan.dayNumber,
-                    places = dayPlan.places.map { placeDetails ->
-                        PlanPlaceRequest(
-                            placeName = placeDetails.name,
-                            planDayId = dayPlan.dayNumber,
-                            placeCategory = placeDetails.category,
-                            placeAddress = placeDetails.address
-                        )
-
-                    }
-                )
-            }
-        )
-        Log.d("WritePlannerFragment", "Updating plan with request: $planRequest")
-
-        val call = ServerClient.planInstance.updatePlan(planId!!, planRequest)
-
-        call.enqueue(object : Callback<Plan> {
-            override fun onResponse(call: Call<Plan>, response: Response<Plan>) {
-                if (response.isSuccessful) {
-                    val planResponse = response.body()
-                    Log.d("WritePlannerFragment", "Plan updated: $planResponse")
-                    Toast.makeText(context, "플랜이 업데이트되었습니다.", Toast.LENGTH_SHORT).show()
-                    updateUI(planResponse)
-                } else {
-                    Log.e("WritePlannerFragment", "Failed to update plan: ${response.errorBody()?.string()}")
-                    Toast.makeText(context, "플랜 업데이트에 실패했습니다.", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-
-            private fun updateUI(plan: Plan?) {
-                plan?.let {
-                    Log.d("WritePlannerFragment", "Updating UI with plan: $it")
-                    // UI 업데이트 로직 구현
-                    binding.txtRegion.text = "${it.region} 여행"
-                    fetchPlanData(it.planId)
-                }
-            }
-
-            override fun onFailure(call: Call<Plan>, t: Throwable) {
-                Log.e("WritePlannerFragment", "Error updating plan", t)
-                Toast.makeText(context, "플랜 업데이트 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
-    // 초기 DayPlans 설정
     private fun initializeDayPlans(selectedDaysCount: Int) {
         for (i in 1..selectedDaysCount) {
             dayPlans.add(DayPlan(i, mutableListOf()))
         }
+        updateItems()
     }
 
     private fun addPlaceToDay(dayNumber: Int, newPlace: PlaceDetails) {
-        val dayPlanIndex = dayPlans.indexOfFirst { it.dayNumber == dayNumber }
-
-        if (dayPlanIndex != -1) {
-            // 기존 일차에 장소 추가
-            dayPlans[dayPlanIndex].places.add(newPlace)
-            dayPlanAdapter.notifyItemChanged(dayPlanIndex) // 변경된 항목만 갱신
+        val dayPlan = dayPlans.find { it.dayNumber == dayNumber }
+        if (dayPlan != null) {
+            dayPlan.places.add(newPlace)
         } else {
-            // 새로운 일차 생성 후 장소 추가
             dayPlans.add(DayPlan(dayNumber, mutableListOf(newPlace)))
-            dayPlanAdapter.notifyItemInserted(dayPlans.size - 1) // 새 항목 삽입
         }
+        updateItems()
     }
 
-    private fun getUserInfo(): String? {
-        val sharedPreferences = requireContext().getSharedPreferences("user_info", Context.MODE_PRIVATE)
-        return sharedPreferences.getString("user_id"," ")
-    }
-
-    private fun sendPlanRequest() {
-
-        val sharedPreferences = requireContext().getSharedPreferences("TravelAppPrefs", Context.MODE_PRIVATE)
-        val startDayString = sharedPreferences.getString("startDay", "")
-        val endDayString = sharedPreferences.getString("endDay", "")
-
-        val sharedPreferences_Region = requireContext().getSharedPreferences("Region", Context.MODE_PRIVATE)
-        val regionName = sharedPreferences_Region.getString("RegionName", "")
-
-        Log.e("받을때 startDay", startDayString.toString())
-        // PlanRequest 객체 생성
-        val planRequest = PlanRequest(
-            startDay = startDayString.toString(),
-            endDay = endDayString.toString(),
-            authorId = getUserInfo(), // 사용자 ID를 가져옴
-            region = regionName.toString(),
-//            title = binding.txtRegion.text.toString(), // 여행 계획 제목
-            days = dayPlans.map { dayPlan ->
-                DayRequest(
-                    dayNumber = dayPlan.dayNumber,
-                    places = dayPlan.places.map { placeDetails ->
-                        PlanPlaceRequest(
-                            placeName = placeDetails.name, // Place ID는 서버에서 자동 생성되므로 클라이언트에서 전송할 필요 없음
-                            planDayId = dayPlan.dayNumber,
-                            placeCategory = placeDetails.category,
-                            placeAddress = placeDetails.address
-                        )
-                    }
-                )
-            }
-        )
-
-        // 요청 데이터 로깅
-        Log.d("WritePlannerFragment", "Sending PlanRequest: $planRequest")
-
-        // Retrofit을 사용하여 API 호출
-        val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8080/") // 서버 주소로 변경
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        val api = retrofit.create(PlanInterface::class.java)
-        val call = ServerClient.planInstance.savePlan(planRequest)
-
-        call.enqueue(object : Callback<PlanResponse> {
-            override fun onResponse(call: Call<PlanResponse>, response: Response<PlanResponse>) {
-                // 응답 상태 코드와 본문 로깅
-                Log.d("WritePlannerFragment", "Response code: ${response.code()}")
-                if (response.isSuccessful) {
-                    val planResponse = response.body()
-                    Log.d("WritePlannerFragment", "Plan saved: $planResponse")
-                } else {
-                    Log.e("WritePlannerFragment", "Failed to save plan: ${response.errorBody()?.string()}")
-                }
-            }
-
-            override fun onFailure(call: Call<PlanResponse>, t: Throwable) {
-                Log.e("WritePlannerFragment", "Error saving plan", t)
-            }
-        })
+    private fun updateItems() {
+        items.clear()
+        dayPlans.sortedBy { it.dayNumber }.forEach { dayPlan ->
+            items.add(PlaceAdapter.DayHeader(dayPlan.dayNumber))
+            items.addAll(dayPlan.places)
+        }
+        placeAdapter.notifyDataSetChanged()
     }
 
     private fun fetchPlanData(planId: Long) {
@@ -303,40 +162,26 @@ class WritePlannerFragment : Fragment() {
     }
 
     private fun fetchPlanDays(planId: Long) {
-        Log.d("WritePlannerFragment", "Fetching plan days for planId: $planId")
         ServerClient.planInstance.getPlanDays(planId).enqueue(object : Callback<List<DayPlanDto>> {
             override fun onResponse(call: Call<List<DayPlanDto>>, response: Response<List<DayPlanDto>>) {
                 if (response.isSuccessful) {
                     val dayPlansDto = response.body() ?: emptyList()
-                    updateDayPlans(dayPlansDto)
-                } else {
-                    Log.e("WritePlannerFragment", "Failed to fetch plan days: ${response.errorBody()?.string()}")
-                }
-            }
-
-            private fun updateDayPlans(dayPlansDto: List<DayPlanDto>) {
-                val updatedDayPlans = dayPlansDto.sortedBy { it.dayNumber }.map { dayPlanDto ->
-                    val existingDayPlan = dayPlans.find { it.dayNumber == dayPlanDto.dayNumber }
-                    DayPlan(
-                        dayNumber = dayPlanDto.dayNumber,
-                        places = (existingDayPlan?.places ?: mutableListOf()).apply {
-                            addAll((dayPlanDto.places ?: emptyList()).map { placeDetailsDto ->
-                                PlaceDetails(
-                                    name = placeDetailsDto.placeName,
-                                    category = placeDetailsDto.placeCategory ?: "",
-                                    address = placeDetailsDto.placeAddress ?: ""
-                                )
-                            })
-                        }.distinctBy { it.name }.toMutableList()  // 중복 제거
+                    dayPlans.clear()
+                    dayPlans.addAll(
+                        dayPlansDto.map { dto ->
+                            DayPlan(
+                                dayNumber = dto.dayNumber,
+                                places = dto.places.map {
+                                    PlaceDetails(
+                                        name = it.placeName,
+                                        category = it.placeCategory ?: "",
+                                        address = it.placeAddress ?: ""
+                                    )
+                                }.toMutableList()
+                            )
+                        }
                     )
-                }
-
-                dayPlans.clear()
-                dayPlans.addAll(updatedDayPlans)
-
-                activity?.runOnUiThread {
-                    dayPlanAdapter.notifyDataSetChanged()
-                    Log.d("WritePlannerFragment", "Day plans updated and notified: $dayPlans")
+                    updateItems()
                 }
             }
 
@@ -346,13 +191,116 @@ class WritePlannerFragment : Fragment() {
         })
     }
 
+    private fun updatePlan() {
+        // 기존 코드 유지
+        val sharedPreferences = requireContext().getSharedPreferences("TravelAppPrefs", Context.MODE_PRIVATE)
+        val startDayString = sharedPreferences.getString("startDay", "")
+        val endDayString = sharedPreferences.getString("endDay", "")
 
-    private fun hideBottomNavigationView(){
+        val sharedPreferencesRegion = requireContext().getSharedPreferences("Region", Context.MODE_PRIVATE)
+        val regionName = sharedPreferencesRegion.getString("RegionName", "")
+
+        val planRequest = PlanRequest(
+            startDay = startDayString.toString(),
+            endDay = endDayString.toString(),
+            authorId = getUserInfo(),
+            region = regionName.toString(),
+            days = dayPlans.map { dayPlan ->
+                DayRequest(
+                    dayNumber = dayPlan.dayNumber,
+                    places = dayPlan.places.map { placeDetails ->
+                        PlanPlaceRequest(
+                            placeName = placeDetails.name,
+                            planDayId = dayPlan.dayNumber,
+                            placeCategory = placeDetails.category,
+                            placeAddress = placeDetails.address
+                        )
+                    }
+                )
+            }
+        )
+        Log.d("WritePlannerFragment", "Updating plan with request: $planRequest")
+
+        val call = ServerClient.planInstance.updatePlan(planId!!, planRequest)
+
+        call.enqueue(object : Callback<Plan> {
+            override fun onResponse(call: Call<Plan>, response: Response<Plan>) {
+                if (response.isSuccessful) {
+                    val planResponse = response.body()
+                    Log.d("WritePlannerFragment", "Plan updated: $planResponse")
+                    Toast.makeText(context, "플랜이 업데이트되었습니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Log.e("WritePlannerFragment", "Failed to update plan: ${response.errorBody()?.string()}")
+                    Toast.makeText(context, "플랜 업데이트에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Plan>, t: Throwable) {
+                Log.e("WritePlannerFragment", "Error updating plan", t)
+                Toast.makeText(context, "플랜 업데이트 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun sendPlanRequest() {
+        // 기존 코드 유지
+        val sharedPreferences = requireContext().getSharedPreferences("TravelAppPrefs", Context.MODE_PRIVATE)
+        val startDayString = sharedPreferences.getString("startDay", "")
+        val endDayString = sharedPreferences.getString("endDay", "")
+
+        val sharedPreferencesRegion = requireContext().getSharedPreferences("Region", Context.MODE_PRIVATE)
+        val regionName = sharedPreferencesRegion.getString("RegionName", "")
+
+        val planRequest = PlanRequest(
+            startDay = startDayString.toString(),
+            endDay = endDayString.toString(),
+            authorId = getUserInfo(),
+            region = regionName.toString(),
+            days = dayPlans.map { dayPlan ->
+                DayRequest(
+                    dayNumber = dayPlan.dayNumber,
+                    places = dayPlan.places.map { placeDetails ->
+                        PlanPlaceRequest(
+                            placeName = placeDetails.name,
+                            planDayId = dayPlan.dayNumber,
+                            placeCategory = placeDetails.category,
+                            placeAddress = placeDetails.address
+                        )
+                    }
+                )
+            }
+        )
+        Log.d("WritePlannerFragment", "Sending PlanRequest: $planRequest")
+
+        val call = ServerClient.planInstance.savePlan(planRequest)
+
+        call.enqueue(object : Callback<PlanResponse> {
+            override fun onResponse(call: Call<PlanResponse>, response: Response<PlanResponse>) {
+                if (response.isSuccessful) {
+                    val planResponse = response.body()
+                    Log.d("WritePlannerFragment", "Plan saved: $planResponse")
+                } else {
+                    Log.e("WritePlannerFragment", "Failed to save plan: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: Call<PlanResponse>, t: Throwable) {
+                Log.e("WritePlannerFragment", "Error saving plan", t)
+            }
+        })
+    }
+
+    private fun getUserInfo(): String? {
+        val sharedPreferences = requireContext().getSharedPreferences("user_info", Context.MODE_PRIVATE)
+        return sharedPreferences.getString("user_id", " ")
+    }
+
+    private fun hideBottomNavigationView() {
         val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)
         bottomNavigationView?.visibility = View.GONE
     }
 
-    private fun showBottomNavigationView(){
+    private fun showBottomNavigationView() {
         val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)
         bottomNavigationView?.visibility = View.VISIBLE
     }
@@ -414,3 +362,8 @@ class WritePlannerFragment : Fragment() {
         val places: MutableList<PlaceDetails> // 각 일자별 장소 리스트
     )
 }
+
+
+
+
+

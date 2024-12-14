@@ -90,7 +90,6 @@ class WriteBulletinFragment : Fragment() {
                 val placeDetails = PlaceDetails(
                     placeName,
                     placeCategory,
-                    placePhoto,
                     placeAddress
                 )
                 placesList.add(placeDetails)
