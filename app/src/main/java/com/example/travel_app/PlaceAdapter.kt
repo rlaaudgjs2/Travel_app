@@ -10,14 +10,19 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
+sealed class PlannerItem {
+    data class Header(val dayNumber: Int) : PlannerItem()
+    data class Place(val details: PlaceDetails) : PlannerItem()
+}
+
 class PlaceAdapter(
     private val context: Context,
-    private val items: MutableList<Any> // DayHeader와 PlaceDetails가 혼합된 리스트
+    private val items: MutableList<PlannerItem>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
         private const val VIEW_TYPE_HEADER = 0
-        private const val VIEW_TYPE_ITEM = 1
+        private const val VIEW_TYPE_PLACE = 1
     }
 
     inner class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -31,7 +36,10 @@ class PlaceAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (items[position] is DayHeader) VIEW_TYPE_HEADER else VIEW_TYPE_ITEM
+        return when (items[position]) {
+            is PlannerItem.Header -> VIEW_TYPE_HEADER
+            is PlannerItem.Place -> VIEW_TYPE_PLACE
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -45,15 +53,18 @@ class PlaceAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (holder is HeaderViewHolder) {
-            val header = items[position] as DayHeader
-            holder.headerText.text = "${header.dayNumber}일차"
-        } else if (holder is PlaceViewHolder) {
-            val place = items[position] as PlaceDetails
-            holder.placeName.text = place.name
-            holder.placeCategory.text = place.category
-            holder.deleteButton.setOnClickListener {
-                removeAt(position)
+        when (val item = items[position]) {
+            is PlannerItem.Header -> {
+                val headerHolder = holder as HeaderViewHolder
+                headerHolder.headerText.text = "${item.dayNumber}일차"
+            }
+            is PlannerItem.Place -> {
+                val placeHolder = holder as PlaceViewHolder
+                placeHolder.placeName.text = item.details.name
+                placeHolder.placeCategory.text = item.details.category
+                placeHolder.deleteButton.setOnClickListener {
+                    removeAt(position)
+                }
             }
         }
     }
@@ -65,9 +76,8 @@ class PlaceAdapter(
         notifyItemRemoved(position)
         notifyItemRangeChanged(position, items.size)
     }
-
-    data class DayHeader(val dayNumber: Int)
 }
+
 data class PlaceDetails(
     val name: String,
     val category: String,

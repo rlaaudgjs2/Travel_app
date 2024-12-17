@@ -69,7 +69,7 @@ class WriteBulletinFragment : Fragment() {
 
         // 장소 RecyclerView 초기화
         recyclerView = binding.placeRecycler
-        placeAdapter = PlaceAdapter(requireContext(), placesList)
+        placeAdapter = PlaceAdapter(requireContext(), placesList.map { PlannerItem.Place(it) }.toMutableList())
         recyclerView.adapter = placeAdapter
 
         // 이미지 미리보기 RecyclerView 초기화

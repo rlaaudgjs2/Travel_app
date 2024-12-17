@@ -36,9 +36,11 @@ class WritePlannerFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val dayPlans = mutableListOf<DayPlan>()
-    private lateinit var placeAdapter: PlaceAdapter
-    private val items = mutableListOf<Any>() // DayHeader와 PlaceDetails를 저장하는 리스트
+//    private lateinit var placeAdapter: PlaceAdapter
+    private val items = mutableListOf<PlannerItem>() // DayHeader와 PlaceDetails를 저장하는 리스트
     private var planId: Long? = null
+
+    private lateinit var dayPlanAdapter: DayPlanAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -60,9 +62,16 @@ class WritePlannerFragment : Fragment() {
         binding.txtRegion.text = "$regionName 여행"
 
         // 초기 PlaceAdapter 설정
-        placeAdapter = PlaceAdapter(requireContext(), items)
+//        placeAdapter = PlaceAdapter(requireContext(), items)
+//        binding.dayRecycler.layoutManager = LinearLayoutManager(requireContext())
+//        binding.dayRecycler.adapter = placeAdapter
+
+        // DayPlanAdapter 초기화
+        dayPlanAdapter = DayPlanAdapter(dayPlans)
         binding.dayRecycler.layoutManager = LinearLayoutManager(requireContext())
-        binding.dayRecycler.adapter = placeAdapter
+        binding.dayRecycler.adapter = dayPlanAdapter // lateinit으로 선언된 dayPlanAdapter 초기화
+
+        Log.d("WritePlannerFragment", "Adapter initialized with dayPlans: $dayPlans")
 
         val planData: Plan? = arguments?.getParcelable("planData")
         planData?.let { plan ->
@@ -116,9 +125,11 @@ class WritePlannerFragment : Fragment() {
 
 
     private fun initializeDayPlans(selectedDaysCount: Int) {
+        Log.d("WritePlannerFragment", "Initializing day plans with count: $selectedDaysCount")
         for (i in 1..selectedDaysCount) {
             dayPlans.add(DayPlan(i, mutableListOf()))
         }
+        Log.d("WritePlannerFragment", "Day plans initialized: $dayPlans")
         updateItems()
     }
 
@@ -133,12 +144,14 @@ class WritePlannerFragment : Fragment() {
     }
 
     private fun updateItems() {
-        items.clear()
-        dayPlans.sortedBy { it.dayNumber }.forEach { dayPlan ->
-            items.add(PlaceAdapter.DayHeader(dayPlan.dayNumber))
-            items.addAll(dayPlan.places)
-        }
-        placeAdapter.notifyDataSetChanged()
+//        items.clear()
+//        dayPlans.sortedBy { it.dayNumber }.forEach { dayPlan ->
+//            items.add(PlannerItem.Header(dayPlan.dayNumber))
+//            items.addAll(dayPlan.places.map { PlannerItem.Place(it) })
+//        }
+//        placeAdapter.notifyDataSetChanged()
+
+        dayPlanAdapter.submitList(dayPlans)
     }
 
     private fun fetchPlanData(planId: Long) {
@@ -322,6 +335,9 @@ class WritePlannerFragment : Fragment() {
 
         fun submitList(newDayPlans: List<DayPlan>) {
             Log.d("DayPlanAdapter", "Submitting new list of day plans: $newDayPlans")
+//            dayPlans.clear()
+//            dayPlans.addAll(newDayPlans)
+//            notifyDataSetChanged()
             dayPlans.clear()
             dayPlans.addAll(newDayPlans)
             notifyDataSetChanged()
@@ -338,7 +354,7 @@ class WritePlannerFragment : Fragment() {
 
                 // RecyclerView 초기화
                 placeRecyclerView.layoutManager = LinearLayoutManager(itemView.context)
-                placeRecyclerView.adapter = PlaceAdapter(itemView.context, dayPlan.places)
+                placeRecyclerView.adapter = PlaceAdapter(itemView.context, dayPlan.places.map { PlannerItem.Place(it) }.toMutableList())
 
                 // '장소 추가' 버튼 클릭 리스너
                 addButton.setOnClickListener {
