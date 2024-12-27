@@ -42,6 +42,8 @@ class WritePlannerFragment : Fragment() {
 
     private lateinit var dayPlanAdapter: DayPlanAdapter
 
+    private var isDayPlansInitialized = false // 초기화 여부를 저장
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -56,6 +58,7 @@ class WritePlannerFragment : Fragment() {
 
         val sharedPreferences = requireContext().getSharedPreferences("TravelAppPrefs", Context.MODE_PRIVATE)
         val selectedDaysCount = sharedPreferences.getInt("selectedDaysCount", 0)
+        Log.d("WritePlannerFragment", "Selected days count: $selectedDaysCount")
 
         val sharedPreferencesRegion = requireContext().getSharedPreferences("Region", Context.MODE_PRIVATE)
         val regionName = sharedPreferencesRegion.getString("RegionName", "")
@@ -67,12 +70,17 @@ class WritePlannerFragment : Fragment() {
 //        binding.dayRecycler.adapter = placeAdapter
 
         // DayPlanAdapter 초기화
-        dayPlanAdapter = DayPlanAdapter(dayPlans)
-        binding.dayRecycler.layoutManager = LinearLayoutManager(requireContext())
-        binding.dayRecycler.adapter = dayPlanAdapter // lateinit으로 선언된 dayPlanAdapter 초기화
+        if(!::dayPlanAdapter.isInitialized){
+            dayPlanAdapter = DayPlanAdapter(dayPlans)
+            binding.dayRecycler.layoutManager = LinearLayoutManager(requireContext())
+            binding.dayRecycler.adapter = dayPlanAdapter // lateinit으로 선언된 dayPlanAdapter 초기화
+        }
+        if(!isDayPlansInitialized){
+            initializeDayPlans(selectedDaysCount)
+            isDayPlansInitialized = true
+        }
 
         Log.d("WritePlannerFragment", "Adapter initialized with dayPlans: $dayPlans")
-
         val planData: Plan? = arguments?.getParcelable("planData")
         planData?.let { plan ->
             planId = plan.planId
@@ -80,9 +88,12 @@ class WritePlannerFragment : Fragment() {
             fetchPlanData(plan.planId)
         }
 
-        if (dayPlans.isEmpty()) {
-            initializeDayPlans(selectedDaysCount)
-        }
+//        if (dayPlans.isEmpty()) {
+//            Log.d("WritePlannerFragment", "Day plans are empty. Initializing...")
+//            initializeDayPlans(selectedDaysCount)
+//        } else {
+//            Log.d("WritePlannerFragment", "Day plans already initialized: $dayPlans")
+//        }
 
         parentFragmentManager.setFragmentResultListener(
             "requestKey",
@@ -125,33 +136,40 @@ class WritePlannerFragment : Fragment() {
 
 
     private fun initializeDayPlans(selectedDaysCount: Int) {
-        Log.d("WritePlannerFragment", "Initializing day plans with count: $selectedDaysCount")
+        if (dayPlans.isNotEmpty()) {
+            Log.d("WritePlannerFragment", "Day plans already initialized: $dayPlans")
+            return // 이미 초기화된 경우 초기화를 생략
+        }
+
         for (i in 1..selectedDaysCount) {
             dayPlans.add(DayPlan(i, mutableListOf()))
         }
         Log.d("WritePlannerFragment", "Day plans initialized: $dayPlans")
-        updateItems()
+        updateItems() // 어댑터 갱신
     }
 
     private fun addPlaceToDay(dayNumber: Int, newPlace: PlaceDetails) {
         val dayPlan = dayPlans.find { it.dayNumber == dayNumber }
         if (dayPlan != null) {
+            // 기존 장소 리스트에 새 장소 추가
             dayPlan.places.add(newPlace)
         } else {
+            // 해당 날짜가 없을 경우 새로 생성
             dayPlans.add(DayPlan(dayNumber, mutableListOf(newPlace)))
         }
-        updateItems()
+        Log.d("WritePlannerFragment", "After adding place: $dayPlans")
+        updateItems() // 어댑터 갱신
     }
 
     private fun updateItems() {
-//        items.clear()
-//        dayPlans.sortedBy { it.dayNumber }.forEach { dayPlan ->
-//            items.add(PlannerItem.Header(dayPlan.dayNumber))
-//            items.addAll(dayPlan.places.map { PlannerItem.Place(it) })
-//        }
-//        placeAdapter.notifyDataSetChanged()
+        if (!::dayPlanAdapter.isInitialized) {
+            Log.e("WritePlannerFragment", "Adapter not initialized. Skipping update.")
+            return
+        }
 
-        dayPlanAdapter.submitList(dayPlans)
+        Log.d("WritePlannerFragment", "Updating items: $dayPlans")
+        // 새로운 리스트를 생성하여 전달
+        dayPlanAdapter.submitList(dayPlans.map { it.copy(places = it.places.toMutableList()) })
     }
 
     private fun fetchPlanData(planId: Long) {
@@ -341,7 +359,7 @@ class WritePlannerFragment : Fragment() {
             dayPlans.clear()
             dayPlans.addAll(newDayPlans)
             notifyDataSetChanged()
-            Log.d("DayPlanAdapter", "Adapter data set changed")
+            Log.d("DayPlanAdapter", "Adapter updated with: $dayPlans")
         }
 
         inner class DayViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -365,7 +383,11 @@ class WritePlannerFragment : Fragment() {
                         }
                     }
                     requireActivity().supportFragmentManager.beginTransaction()
-                        .replace(R.id.mainFrameLayout, testAPIFragment)
+//                        .replace(R.id.mainFrameLayout, testAPIFragment)
+//                        .addToBackStack(null)
+//                        .commit()
+                        .hide(this@WritePlannerFragment) // 현재 Fragment를 숨김
+                        .add(R.id.mainFrameLayout, testAPIFragment) // 새로운 Fragment 추가
                         .addToBackStack(null)
                         .commit()
                 }

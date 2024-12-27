@@ -13,7 +13,7 @@
         android:layout_marginStart="40dp"
         android:layout_marginTop="40dp"
         android:layout_marginEnd="40dp"
-        android:layout_marginBottom="80dp"
+        android:layout_marginBottom="20dp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -29,128 +29,144 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/layout_2"
+    <TableLayout
+        android:id="@+id/layout_3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="40dp"
         android:layout_marginTop="20dp"
         android:layout_marginEnd="40dp"
-        android:layout_marginBottom="80dp"
-
-        android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/layout_1"
+        app:layout_constraintBottom_toTopOf="@+id/create_button"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layout_1"
-        tools:ignore="ExtraText">
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="장소를 선택하세요."
-            android:textAlignment="center"
-            android:gravity="center"
-            android:textColor="#ADADAD"
-            android:textSize="18sp" />
-    </LinearLayout>
-
-    <TableLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/layout_3"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="0dp"
-        android:layout_marginEnd="40dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layout_2"
-        app:layout_constraintBottom_toTopOf="@+id/create_button">
-        <TableRow tools:ignore="UselessParent">
+        <!-- 첫 번째 행 -->
+        <TableRow>
             <Button
                 android:id="@+id/btn_1"
                 android:layout_width="0dp"
                 android:layout_height="100dp"
+                android:layout_weight="1"
                 android:layout_margin="2dp"
-                android:text="전북"
-                android:textColor="#000000"
-                android:backgroundTint="@color/white"
-                android:layout_weight="1"/>
+                android:text="서울" />
             <Button
                 android:id="@+id/btn_2"
                 android:layout_width="0dp"
                 android:layout_height="100dp"
+                android:layout_weight="1"
                 android:layout_margin="2dp"
-                android:text="전남"
-                android:textColor="#000000"
-                android:backgroundTint="@color/white"
-                android:layout_weight="1"/>
+                android:text="인천" />
             <Button
                 android:id="@+id/btn_3"
                 android:layout_width="0dp"
                 android:layout_height="100dp"
+                android:layout_weight="1"
                 android:layout_margin="2dp"
-                android:text="경기"
-                android:textColor="#000000"
-                android:backgroundTint="@color/white"
-                android:layout_weight="1"/>
-        </TableRow>
-        <TableRow tools:ignore="UselessParent">
+                android:text="경기" />
             <Button
                 android:id="@+id/btn_4"
                 android:layout_width="0dp"
                 android:layout_height="100dp"
+                android:layout_weight="1"
                 android:layout_margin="2dp"
-                android:text="강원"
-                android:textColor="#000000"
-                android:backgroundTint="@color/white"
-                android:layout_weight="1"/>
+                android:text="강원" />
+        </TableRow>
+
+        <!-- 두 번째 행 -->
+        <TableRow>
             <Button
                 android:id="@+id/btn_5"
                 android:layout_width="0dp"
                 android:layout_height="100dp"
+                android:layout_weight="1"
                 android:layout_margin="2dp"
-                android:text="충남"
-                android:textColor="#000000"
-                android:backgroundTint="@color/white"
-                android:layout_weight="1"/>
+                android:text="대전" />
             <Button
                 android:id="@+id/btn_6"
                 android:layout_width="0dp"
                 android:layout_height="100dp"
+                android:layout_weight="1"
                 android:layout_margin="2dp"
-                android:text="충북"
-                android:textColor="#000000"
-                android:backgroundTint="@color/white"
-                android:layout_weight="1"/>
-        </TableRow>
-        <TableRow tools:ignore="UselessParent">
+                android:text="제주" />
             <Button
                 android:id="@+id/btn_7"
                 android:layout_width="0dp"
                 android:layout_height="100dp"
+                android:layout_weight="1"
                 android:layout_margin="2dp"
-                android:text="경북"
-                android:textColor="#000000"
-                android:backgroundTint="@color/white"
-                android:layout_weight="1"/>
+                android:text="충북" />
             <Button
                 android:id="@+id/btn_8"
                 android:layout_width="0dp"
                 android:layout_height="100dp"
+                android:layout_weight="1"
                 android:layout_margin="2dp"
-                android:text="경남"
-                android:textColor="#000000"
-                android:backgroundTint="@color/white"
-                android:layout_weight="1"/>
+                android:text="충남" />
+        </TableRow>
+
+        <!-- 세 번째 행 -->
+        <TableRow>
             <Button
                 android:id="@+id/btn_9"
                 android:layout_width="0dp"
                 android:layout_height="100dp"
+                android:layout_weight="1"
                 android:layout_margin="2dp"
-                android:text="제주"
-                android:textColor="#000000"
-                android:backgroundTint="@color/white"
-                android:layout_weight="1"/>
+                android:text="울산" />
+            <Button
+                android:id="@+id/btn_10"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                android:layout_margin="2dp"
+                android:text="전북" />
+            <Button
+                android:id="@+id/btn_11"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                android:layout_margin="2dp"
+                android:text="광주" />
+            <Button
+                android:id="@+id/btn_12"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                android:layout_margin="2dp"
+                android:text="전남" />
+        </TableRow>
+
+        <!-- 네 번째 행 -->
+        <TableRow>
+            <Button
+                android:id="@+id/btn_13"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                android:layout_margin="2dp"
+                android:text="대구" />
+            <Button
+                android:id="@+id/btn_14"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                android:layout_margin="2dp"
+                android:text="경북" />
+            <Button
+                android:id="@+id/btn_15"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                android:layout_margin="2dp"
+                android:text="부산" />
+            <Button
+                android:id="@+id/btn_16"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                android:layout_margin="2dp"
+                android:text="경남" />
         </TableRow>
     </TableLayout>
 

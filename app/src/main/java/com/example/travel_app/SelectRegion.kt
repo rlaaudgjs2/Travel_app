@@ -4,16 +4,14 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.travel_app.databinding.SelectRegionBinding
 
-class SelectRegion : Fragment(){
+class SelectRegion : Fragment() {
     private var _binding: SelectRegionBinding? = null
     private val binding get() = _binding!!
     private var selectedButton: Button? = null
@@ -30,25 +28,22 @@ class SelectRegion : Fragment(){
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 16개의 버튼을 리스트로 관리
         val buttons = listOf(
-            binding.btn1,
-            binding.btn2,
-            binding.btn3,
-            binding.btn4,
-            binding.btn5,
-            binding.btn6,
-            binding.btn7,
-            binding.btn8,
-            binding.btn9
+            binding.btn1, binding.btn2, binding.btn3, binding.btn4,
+            binding.btn5, binding.btn6, binding.btn7, binding.btn8,
+            binding.btn9, binding.btn10, binding.btn11, binding.btn12,
+            binding.btn13, binding.btn14, binding.btn15, binding.btn16
         )
 
-        buttons.forEach{button ->
-            button.setOnClickListener{
+        buttons.forEach { button ->
+            button.setOnClickListener {
                 onButtonClick(button)
             }
         }
-        binding.createButton.setOnClickListener {
 
+        // '선택 완료' 버튼 클릭 리스너
+        binding.createButton.setOnClickListener {
             parentFragmentManager.beginTransaction().apply {
                 replace(R.id.mainFrameLayout, WritePlannerFragment())
                 addToBackStack(null)
@@ -56,56 +51,26 @@ class SelectRegion : Fragment(){
             }
         }
     }
+
     private fun onButtonClick(button: Button) {
+        // 이전에 선택된 버튼의 스타일 초기화
         selectedButton?.let { previousButton ->
-            // 버튼의 배경을 투명하게 설정
-            val clearDrawable = GradientDrawable().apply {
-                setColor(Color.TRANSPARENT)
-                setStroke(0, Color.TRANSPARENT)
-            }
-            previousButton.background = clearDrawable
+            previousButton.background = null
         }
 
-        // 선택된 버튼의 배경을 설정
-        val colorString = "#96EFFF"
-        val color = Color.parseColor(colorString)
-
-        val strokeWidth = 8
+        // 현재 선택된 버튼에 테두리 스타일 적용
         val strokeDrawable = GradientDrawable().apply {
-            setColor(Color.TRANSPARENT) // 배경색을 투명하게 설정
-            setStroke(strokeWidth, color) // 스트로크 색상 설정
+            setColor(Color.TRANSPARENT)
+            setStroke(8, Color.parseColor("#96EFFF")) // 테두리 색상
         }
 
         button.background = strokeDrawable
         selectedButton = button
 
+        // 선택된 지역 이름 저장
         val sharedPreferences = requireContext().getSharedPreferences("Region", Context.MODE_PRIVATE)
         sharedPreferences.edit().putString("RegionName", button.text.toString()).apply()
     }
-
-
-//    private fun onButtonClick(button: Button){
-//        selectedButton?.let{ previousButton ->
-//            previousButton.setBackgroundColor(Color.TRANSPARENT)
-//            val clearColor = Color.TRANSPARENT
-//            val clearStrokeWidth = 0
-//            val clearStrokeDrawable = GradientDrawable().apply {
-//                setStroke(clearStrokeWidth, clearColor)
-//            }
-//            previousButton.background = clearStrokeDrawable
-//        }
-//
-//        val colorString = "#6BE8FF"
-//        val color = Color.parseColor(colorString)
-//
-//        val strokeWidth = 8
-//        val strokeDrawable = GradientDrawable()
-//        strokeDrawable.setColor(Color.TRANSPARENT)
-//        strokeDrawable.setStroke(strokeWidth, color)
-//
-//        button.background = strokeDrawable
-//        selectedButton = button
-//    }
 
     override fun onDestroyView() {
         super.onDestroyView()
