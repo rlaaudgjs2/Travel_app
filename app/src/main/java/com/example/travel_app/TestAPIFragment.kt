@@ -34,10 +34,11 @@ class TestAPIFragment : Fragment() {
     companion object {
         private const val ARG_FRAGMENT_TYPE = "fragment_type"
 
-        fun newInstance(fragmentType: String): TestAPIFragment {
+        fun newInstance(fragmentType: String, dayNumber: Int): TestAPIFragment {
             val fragment = TestAPIFragment()
             val args = Bundle().apply {
                 putString(ARG_FRAGMENT_TYPE, fragmentType)
+                putInt("dayNumber", dayNumber)
             }
             fragment.arguments = args
             return fragment
@@ -110,11 +111,16 @@ class TestAPIFragment : Fragment() {
                 // TODO: Get info about the selected place.
                 Log.i(TAG, "Place: ${place.name}, ${place.id}")
 
+                Log.d(TAG, "Fragment type: ${getFragmentType()}") // getFragmentType() 값 확인
                 when (getFragmentType()) {
                     "WriteBulletin" -> fetchPlaceDetails(place.id, placesClient)
                     "WritePlanner" -> {
                         val dayNumber = arguments?.getInt("dayNumber") ?: 0
+                        Log.d(TAG, "Day number from arguments: $dayNumber") // dayNumber 값 확인
                         fetchPlanPlaceDetails(dayNumber, place.id, placesClient)
+                    }
+                    else -> {
+                        Log.e(TAG, "Unknown fragment type: ${getFragmentType()}")
                     }
                 }
             }
@@ -144,6 +150,7 @@ class TestAPIFragment : Fragment() {
                 var placeAddress = place.address ?: "Unknown" // 주소 추가
                 val photoMetadata = place.photoMetadatas?.firstOrNull()
 
+                Log.d("TestAPIFragment", "Fetched place details: name=$placeName, category=$placeCategory, address=$placeAddress")
                 if (placeAddress.startsWith("대한민국")) {
                     placeAddress = placeAddress.replaceFirst("대한민국", "").trim()
                 }
@@ -165,9 +172,11 @@ class TestAPIFragment : Fragment() {
                             putString("placeAddress", placeAddress) // 주소 추가
                             putString("placePhoto", photoBitmap.toString())
                         })
+                        Log.d("TestAPIFragment", "Returning to previous fragment")
                         parentFragmentManager.popBackStack()
                     }.addOnFailureListener { exception ->
                         Log.e(TAG, "Photo request failed: ${exception.message}")
+                        Log.e("TestAPIFragment", "Place Details request failed: ${exception.message}")
                     }
                 } else {
                     parentFragmentManager.setFragmentResult("requestKey", Bundle().apply {
@@ -177,6 +186,7 @@ class TestAPIFragment : Fragment() {
                         putString("placeAddress", placeAddress) // 주소 추가
                         putString("placePhoto", "")
                     })
+                    Log.d("TestAPIFragment", "Returning to previous fragment")
                     parentFragmentManager.popBackStack()
                 }
             }
