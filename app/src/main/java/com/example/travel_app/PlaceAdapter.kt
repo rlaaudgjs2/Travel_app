@@ -1,9 +1,15 @@
 package com.example.travel_app
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -13,7 +19,7 @@ import com.example.travel_app.model.PlaceDetails
 
 sealed class PlannerItem {
     data class Header(val dayNumber: Int) : PlannerItem()
-    data class Place(val details: PlaceDetails) : PlannerItem()
+    data class Place(val details: PlaceDetails, var memo: String = "") : PlannerItem()
 }
 
 class PlaceAdapter(
@@ -33,6 +39,8 @@ class PlaceAdapter(
     inner class PlaceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val placeName: TextView = itemView.findViewById(R.id.txt_place_title)
         val placeCategory: TextView = itemView.findViewById(R.id.txt_place_content)
+        val placeImage: ImageView = itemView.findViewById(R.id.img_place_image)
+        val edtMemo: EditText = itemView.findViewById(R.id.edt_memo)
         val deleteButton: ImageButton = itemView.findViewById(R.id.btn_delete)
     }
 
@@ -63,6 +71,26 @@ class PlaceAdapter(
                 val placeHolder = holder as PlaceViewHolder
                 placeHolder.placeName.text = item.details.name
                 placeHolder.placeCategory.text = item.details.category
+
+                // 사진을 Bitmap으로 변환하여 이미지뷰에 표시
+                val photoBitmap = decodeBitmapFromString(item.details.photo)
+                if (photoBitmap != null) {
+                    placeHolder.placeImage.setImageBitmap(photoBitmap)
+                } else {
+                    placeHolder.placeImage.setImageResource(R.drawable.google) // 기본 이미지
+                }
+
+                placeHolder.edtMemo.setText(item.memo)
+
+                placeHolder.edtMemo.addTextChangedListener(object : TextWatcher {
+                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                        item.memo = s.toString()
+                    }
+
+                    override fun afterTextChanged(s: Editable?) {}
+                })
                 placeHolder.deleteButton.setOnClickListener {
                     removeAt(position)
                 }
@@ -71,6 +99,16 @@ class PlaceAdapter(
     }
 
     override fun getItemCount(): Int = items.size
+
+    // String을 Bitmap으로 변환
+    private fun decodeBitmapFromString(photoString: String): Bitmap? {
+        return try {
+            val decodedBytes = Base64.decode(photoString, Base64.DEFAULT)
+            BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+        } catch (e: Exception) {
+            null
+        }
+    }
 
     private fun removeAt(position: Int) {
         items.removeAt(position)

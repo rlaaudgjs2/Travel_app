@@ -2,7 +2,9 @@ package com.example.travel_app
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -24,6 +26,7 @@ import com.google.android.libraries.places.api.net.FetchPhotoRequest
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
+import java.io.ByteArrayOutputStream
 import java.util.Locale
 
 class TestAPIFragment : Fragment() {
@@ -150,7 +153,7 @@ class TestAPIFragment : Fragment() {
                 var placeAddress = place.address ?: "Unknown" // 주소 추가
                 val photoMetadata = place.photoMetadatas?.firstOrNull()
 
-                Log.d("TestAPIFragment", "Fetched place details: name=$placeName, category=$placeCategory, address=$placeAddress")
+                Log.d("TestAPIFragment", "Fetched place details: name=$placeName, category=$placeCategory, address=$placeAddress, photo=$photoMetadata")
                 if (placeAddress.startsWith("대한민국")) {
                     placeAddress = placeAddress.replaceFirst("대한민국", "").trim()
                 }
@@ -163,30 +166,27 @@ class TestAPIFragment : Fragment() {
 
                     placesClient.fetchPhoto(photoRequest).addOnSuccessListener { fetchPhotoResponse ->
                         val photoBitmap = fetchPhotoResponse.bitmap
+                        val photoString = encodeBitmapToString(photoBitmap)
 
-                        // 결과를 FragmentResult API를 사용하여 전달
                         parentFragmentManager.setFragmentResult("requestKey", Bundle().apply {
                             putInt("dayNumber", dayNumber)
                             putString("placeName", placeName)
                             putString("placeCategory", placeCategory)
-                            putString("placeAddress", placeAddress) // 주소 추가
-                            putString("placePhoto", photoBitmap.toString())
+                            putString("placeAddress", placeAddress)
+                            putString("placePhoto", photoString)
                         })
-                        Log.d("TestAPIFragment", "Returning to previous fragment")
                         parentFragmentManager.popBackStack()
                     }.addOnFailureListener { exception ->
                         Log.e(TAG, "Photo request failed: ${exception.message}")
-                        Log.e("TestAPIFragment", "Place Details request failed: ${exception.message}")
                     }
                 } else {
                     parentFragmentManager.setFragmentResult("requestKey", Bundle().apply {
                         putInt("dayNumber", dayNumber)
                         putString("placeName", placeName)
                         putString("placeCategory", placeCategory)
-                        putString("placeAddress", placeAddress) // 주소 추가
-                        putString("placePhoto", "")
+                        putString("placeAddress", placeAddress)
+                        putString("placePhoto", "") // 사진이 없을 경우 빈 값
                     })
-                    Log.d("TestAPIFragment", "Returning to previous fragment")
                     parentFragmentManager.popBackStack()
                 }
             }
@@ -246,6 +246,18 @@ class TestAPIFragment : Fragment() {
             .addOnFailureListener { exception ->
                 Log.e(TAG, "Place Details request failed: ${exception.message}")
             }
+    }
+    // Bitmap to String 변환 함수
+    private fun encodeBitmapToString(bitmap: Bitmap): String {
+        return try {
+            val byteArrayOutputStream = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+            val byteArray = byteArrayOutputStream.toByteArray()
+            Base64.encodeToString(byteArray, Base64.DEFAULT)
+        } catch (e: Exception) {
+            Log.e("TestAPIFragment", "Failed to encode bitmap: ${e.message}")
+            ""
+        }
     }
 
 }

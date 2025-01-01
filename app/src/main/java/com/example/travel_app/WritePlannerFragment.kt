@@ -1,7 +1,10 @@
 package com.example.travel_app
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -16,6 +19,7 @@ import com.example.travel_app.model.PlaceDetails
 import com.example.travel_app.viewmodel.WritePlannerViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.tabs.TabLayout
+import java.io.ByteArrayInputStream
 
 class WritePlannerFragment : Fragment() {
 
@@ -71,7 +75,7 @@ class WritePlannerFragment : Fragment() {
             if (placeName != null && placeCategory != null && placeAddress != null) {
                 viewModel.addPlaceToDay(
                     dayNumber,
-                    PlaceDetails(placeName, placeCategory, placeAddress)
+                    PlaceDetails(placeName, placeCategory, placeAddress, placePhoto ?: "")
                 )
                 Toast.makeText(requireContext(), "$placeName 추가됨", Toast.LENGTH_SHORT).show()
             }
@@ -120,22 +124,38 @@ class WritePlannerFragment : Fragment() {
 
             // RecyclerView 갱신
             val currentDay = viewModel.selectedTab.value ?: 1
-            Log.d("WritePlannerFragment", "Current day: $currentDay")
             val places = dayPlans.find { it.dayNumber == currentDay }?.places ?: emptyList()
-            Log.d("WritePlannerFragment", "Places for current day: $places")
-            val adapter = PlaceAdapter(requireContext(), places.map { PlannerItem.Place(it) }.toMutableList())
+            // PlaceDetails -> PlannerItem.Place로 변환
+            val plannerItems = places.map { placeDetails ->
+                PlannerItem.Place(placeDetails, placeDetails.memo) // memo 포함
+            }
+
+            val adapter = PlaceAdapter(requireContext(), plannerItems.toMutableList())
             binding.dayRecycler.layoutManager = LinearLayoutManager(requireContext())
             binding.dayRecycler.adapter = adapter
         })
 
         viewModel.selectedTab.observe(viewLifecycleOwner, Observer { tab ->
             Toast.makeText(requireContext(), "$tab 탭 선택됨", Toast.LENGTH_SHORT).show()
-            Log.d("WritePlannerFragment", "Selected tab: $tab")
             val places = viewModel.getPlacesForDay(tab)
-            Log.d("WritePlannerFragment", "Places for selected tab: $places")
-            val adapter = PlaceAdapter(requireContext(), places.map { PlannerItem.Place(it) }.toMutableList())
+            val plannerItems = places.map { placeDetails ->
+                PlannerItem.Place(placeDetails, placeDetails.memo)
+            }
+
+            val adapter = PlaceAdapter(requireContext(), plannerItems.toMutableList())
             binding.dayRecycler.adapter = adapter
         })
+    }
+
+    private fun decodeBitmapFromString(photoString: String): Bitmap? {
+        return try {
+            val decodedBytes = Base64.decode(photoString, Base64.DEFAULT)
+            val inputStream = ByteArrayInputStream(decodedBytes)
+            BitmapFactory.decodeStream(inputStream)
+        } catch (e: Exception) {
+            Log.e("WritePlannerFragment", "Failed to decode bitmap: ${e.message}")
+            null
+        }
     }
 
     private fun hideBottomNavigationView() {
