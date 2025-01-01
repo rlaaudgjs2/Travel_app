@@ -9,6 +9,7 @@ import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -41,6 +42,7 @@ class PlaceAdapter(
         val placeCategory: TextView = itemView.findViewById(R.id.txt_place_content)
         val placeImage: ImageView = itemView.findViewById(R.id.img_place_image)
         val edtMemo: EditText = itemView.findViewById(R.id.edt_memo)
+        val addMemoButton: Button = itemView.findViewById(R.id.btn_add_memo)
         val deleteButton: ImageButton = itemView.findViewById(R.id.btn_delete)
     }
 
@@ -93,6 +95,13 @@ class PlaceAdapter(
                 })
                 placeHolder.deleteButton.setOnClickListener {
                     removeAt(position)
+                }
+                placeHolder.addMemoButton.setOnClickListener{
+                    val memo = placeHolder.edtMemo.text.toString()
+                    item.memo = memo
+                    item.details.memo = memo
+
+
                 }
             }
         }

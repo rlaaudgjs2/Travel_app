@@ -51,13 +51,23 @@ class WritePlannerViewModel : ViewModel() {
         val dayPlan = updatedPlans?.find { it.dayNumber == dayNumber }
 
         if (dayPlan != null) {
-            dayPlan.places.add(placeDetails)
-            Log.d("WritePlannerViewModel", "Updated dayPlan: $dayPlan")
+            // 기존 장소가 이미 있는지 확인
+            val existingPlace = dayPlan.places.find { it.name == placeDetails.name }
+            if (existingPlace != null) {
+                // 장소가 이미 존재하면 로그만 출력 (덮어쓰지 않음)
+                Log.d("WritePlannerViewModel", "Place already exists: ${placeDetails.name}")
+            } else {
+                // 새로운 장소 추가
+                dayPlan.places.add(placeDetails)
+                Log.d("WritePlannerViewModel", "Updated dayPlan: $dayPlan")
+            }
         } else {
+            // 해당 날짜의 DayPlan이 없으면 새로 추가
             updatedPlans.add(DayPlan(dayNumber, mutableListOf(placeDetails)))
-            Log.e("WritePlannerViewModel", "DayPlan not found for dayNumber: $dayNumber")
+            Log.e("WritePlannerViewModel", "DayPlan not found for dayNumber: $dayNumber. Created new DayPlan.")
         }
 
+        // LiveData 갱신
         _dayPlans.value = updatedPlans
     }
 

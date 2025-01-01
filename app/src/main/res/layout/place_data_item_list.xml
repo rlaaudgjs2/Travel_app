@@ -61,13 +61,27 @@
 
     </LinearLayout>
 
-    <EditText
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="장소에 대한 메모를 작성하세요 !"
-        android:textSize="14sp"
-        android:id="@+id/edt_memo"
-        />
+        android:orientation="horizontal"
+        >
+        <EditText
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:hint="장소에 대한 메모를 작성하세요 !"
+            android:textSize="14sp"
+            android:id="@+id/edt_memo"
+            />
+        <Button
+            android:layout_width="80dp"
+            android:layout_height="50dp"
+            android:id="@+id/btn_add_memo"
+            android:hint="저장"
+            />
 
+    </LinearLayout>
 
 </LinearLayout>
