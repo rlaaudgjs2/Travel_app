@@ -66,7 +66,8 @@ class AnswerWrite : Fragment() {
     }
 
     private fun setupRegionSpinner() {
-        val regions = listOf("지역 선택","전북", "전남", "경기", "강원", "충남", "충북", "경북", "경남", "제주")
+        val regions = listOf("서울", "인천", "경기", "강원", "대전", "제주", "충북", "충남세종", "울산", "전주전북"
+            , "광주", "전남", "대구", "경북", "부산", "경남")
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, regions)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerRegion.adapter = adapter

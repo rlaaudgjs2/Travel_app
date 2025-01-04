@@ -15,7 +15,7 @@ class MyScheduleAdapter(private val items: MutableList<ScheduleItem>, private va
         val imgRegion: ImageView = itemView.findViewById(R.id.img_region)
         val txtRegion: TextView = itemView.findViewById(R.id.txt_region)
         val txtTravelPreiod: TextView = itemView.findViewById(R.id.txt_travel_period)
-        val btnMore: ImageButton = itemView.findViewById(R.id.btn_more)
+//        val btnMore: ImageButton = itemView.findViewById(R.id.btn_more)
 
         init {
             // 전체 아이템 클릭 리스너
@@ -27,12 +27,12 @@ class MyScheduleAdapter(private val items: MutableList<ScheduleItem>, private va
             }
 
             // "더보기" 버튼 클릭 리스너
-            btnMore.setOnClickListener {
-                val position = adapterPosition
-                if (position != RecyclerView.NO_POSITION) {
-                    listener.onActionClick(position)
-                }
-            }
+//            btnMore.setOnClickListener {
+//                val position = adapterPosition
+//                if (position != RecyclerView.NO_POSITION) {
+//                    listener.onActionClick(position)
+//                }
+//            }
         }
     }
 
