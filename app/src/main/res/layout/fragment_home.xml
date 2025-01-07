@@ -8,7 +8,8 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="#F3F4F6">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="80dp"
@@ -21,6 +22,7 @@
                 android:layout_height="80dp"
                 android:id="@+id/homeSearch"
                 android:focusable="true"
+                android:background="#F3F4F6"
                 android:padding="20dp"
                 app:iconifiedByDefault="false"
                 app:queryHint="지금 찾으러 가기"/>
@@ -87,15 +89,16 @@
                 android:id="@+id/showBulletin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                >
-
-            </androidx.recyclerview.widget.RecyclerView>
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_bulletin"
+                />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        >
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:layout_width="wrap_content"
@@ -106,7 +109,7 @@
             app:backgroundTint="@color/maincolor"
             android:layout_marginRight="40dp"
             android:layout_marginBottom="80dp"
-            android:src="@drawable/ic_write"/>
+            android:src="@drawable/plus"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>
