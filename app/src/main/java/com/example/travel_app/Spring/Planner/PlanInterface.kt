@@ -14,7 +14,7 @@ interface PlanInterface {
     fun savePlan(@Body planRequest: PlanRequest): Call<PlanResponse>
 
     @GET("api/plans/author/{author_id}")
-    fun getPlansByAuthorId(@Path("author_id") authorId: Long): Call<List<PlanResponse>>
+    fun getPlansByAuthorId(@Path("author_id") authorId: Long): Call<List<PlanDto>>
 
     @GET("api/plans/{planId}")
     fun getPlanById(@Path("planId") planId: Long): Call<PlanDto>

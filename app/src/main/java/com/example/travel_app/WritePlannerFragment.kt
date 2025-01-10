@@ -37,6 +37,13 @@ class WritePlannerFragment : Fragment() {
 
         hideBottomNavigationView()
 
+        val sharedPreferences1 = requireContext().getSharedPreferences("TravelAppPrefs", Context.MODE_PRIVATE)
+        val userSharedPreferences = requireContext().getSharedPreferences("user_info", Context.MODE_PRIVATE)
+
+        val startDay = sharedPreferences1.getString("startDay", null) // 시작 날짜
+        val endDay = sharedPreferences1.getString("endDay", null)     // 종료 날짜
+        val userId = userSharedPreferences.getString("user_id", null) // 사용자 ID
+
         // SharedPreferences에서 daysCount 값을 불러오기
         val sharedPreferences = requireContext().getSharedPreferences("TravelAppPrefs", Context.MODE_PRIVATE)
         val daysCount = sharedPreferences.getInt("selectedDaysCount", 1)
@@ -82,15 +89,36 @@ class WritePlannerFragment : Fragment() {
         }
 
         binding.btnRegisterPlanner.setOnClickListener {
-            val request = viewModel.getPlanRequest(
-                regionName = "서울",
-                startDay = "2024-01-01",
-                endDay = "2024-01-02",
-                userId = "12345"
+            val planRequest = viewModel.getPlanRequest(
+                regionName = regionName ?: "",
+                startDay = startDay ?: "",
+                endDay = endDay ?: "",
+                userId = userId ?: ""
             )
-            // Plan 등록 처리
-            Toast.makeText(requireContext(), "Plan 등록 완료", Toast.LENGTH_SHORT).show()
+
+            viewModel.savePlanToServer(planRequest,
+                onSuccess = { response ->
+                    if (response.success) {
+                        Toast.makeText(requireContext(), "Plan 저장 완료! ID: ${response.planId}", Toast.LENGTH_SHORT).show()
+
+                        viewModel.clearData()
+                        // MySchedule Fragment로 이동
+                        val myScheduleFragment = MySchedule() // MySchedule Fragment 인스턴스 생성
+                        parentFragmentManager.beginTransaction()
+                            .replace(R.id.mainFrameLayout, myScheduleFragment)
+                            .addToBackStack(null) // 뒤로가기 스택에 추가
+                            .commit()
+
+                    } else {
+                        Toast.makeText(requireContext(), "Plan 저장 실패: ${response.error}", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                onError = { error ->
+                    Toast.makeText(requireContext(), "오류 발생: ${error.message}", Toast.LENGTH_SHORT).show()
+                }
+            )
         }
+
 
     }
 

@@ -7,8 +7,11 @@ import androidx.lifecycle.ViewModel
 import com.example.travel_app.Spring.Planner.DayRequest
 import com.example.travel_app.Spring.Planner.PlanPlaceRequest
 import com.example.travel_app.Spring.Planner.PlanRequest
+import com.example.travel_app.Spring.Planner.PlanResponse
 import com.example.travel_app.model.DayPlan
 import com.example.travel_app.model.PlaceDetails
+import com.example.travel_app.repository.PlannerRepository
+import retrofit2.Call
 
 class WritePlannerViewModel : ViewModel() {
     private val _dayPlans = MutableLiveData<List<DayPlan>>()
@@ -19,6 +22,8 @@ class WritePlannerViewModel : ViewModel() {
 
     private val _selectedTab = MutableLiveData<Int>()
     val selectedTab: LiveData<Int> get() = _selectedTab
+
+    private val repository = PlannerRepository()
 
     init {
         _selectedTab.value = 1 // 기본 1일차 탭 선택
@@ -77,6 +82,42 @@ class WritePlannerViewModel : ViewModel() {
         return places
     }
 
+    fun savePlanToServer(planRequest: PlanRequest, onSuccess: (PlanResponse) -> Unit, onError: (Throwable) -> Unit) {
+        val call = repository.savePlan(planRequest)
+
+        // 요청 객체 로그 출력
+        Log.d("savePlanToServer", "Sending PlanRequest: $planRequest")
+
+        call.enqueue(object : retrofit2.Callback<PlanResponse> {
+            override fun onResponse(call: Call<PlanResponse>, response: retrofit2.Response<PlanResponse>) {
+                // 응답 상태 로그 출력
+                Log.d("savePlanToServer", "Response received: Code = ${response.code()}")
+
+                if (response.isSuccessful) {
+                    val responseBody = response.body()
+                    if (responseBody != null) {
+                        Log.d("savePlanToServer", "Response body: $responseBody")
+                        onSuccess(responseBody)
+                    } else {
+                        Log.e("savePlanToServer", "Response body is null")
+                        onError(Exception("Response body is null"))
+                    }
+                } else {
+                    Log.e("savePlanToServer", "Request failed: Code = ${response.code()}, ErrorBody = ${response.errorBody()?.string()}")
+                    onError(Exception("Failed with code: ${response.code()}"))
+                }
+            }
+
+            override fun onFailure(call: Call<PlanResponse>, t: Throwable) {
+                // 네트워크 또는 기타 실패 로그 출력
+                Log.e("savePlanToServer", "Request failed with error: ${t.message}", t)
+                onError(t)
+            }
+        })
+    }
+
+
+
     fun getPlanRequest(regionName: String, startDay: String, endDay: String, userId: String): PlanRequest {
         return PlanRequest(
             startDay = startDay,
@@ -91,11 +132,20 @@ class WritePlannerViewModel : ViewModel() {
                             placeName = place.name,
                             planDayId = dayPlan.dayNumber,
                             placeCategory = place.category,
-                            placeAddress = place.address
+                            placeAddress = place.address,
+                            placePhoto = place.photo,
+                            placeMemo = place.memo
                         )
                     }
                 )
             } ?: listOf()
         )
     }
+    // ViewModel 초기화 메서드
+    fun clearData() {
+        _dayPlans.value = emptyList()
+        _selectedTab.value = null
+        _daysCount.value = 0
+    }
+
 }

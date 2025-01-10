@@ -1,5 +1,9 @@
 package com.example.travel_app
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -44,9 +48,17 @@ class MyScheduleAdapter(private val items: MutableList<ScheduleItem>, private va
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
-        holder.imgRegion.setImageResource(item.iconResId)
         holder.txtRegion.text = item.region
         holder.txtTravelPreiod.text = item.travelPreriod
+
+        // Base64를 Bitmap으로 변환하여 imgRegion에 설정
+        val bitmap = item.placePhoto?.let { decodeBitmapFromString(it) }
+        if (bitmap != null) {
+            holder.imgRegion.setImageBitmap(bitmap) // Base64 사진 표시
+        } else {
+            holder.imgRegion.setImageResource(R.drawable.ic_more) // 기본 아이콘 설정
+        }
+
     }
 
     override fun getItemCount(): Int = items.size
@@ -63,11 +75,22 @@ class MyScheduleAdapter(private val items: MutableList<ScheduleItem>, private va
         items.removeAt(position)
         notifyItemRemoved(position)
     }
+    // Base64 String을 Bitmap으로 디코딩하는 함수
+    private fun decodeBitmapFromString(photoString: String): Bitmap? {
+        return try {
+            val decodedBytes = Base64.decode(photoString, Base64.DEFAULT)
+            BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+        } catch (e: Exception) {
+            Log.e("MyScheduleAdapter", "Error decoding Base64 image: ${e.message}")
+            null
+        }
+    }
 }
 
 data class ScheduleItem(
     val planId: Long,
     val iconResId: Int,
-    val region: String,
-    val travelPreriod: String
+    val region: String?,
+    val travelPreriod: String?,
+    val placePhoto: String?
 )

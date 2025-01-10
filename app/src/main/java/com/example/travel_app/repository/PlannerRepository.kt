@@ -10,7 +10,13 @@ import retrofit2.Call
 class PlannerRepository {
     private val api: PlanInterface = ServerClient.planInstance
 
-    fun savePlan(request: PlanRequest): Call<PlanResponse> = api.savePlan(request)
+    fun savePlan(request: PlanRequest): Call<PlanResponse>{
+        return api.savePlan(request)
+    }
 
     fun fetchPlan(planId: Long): Call<PlanDto> = api.getPlanById(planId)
+
+    fun fetchPlansByAuthorId(authorId: Long): Call<List<PlanDto>> {
+        return api.getPlansByAuthorId(authorId)
+    }
 }

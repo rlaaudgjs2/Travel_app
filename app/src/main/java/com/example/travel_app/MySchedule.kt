@@ -21,6 +21,7 @@ import com.example.travel_app.Spring.ServerClient
 import com.example.travel_app.Spring.User.UserIdResponse
 import com.example.travel_app.Spring.User.UserInterface
 import com.example.travel_app.databinding.MyScheduleBinding
+import com.example.travel_app.repository.PlannerRepository
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -31,6 +32,7 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
     private var _binding: MyScheduleBinding?=null
     private val binding get() = _binding!!
 
+    private val repository = PlannerRepository()
 
     private lateinit var myScheduleAdapter: MyScheduleAdapter
     override fun onCreateView(
@@ -49,8 +51,16 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
         val recyclerView: RecyclerView = binding.myScheduleRecycler
         recyclerView.layoutManager = LinearLayoutManager(context)
 
+        val sharedPreferences1 = requireContext().getSharedPreferences("TravelAppPrefs", Context.MODE_PRIVATE)
+
+        val startDay = sharedPreferences1.getString("startDay", null) // 시작 날짜
+        val endDay = sharedPreferences1.getString("endDay", null)     // 종료 날짜
+
         val sharedPreferences = requireContext().getSharedPreferences("user_info", Context.MODE_PRIVATE)
         val username = sharedPreferences.getString("user_id", "")
+
+        val sharedPreferencesRegion = requireContext().getSharedPreferences("Region", Context.MODE_PRIVATE)
+        val regionName = sharedPreferencesRegion.getString("RegionName", "")
 
         if (!username.isNullOrEmpty()) {
             fetchUserIdByUsername(username)
@@ -98,36 +108,41 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
         })
     }
     private fun fetchPlansByAuthorId(authorId: Long) {
-        val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8080/") // 서버 주소로 변경
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
 
-        val apiService = retrofit.create(PlanInterface::class.java)
-
-        // 첫 번째 API 호출: Plan ID 리스트 가져오기
-        apiService.getPlansByAuthorId(authorId).enqueue(object : Callback<List<PlanResponse>> {
-            override fun onResponse(call: Call<List<PlanResponse>>, response: Response<List<PlanResponse>>) {
-                Log.d("MySchedule", "Response code: ${response.code()}")
-                Log.d("MySchedule", "Response body: ${response.body()}")
+        repository.fetchPlansByAuthorId(authorId).enqueue(object : Callback<List<PlanDto>> {
+            override fun onResponse(call: Call<List<PlanDto>>, response: Response<List<PlanDto>>) {
                 if (response.isSuccessful) {
+                    val responseBody = response.body()
+                    Log.d("MySchedule", "Fetched plans: $responseBody") // 서버 응답 로그
 
-                    val planIds = response.body()?.mapNotNull { it.planId } ?: emptyList()
-                    Log.e("MySchedule", "planid 가져오는거 : $planIds")
-                    fetchPlanDetails(planIds)
+                    val plans = responseBody?.map { planDto ->
+                        ScheduleItem(
+                            planId = planDto.id,
+                            iconResId = R.drawable.ic_more,
+                            region = planDto.region ?: "Unknown",
+                            travelPreriod = "${planDto.startDay} ~ ${planDto.endDay}",
+                            placePhoto = planDto.representativePhoto
+                        )
+                    } ?: emptyList()
+
+                    // RecyclerView 업데이트
+                    myScheduleAdapter = MyScheduleAdapter(plans.toMutableList(), this@MySchedule)
+                    binding.myScheduleRecycler.adapter = myScheduleAdapter
                 } else {
-                    Log.e("MySchedule", "Failed to fetch plan IDs: ${response.errorBody()?.string()}")
-                    Toast.makeText(context, "Failed to fetch plan IDs", Toast.LENGTH_SHORT).show()
+                    Log.e("MySchedule", "Failed to fetch plans: ${response.errorBody()?.string()}")
+                    Toast.makeText(context, "플래너를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
                 }
             }
 
-            override fun onFailure(call: Call<List<PlanResponse>>, t: Throwable) {
-                Log.e("MySchedule", "Error fetching plan IDs", t)
-                Toast.makeText(context, "Error fetching plan IDs: ${t.message}", Toast.LENGTH_SHORT).show()
 
+            override fun onFailure(call: Call<List<PlanDto>>, t: Throwable) {
+                Log.e("MySchedule", "Error fetching plans", t)
+                Toast.makeText(context, "플래너를 가져오는 중 오류가 발생했습니다: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
+
+
 
     private fun fetchPlanDetails(planIds: List<Long>) {
         val retrofit = Retrofit.Builder()
@@ -154,7 +169,8 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
                                     planId = it.id,  // Plan ID 추가
                                     iconResId = R.drawable.ic_more,
                                     region = it.region,
-                                    travelPreriod = "${it.startDay} ~ ${it.endDay}"
+                                    travelPreriod = "${it.startDay} ~ ${it.endDay}",
+                                    placePhoto = it.representativePhoto
                                 )
                             )
 

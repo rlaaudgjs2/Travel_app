@@ -9,7 +9,8 @@ data class PlanDto(
     val region: String,
     val startDay: String,
     val endDay: String,
-    val days: List<DayPlanDto>?
+    val days: List<DayPlanDto>?,
+    val representativePhoto : String
 )
 
 data class DayPlanDto(
@@ -20,7 +21,8 @@ data class DayPlanDto(
 data class PlaceDetailsDto(
     val placeName: String,
     val placeCategory: String,
-    val placeAddress: String
+    val placeAddress: String,
+    val placePhoto: String
 )
 
 fun PlanDto.toPlan(): Plan {
