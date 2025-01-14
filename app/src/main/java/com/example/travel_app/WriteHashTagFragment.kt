@@ -27,7 +27,7 @@ class WriteHashTagFragment : Fragment() {
     private lateinit var userID: String
     private lateinit var selectedRegion: String
     private lateinit var answer: String
-
+    private val photoPaths = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +37,8 @@ class WriteHashTagFragment : Fragment() {
             userID = it.getString("userID", "")
             selectedRegion = it.getString("selectedRegion","")
             answer = it.getString("answer", "")
+            val photoPathsString = it.getString("photoPaths", "")
+            photoPaths.addAll(photoPathsString.split(",").filter { path -> path.isNotBlank() })
         }
     }
     override fun onCreateView( //oncreate에서 요소를 가져오고 view를 만들어 기존 화면 보여주기
@@ -48,9 +50,7 @@ class WriteHashTagFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        hideBottomNavigationView()
         hashtagList.clear()
-        binding.txtShowHashtag.text = ""
 
         binding.btnAddHashtag.setOnClickListener {
             val hashtag = binding.edtWriteHashtag.text.toString()
@@ -62,12 +62,16 @@ class WriteHashTagFragment : Fragment() {
         }
 
         binding.btnRegisterHashtag.setOnClickListener {
-            Log.e("해시태그 목록", hashtagList.toString())
             saveFinalPost()
         }
     }
 
+
     private fun saveFinalPost() {
+        if (hashtagList.isEmpty()) {
+            Toast.makeText(context, "최소 1개 이상 해시태그를 작성해주세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
         val currentTime = DateUtility.getCurrentFormattedDate()
         val answerResponse = AnswerResponse(
             answerTitle = AnswerTitle,
@@ -76,7 +80,8 @@ class WriteHashTagFragment : Fragment() {
             region = selectedRegion,
             hashtagList = hashtagList,
             currentTime = currentTime,
-            like = 0  // 초기 좋아요 수를 0으로 설정
+            like = 0  ,
+            photoPaths = photoPaths
         )
         val call = ServerClient.postInstance.createPost(answerResponse)
         call.enqueue(object : Callback<AnswerResponse> {
@@ -112,6 +117,7 @@ class WriteHashTagFragment : Fragment() {
         val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)
         bottomNavigationView?.visibility = View.GONE
     }
+
 
     private fun showBottomNavigationView() {
         val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)

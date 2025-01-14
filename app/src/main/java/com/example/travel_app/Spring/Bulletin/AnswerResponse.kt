@@ -7,6 +7,7 @@ data class AnswerResponse(
     val region : String,
     val hashtagList: List<String>,
     val currentTime: String,
-    val like : Int
+    val like : Int,
+    val photoPaths: List<String>
 
 )
