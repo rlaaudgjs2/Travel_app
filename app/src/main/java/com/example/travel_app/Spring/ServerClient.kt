@@ -1,5 +1,6 @@
 package com.example.travel_app.Spring
 
+import com.example.travel_app.Spring.Bulletin.AnswerInterface
 import com.example.travel_app.Spring.Bulletin.PostInterface
 import com.example.travel_app.Spring.Planner.PlanInterface
 import com.example.travel_app.Spring.User.UserInterface
@@ -29,6 +30,13 @@ object ServerClient {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(PlanInterface::class.java)
+    }
+    val answerInstance: AnswerInterface by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(AnswerInterface::class.java)
     }
 
 }

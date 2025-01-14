@@ -6,8 +6,10 @@ import com.google.gson.annotations.SerializedName
 data class PostResponse(
     val id: Long,
     val title: String,
+    val answer: String,
     val nickName: String,
     val creationDate: String, // ISO 8601 형식의 날짜 문자열
     val imageUrls: List<String>,
+    val like : Int,
     val hashtagList: List<String>
 )

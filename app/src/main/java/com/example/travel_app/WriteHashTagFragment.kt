@@ -79,8 +79,8 @@ class WriteHashTagFragment : Fragment() {
             answer = answer,
             region = selectedRegion,
             hashtagList = hashtagList,
-            currentTime = currentTime,
-            like = 0  ,
+            currentAt = currentTime,
+            likes = 0  ,
             photoPaths = photoPaths
         )
         val call = ServerClient.postInstance.createPost(answerResponse)

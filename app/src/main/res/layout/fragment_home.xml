@@ -85,13 +85,13 @@
             android:id="@+id/ll_bulletin"
             app:layout_constraintTop_toBottomOf="@+id/moreLayout"
             >
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/showBulletin"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="403dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/item_bulletin"
-                />
+                tools:listitem="@layout/item_bulletinview" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
