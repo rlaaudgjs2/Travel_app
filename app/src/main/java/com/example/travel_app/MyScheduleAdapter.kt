@@ -19,6 +19,7 @@ class MyScheduleAdapter(private val items: MutableList<ScheduleItem>, private va
         val imgRegion: ImageView = itemView.findViewById(R.id.img_region)
         val txtRegion: TextView = itemView.findViewById(R.id.txt_region)
         val txtTravelPreiod: TextView = itemView.findViewById(R.id.txt_travel_period)
+        val txtLocation: TextView = itemView.findViewById(R.id.txt_location)
 //        val btnMore: ImageButton = itemView.findViewById(R.id.btn_more)
 
         init {
@@ -50,6 +51,7 @@ class MyScheduleAdapter(private val items: MutableList<ScheduleItem>, private va
         val item = items[position]
         holder.txtRegion.text = item.region
         holder.txtTravelPreiod.text = item.travelPreriod
+        holder.txtLocation.text = item.representativeRegion
 
         // Base64를 Bitmap으로 변환하여 imgRegion에 설정
         val bitmap = item.placePhoto?.let { decodeBitmapFromString(it) }
@@ -92,5 +94,6 @@ data class ScheduleItem(
     val iconResId: Int,
     val region: String?,
     val travelPreriod: String?,
-    val placePhoto: String?
+    val placePhoto: String?,
+    val representativeRegion: String?,
 )

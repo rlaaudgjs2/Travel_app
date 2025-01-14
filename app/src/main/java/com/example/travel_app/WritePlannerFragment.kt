@@ -103,9 +103,8 @@ class WritePlannerFragment : Fragment() {
 
                         viewModel.clearData()
                         // MySchedule Fragment로 이동
-                        val myScheduleFragment = MySchedule() // MySchedule Fragment 인스턴스 생성
                         parentFragmentManager.beginTransaction()
-                            .replace(R.id.mainFrameLayout, myScheduleFragment)
+                            .replace(R.id.mainFrameLayout, MySchedule())
                             .addToBackStack(null) // 뒤로가기 스택에 추가
                             .commit()
 
@@ -164,14 +163,19 @@ class WritePlannerFragment : Fragment() {
         })
 
         viewModel.selectedTab.observe(viewLifecycleOwner, Observer { tab ->
-            Toast.makeText(requireContext(), "$tab 탭 선택됨", Toast.LENGTH_SHORT).show()
-            val places = viewModel.getPlacesForDay(tab)
-            val plannerItems = places.map { placeDetails ->
-                PlannerItem.Place(placeDetails, placeDetails.memo)
-            }
+            if (tab != null) {
+                // `tab`이 null이 아닌 경우에만 RecyclerView를 업데이트
+                Toast.makeText(requireContext(), "$tab 탭 선택됨", Toast.LENGTH_SHORT).show()
+                val places = viewModel.getPlacesForDay(tab)
+                val plannerItems = places.map { placeDetails ->
+                    PlannerItem.Place(placeDetails, placeDetails.memo)
+                }
 
-            val adapter = PlaceAdapter(requireContext(), plannerItems.toMutableList())
-            binding.dayRecycler.adapter = adapter
+                val adapter = PlaceAdapter(requireContext(), plannerItems.toMutableList())
+                binding.dayRecycler.adapter = adapter
+            } else {
+                Log.w("WritePlannerFragment", "Selected tab is null, skipping RecyclerView update.")
+            }
         })
     }
 

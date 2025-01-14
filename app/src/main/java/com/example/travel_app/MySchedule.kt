@@ -22,6 +22,7 @@ import com.example.travel_app.Spring.User.UserIdResponse
 import com.example.travel_app.Spring.User.UserInterface
 import com.example.travel_app.databinding.MyScheduleBinding
 import com.example.travel_app.repository.PlannerRepository
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -51,6 +52,7 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
         val recyclerView: RecyclerView = binding.myScheduleRecycler
         recyclerView.layoutManager = LinearLayoutManager(context)
 
+        showBottomNavigationView()
         val sharedPreferences1 = requireContext().getSharedPreferences("TravelAppPrefs", Context.MODE_PRIVATE)
 
         val startDay = sharedPreferences1.getString("startDay", null) // 시작 날짜
@@ -90,6 +92,7 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
                 if (response.isSuccessful) {
                     val userId = response.body()?.id
                     if (userId != null) {
+                        initializeRecyclerView()
                         fetchPlansByAuthorId(userId)
                     } else {
                         Log.e("MySchedule", "User ID not found")
@@ -107,6 +110,11 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
             }
         })
     }
+    private fun initializeRecyclerView() {
+        binding.myScheduleRecycler.layoutManager = LinearLayoutManager(context)
+        myScheduleAdapter = MyScheduleAdapter(mutableListOf(), this@MySchedule)
+        binding.myScheduleRecycler.adapter = myScheduleAdapter
+    }
     private fun fetchPlansByAuthorId(authorId: Long) {
 
         repository.fetchPlansByAuthorId(authorId).enqueue(object : Callback<List<PlanDto>> {
@@ -121,7 +129,8 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
                             iconResId = R.drawable.ic_more,
                             region = planDto.region ?: "Unknown",
                             travelPreriod = "${planDto.startDay} ~ ${planDto.endDay}",
-                            placePhoto = planDto.representativePhoto
+                            placePhoto = planDto.representativePhoto,
+                            representativeRegion = planDto.representativeRegion,
                         )
                     } ?: emptyList()
 
@@ -170,7 +179,8 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
                                     iconResId = R.drawable.ic_more,
                                     region = it.region,
                                     travelPreriod = "${it.startDay} ~ ${it.endDay}",
-                                    placePhoto = it.representativePhoto
+                                    placePhoto = it.representativePhoto,
+                                    representativeRegion = it.representativeRegion ?: "No Address"
                                 )
                             )
 
@@ -313,4 +323,10 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
             }
         builder.show()
     }
+
+    private fun showBottomNavigationView() {
+        val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)
+        bottomNavigationView?.visibility = View.VISIBLE
+    }
+
 }

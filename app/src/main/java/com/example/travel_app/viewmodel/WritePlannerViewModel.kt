@@ -144,7 +144,7 @@ class WritePlannerViewModel : ViewModel() {
     // ViewModel 초기화 메서드
     fun clearData() {
         _dayPlans.value = emptyList()
-        _selectedTab.value = null
+        _selectedTab.value = 1
         _daysCount.value = 0
     }
 

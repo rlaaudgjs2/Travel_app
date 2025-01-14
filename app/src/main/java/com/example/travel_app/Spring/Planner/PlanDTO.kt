@@ -10,7 +10,8 @@ data class PlanDto(
     val startDay: String,
     val endDay: String,
     val days: List<DayPlanDto>?,
-    val representativePhoto : String
+    val representativePhoto : String,
+    val representativeRegion : String,
 )
 
 data class DayPlanDto(
