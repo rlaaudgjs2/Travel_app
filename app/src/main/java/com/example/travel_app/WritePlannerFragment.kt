@@ -32,6 +32,7 @@ class WritePlannerFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentWritePlannerBinding.inflate(inflater, container, false)
+
         return binding.root
     }
 
@@ -53,6 +54,7 @@ class WritePlannerFragment : Fragment() {
 
         // 전달된 PlanData 확인
         val planData = arguments?.getParcelable<Plan>("planData")
+
         if (planData != null) {
             Log.d("WritePlannerFragment", "Received existing planData: $planData")
             setupPlanData(planData) // 기존 플랜 데이터 설정
@@ -66,6 +68,14 @@ class WritePlannerFragment : Fragment() {
         observeViewModel()
         setupDynamicTabs()
 
+        binding.btnBackspace.setOnClickListener{
+            if(parentFragmentManager.backStackEntryCount > 0){
+                viewModel.clearData()
+                parentFragmentManager.popBackStack()
+            }else{
+                Toast.makeText(requireContext(), "이전화면 없음", Toast.LENGTH_SHORT).show()
+            }
+        }
         // '장소 추가' 버튼 처리
         binding.btnAddPlace.setOnClickListener {
             val currentDay = viewModel.selectedTab.value ?: 1
@@ -91,33 +101,7 @@ class WritePlannerFragment : Fragment() {
             }
         }
 
-        // 플랜 저장 버튼 처리
-//        binding.btnRegisterPlanner.setOnClickListener {
-//            val planRequest = viewModel.getPlanRequest(
-//                regionName = regionName ?: "",
-//                startDay = startDay ?: "",
-//                endDay = endDay ?: "",
-//                userId = userId ?: ""
-//            )
-//
-//            viewModel.savePlanToServer(planRequest,
-//                onSuccess = { response ->
-//                    if (response.success) {
-//                        Toast.makeText(requireContext(), "Plan 저장 완료! ID: ${response.planId}", Toast.LENGTH_SHORT).show()
-//                        viewModel.clearData()
-//                        parentFragmentManager.beginTransaction()
-//                            .replace(R.id.mainFrameLayout, MySchedule())
-//                            .addToBackStack(null)
-//                            .commit()
-//                    } else {
-//                        Toast.makeText(requireContext(), "Plan 저장 실패: ${response.error}", Toast.LENGTH_SHORT).show()
-//                    }
-//                },
-//                onError = { error ->
-//                    Toast.makeText(requireContext(), "오류 발생: ${error.message}", Toast.LENGTH_SHORT).show()
-//                }
-//            )
-//        }
+
         // 플랜 저장 버튼 처리
         binding.btnRegisterPlanner.setOnClickListener {
             val planRequest = viewModel.getPlanRequest(

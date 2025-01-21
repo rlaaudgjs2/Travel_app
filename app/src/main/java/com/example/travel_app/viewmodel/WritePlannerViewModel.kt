@@ -24,6 +24,8 @@ class WritePlannerViewModel : ViewModel() {
     private val _selectedTab = MutableLiveData<Int>()
     val selectedTab: LiveData<Int> get() = _selectedTab
 
+    private var isInitialized = false // 초기화 여부를 확인하기 위한 플래그
+
     private val repository = PlannerRepository()
 
     init {
@@ -32,6 +34,9 @@ class WritePlannerViewModel : ViewModel() {
 
     fun initializeDayPlans(count: Int) {
 
+        if (isInitialized) return // 이미 초기화된 경우 실행하지 않음
+
+        isInitialized = true
         if (_dayPlans.value?.isNotEmpty() == true) {
             Log.d("WritePlannerViewModel", "Day plans already initialized, skipping initialization.")
             return
@@ -48,6 +53,9 @@ class WritePlannerViewModel : ViewModel() {
     }
 
     fun initializeDayPlans(dayPlans: List<DayPlan>) {
+        if (isInitialized) return // 이미 초기화된 경우 실행하지 않음
+
+        isInitialized = true
         Log.d("WritePlannerViewModel", "Initializing day plans with provided list: $dayPlans")
 
         // Provided dayPlans를 ViewModel에 설정
@@ -184,6 +192,7 @@ class WritePlannerViewModel : ViewModel() {
     }
     // ViewModel 초기화 메서드
     fun clearData() {
+        isInitialized = false
         _dayPlans.value = emptyList()
         _selectedTab.value = 1
         _daysCount.value = 0

@@ -303,23 +303,10 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
             return
         }
 
-        val options = arrayOf("수정", "삭제")
-        val builder = AlertDialog.Builder(requireContext())
-        builder.setTitle("플래너 관리")
-            .setItems(options) { dialog, which ->
-                when (which) {
-                    0 -> {
-                        // 수정 선택
-                        openPlan(position)
-                    }
-                    1 -> {
-                        // 삭제 선택
-                        deletePlan(selectedPlanId, position)
-                    }
-                }
-            }
-        builder.show()
+        // 바로 수정 기능 수행
+        openPlan(position)
     }
+
 
 
     private fun showBottomNavigationView() {
