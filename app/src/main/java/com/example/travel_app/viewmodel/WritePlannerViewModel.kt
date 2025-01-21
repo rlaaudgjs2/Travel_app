@@ -1,5 +1,6 @@
 package com.example.travel_app.viewmodel
 
+import Plan
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -46,8 +47,48 @@ class WritePlannerViewModel : ViewModel() {
         _daysCount.value = count
     }
 
+    fun initializeDayPlans(dayPlans: List<DayPlan>) {
+        Log.d("WritePlannerViewModel", "Initializing day plans with provided list: $dayPlans")
+
+        // Provided dayPlans를 ViewModel에 설정
+        _dayPlans.value = dayPlans
+
+        // 탭 갱신을 위해 daysCount와 selectedTab 설정
+        _daysCount.value = dayPlans.size
+        _selectedTab.value = if (dayPlans.isNotEmpty()) 1 else 0
+    }
+
+
     fun selectTab(dayNumber: Int) {
         _selectedTab.value = dayNumber
+    }
+
+    fun updatePlanToServer(planId: Long, planRequest: PlanRequest, onSuccess: () -> Unit, onError: (Throwable) -> Unit) {
+        val call = repository.updatePlan(planId, planRequest)
+
+        // 요청 객체 로그 출력
+        Log.d("updatePlanToServer", "Updating PlanRequest: $planRequest")
+
+        call.enqueue(object : retrofit2.Callback<Plan> {
+            override fun onResponse(call: Call<Plan>, response: retrofit2.Response<Plan>) {
+                // 응답 상태 로그 출력
+                Log.d("updatePlanToServer", "Response received: Code = ${response.code()}")
+
+                if (response.isSuccessful) {
+                    Log.d("updatePlanToServer", "Plan updated successfully")
+                    onSuccess()
+                } else {
+                    Log.e("updatePlanToServer", "Update failed: Code = ${response.code()}, ErrorBody = ${response.errorBody()?.string()}")
+                    onError(Exception("Failed with code: ${response.code()}"))
+                }
+            }
+
+            override fun onFailure(call: Call<Plan>, t: Throwable) {
+                // 네트워크 또는 기타 실패 로그 출력
+                Log.e("updatePlanToServer", "Request failed with error: ${t.message}", t)
+                onError(t)
+            }
+        })
     }
 
     fun addPlaceToDay(dayNumber: Int, placeDetails: PlaceDetails) {

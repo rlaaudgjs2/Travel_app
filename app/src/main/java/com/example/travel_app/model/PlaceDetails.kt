@@ -6,4 +6,4 @@ data class PlaceDetails(
     val address: String,
     val photo: String = "", // 사진 데이터
     var memo: String = ""
-    )
+)

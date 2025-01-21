@@ -57,18 +57,24 @@ data class DayPlan(
 data class PlaceDetails(
     val name: String,
     val category: String,
-    val address: String
+    val address: String,
+    val photo: String,
+    val memo: String,
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString() ?: "",
         parcel.readString() ?: "",
-        parcel.readString() ?: ""
+        parcel.readString() ?: "",
+        parcel.readString() ?: "",
+        parcel.readString() ?: "",
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(name)
         parcel.writeString(category)
         parcel.writeString(address)
+        parcel.writeString(photo)
+        parcel.writeString(memo)
     }
 
     override fun describeContents(): Int = 0

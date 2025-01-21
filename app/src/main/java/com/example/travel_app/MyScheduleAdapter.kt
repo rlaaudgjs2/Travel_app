@@ -27,7 +27,7 @@ class MyScheduleAdapter(private val items: MutableList<ScheduleItem>, private va
             itemView.setOnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
-                    listener.onItemClick(position)
+                    listener.onActionClick(position)
                 }
             }
 

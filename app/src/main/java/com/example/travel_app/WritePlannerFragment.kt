@@ -1,5 +1,7 @@
 package com.example.travel_app
 
+
+import Plan
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -15,6 +17,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.travel_app.databinding.FragmentWritePlannerBinding
+import com.example.travel_app.model.DayPlan
 import com.example.travel_app.model.PlaceDetails
 import com.example.travel_app.viewmodel.WritePlannerViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -37,31 +40,33 @@ class WritePlannerFragment : Fragment() {
 
         hideBottomNavigationView()
 
-        val sharedPreferences1 = requireContext().getSharedPreferences("TravelAppPrefs", Context.MODE_PRIVATE)
-        val userSharedPreferences = requireContext().getSharedPreferences("user_info", Context.MODE_PRIVATE)
-
-        val startDay = sharedPreferences1.getString("startDay", null) // 시작 날짜
-        val endDay = sharedPreferences1.getString("endDay", null)     // 종료 날짜
-        val userId = userSharedPreferences.getString("user_id", null) // 사용자 ID
-
-        // SharedPreferences에서 daysCount 값을 불러오기
+        // SharedPreferences에서 기본 값 가져오기
         val sharedPreferences = requireContext().getSharedPreferences("TravelAppPrefs", Context.MODE_PRIVATE)
-        val daysCount = sharedPreferences.getInt("selectedDaysCount", 1)
-        Log.e("WritePlannerFragment", "Days count: $daysCount")
-
         val sharedPreferencesRegion = requireContext().getSharedPreferences("Region", Context.MODE_PRIVATE)
+        val daysCount = sharedPreferences.getInt("selectedDaysCount", 1)
         val regionName = sharedPreferencesRegion.getString("RegionName", "")
-        binding.txtRegion.text = "$regionName 여행"
+        val startDay = sharedPreferences.getString("startDay", "")
+        val endDay = sharedPreferences.getString("endDay", "")
+        val userId = requireContext()
+            .getSharedPreferences("user_info", Context.MODE_PRIVATE)
+            .getString("user_id", "")
 
-        viewModel.initializeDayPlans(daysCount)
+        // 전달된 PlanData 확인
+        val planData = arguments?.getParcelable<Plan>("planData")
+        if (planData != null) {
+            Log.d("WritePlannerFragment", "Received existing planData: $planData")
+            setupPlanData(planData) // 기존 플랜 데이터 설정
+        } else {
+            Log.d("WritePlannerFragment", "No planData received. Initializing new plan.")
+            viewModel.initializeDayPlans(daysCount) // 새 플랜 초기화
+            binding.txtRegion.text = "$regionName 여행"
+        }
 
         // UI 갱신
         observeViewModel()
-
-        // 동적 탭 생성 및 선택 이벤트 처리
         setupDynamicTabs()
 
-        // '장소 추가' 버튼 클릭 이벤트 처리
+        // '장소 추가' 버튼 처리
         binding.btnAddPlace.setOnClickListener {
             val currentDay = viewModel.selectedTab.value ?: 1
             val testAPIFragment = TestAPIFragment.newInstance("WritePlanner", currentDay)
@@ -70,8 +75,6 @@ class WritePlannerFragment : Fragment() {
                 .addToBackStack(null)
                 .commit()
         }
-
-        // FragmentResult API로 TestAPIFragment에서 데이터 받기
         parentFragmentManager.setFragmentResultListener("requestKey", viewLifecycleOwner) { _, bundle ->
             val placeName = bundle.getString("placeName")
             val placeCategory = bundle.getString("placeCategory")
@@ -88,6 +91,34 @@ class WritePlannerFragment : Fragment() {
             }
         }
 
+        // 플랜 저장 버튼 처리
+//        binding.btnRegisterPlanner.setOnClickListener {
+//            val planRequest = viewModel.getPlanRequest(
+//                regionName = regionName ?: "",
+//                startDay = startDay ?: "",
+//                endDay = endDay ?: "",
+//                userId = userId ?: ""
+//            )
+//
+//            viewModel.savePlanToServer(planRequest,
+//                onSuccess = { response ->
+//                    if (response.success) {
+//                        Toast.makeText(requireContext(), "Plan 저장 완료! ID: ${response.planId}", Toast.LENGTH_SHORT).show()
+//                        viewModel.clearData()
+//                        parentFragmentManager.beginTransaction()
+//                            .replace(R.id.mainFrameLayout, MySchedule())
+//                            .addToBackStack(null)
+//                            .commit()
+//                    } else {
+//                        Toast.makeText(requireContext(), "Plan 저장 실패: ${response.error}", Toast.LENGTH_SHORT).show()
+//                    }
+//                },
+//                onError = { error ->
+//                    Toast.makeText(requireContext(), "오류 발생: ${error.message}", Toast.LENGTH_SHORT).show()
+//                }
+//            )
+//        }
+        // 플랜 저장 버튼 처리
         binding.btnRegisterPlanner.setOnClickListener {
             val planRequest = viewModel.getPlanRequest(
                 regionName = regionName ?: "",
@@ -96,31 +127,70 @@ class WritePlannerFragment : Fragment() {
                 userId = userId ?: ""
             )
 
-            viewModel.savePlanToServer(planRequest,
-                onSuccess = { response ->
-                    if (response.success) {
-                        Toast.makeText(requireContext(), "Plan 저장 완료! ID: ${response.planId}", Toast.LENGTH_SHORT).show()
-
-                        viewModel.clearData()
-                        // MySchedule Fragment로 이동
-                        parentFragmentManager.beginTransaction()
-                            .replace(R.id.mainFrameLayout, MySchedule())
-                            .addToBackStack(null) // 뒤로가기 스택에 추가
-                            .commit()
-
-                    } else {
-                        Toast.makeText(requireContext(), "Plan 저장 실패: ${response.error}", Toast.LENGTH_SHORT).show()
+            val planData = arguments?.getParcelable<Plan>("planData")
+            if (planData != null) {
+                // 수정 모드: updatePlan 호출
+                viewModel.updatePlanToServer(planData.planId, planRequest,
+                    onSuccess = {
+                        Toast.makeText(requireContext(), "플랜 수정 완료!", Toast.LENGTH_SHORT).show()
+                        navigateToMySchedule()
+                    },
+                    onError = { error ->
+                        Toast.makeText(requireContext(), "플랜 수정 실패: ${error.message}", Toast.LENGTH_SHORT).show()
                     }
-                },
-                onError = { error ->
-                    Toast.makeText(requireContext(), "오류 발생: ${error.message}", Toast.LENGTH_SHORT).show()
-                }
+                )
+            } else {
+                // 신규 저장 모드: savePlan 호출
+                viewModel.savePlanToServer(planRequest,
+                    onSuccess = { response ->
+                        if (response.success) {
+                            Toast.makeText(requireContext(), "플랜 저장 완료! ID: ${response.planId}", Toast.LENGTH_SHORT).show()
+                            navigateToMySchedule()
+                        } else {
+                            Toast.makeText(requireContext(), "플랜 저장 실패: ${response.error}", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    onError = { error ->
+                        Toast.makeText(requireContext(), "오류 발생: ${error.message}", Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
+        }
+    }
+
+
+    // MySchedule로 이동
+    private fun navigateToMySchedule() {
+        viewModel.clearData()
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.mainFrameLayout, MySchedule())
+            .addToBackStack(null)
+            .commit()
+    }
+
+    private fun setupPlanData(planData: Plan) {
+        // 기본 정보 설정
+        binding.txtRegion.text = "${planData.region} 여행"
+
+        // DayPlans 초기화
+        val dayPlans = planData.days.map { dayPlan ->
+            DayPlan(
+                dayNumber = dayPlan.dayNumber,
+                places = dayPlan.places.map { place ->
+                    PlaceDetails(
+                        name = place.name,
+                        category = place.category,
+                        address = place.address,
+                        photo = place.photo,
+                        memo = place.memo
+                    )
+                }.toMutableList()
             )
         }
 
-
+        // ViewModel에 데이터 설정
+        viewModel.initializeDayPlans(dayPlans)
     }
-
     private fun setupDynamicTabs() {
         viewModel.daysCount.observe(viewLifecycleOwner, Observer { count ->
             binding.tabLayout.removeAllTabs()

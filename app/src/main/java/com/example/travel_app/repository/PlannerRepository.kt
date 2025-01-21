@@ -1,5 +1,6 @@
 package com.example.travel_app.repository
 
+import Plan
 import com.example.travel_app.Spring.Planner.PlanDto
 import com.example.travel_app.Spring.Planner.PlanInterface
 import com.example.travel_app.Spring.Planner.PlanRequest
@@ -12,6 +13,10 @@ class PlannerRepository {
 
     fun savePlan(request: PlanRequest): Call<PlanResponse>{
         return api.savePlan(request)
+    }
+
+    fun updatePlan(planId: Long, planRequest: PlanRequest): Call<Plan> {
+        return api.updatePlan(planId, planRequest)
     }
 
     fun fetchPlan(planId: Long): Call<PlanDto> = api.getPlanById(planId)

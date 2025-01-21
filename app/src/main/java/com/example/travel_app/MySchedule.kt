@@ -232,10 +232,13 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
                             // PlanDto를 Plan으로 변환
                             val plan = it.toPlan()
 
+                            Log.d("MySchedulePlan", "Response: ${response.body()}")
+
                             // WritePlannerFragment로 데이터를 전달하면서 이동
                             val fragment = WritePlannerFragment().apply {
                                 arguments = Bundle().apply {
                                     putParcelable("planData", plan)  // Parcelable로 전달
+                                    Log.e("MySchedulePlan", plan.toString())
                                 }
                             }
                             requireActivity().supportFragmentManager.beginTransaction()
@@ -294,35 +297,30 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
 
 
     override fun onActionClick(position: Int) {
+        val selectedPlanId = myScheduleAdapter.getPlanIdAtPosition(position)
+        if (selectedPlanId == null) {
+            Toast.makeText(context, "Invalid plan ID", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-        // Create and display an AlertDialog with options for Edit and Delete
         val options = arrayOf("수정", "삭제")
         val builder = AlertDialog.Builder(requireContext())
-        builder.setTitle("일정 관리")
+        builder.setTitle("플래너 관리")
             .setItems(options) { dialog, which ->
                 when (which) {
                     0 -> {
-                        // Edit action
-//                        Toast.makeText(context, "Edit clicked for item at position $position", Toast.LENGTH_SHORT).show()
-                        // Here you can implement the logic to edit the selected item
+                        // 수정 선택
                         openPlan(position)
                     }
                     1 -> {
-                        // Delete action
-//                        Toast.makeText(context, "Delete clicked for item at position $position", Toast.LENGTH_SHORT).show()
-
-                        val selectedPlanId = myScheduleAdapter.getPlanIdAtPosition(position)
-                        if (selectedPlanId != null) {
-                            deletePlan(selectedPlanId, position)
-                        } else {
-                            Toast.makeText(context, "Invalid plan ID", Toast.LENGTH_SHORT).show()
-                        }
-                        // Here you can implement the logic to delete the selected item
+                        // 삭제 선택
+                        deletePlan(selectedPlanId, position)
                     }
                 }
             }
         builder.show()
     }
+
 
     private fun showBottomNavigationView() {
         val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)
