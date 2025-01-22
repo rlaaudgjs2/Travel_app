@@ -30,6 +30,8 @@ class WritePlannerFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: WritePlannerViewModel by activityViewModels()
 
+    private lateinit var placeAdapter: PlaceAdapter
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentWritePlannerBinding.inflate(inflater, container, false)
 
@@ -104,42 +106,82 @@ class WritePlannerFragment : Fragment() {
 
         // 플랜 저장 버튼 처리
         binding.btnRegisterPlanner.setOnClickListener {
+            // SharedPreferences에서 값 가져오기
+            val sharedPreferences = requireContext().getSharedPreferences("TravelAppPrefs", Context.MODE_PRIVATE)
+            val sharedPreferencesRegion = requireContext().getSharedPreferences("Region", Context.MODE_PRIVATE)
+
+            val sharedRegionName = sharedPreferencesRegion.getString("RegionName", "") ?: ""
+            val sharedStartDay = sharedPreferences.getString("startDay", "") ?: ""
+            val sharedEndDay = sharedPreferences.getString("endDay", "") ?: ""
+
+            // 전달된 PlanData 확인 (수정인지 신규인지 확인)
+            val planData = arguments?.getParcelable<Plan>("planData")
+
+            val regionName: String
+            val startDay: String
+            val endDay: String
+
+            if (planData != null) {
+                // 플랜 수정 모드
+                regionName = planData.region
+                startDay = planData.startDay
+                endDay = planData.endDay
+
+                Log.d("WritePlannerFragment", "Editing plan: Using planData values -> Region: $regionName, StartDay: $startDay, EndDay: $endDay")
+            } else {
+                // 신규 저장 모드
+                regionName = sharedRegionName
+                startDay = sharedStartDay
+                endDay = sharedEndDay
+
+                Log.d("WritePlannerFragment", "Creating new plan: Using SharedPreferences values -> Region: $regionName, StartDay: $startDay, EndDay: $endDay")
+            }
+
+            // PlanRequest 생성
             val planRequest = viewModel.getPlanRequest(
-                regionName = regionName ?: "",
-                startDay = startDay ?: "",
-                endDay = endDay ?: "",
-                userId = userId ?: ""
+                regionName = regionName,
+                startDay = startDay,
+                endDay = endDay,
+                userId = requireContext().getSharedPreferences("user_info", Context.MODE_PRIVATE).getString("user_id", "") ?: ""
             )
 
-            val planData = arguments?.getParcelable<Plan>("planData")
             if (planData != null) {
-                // 수정 모드: updatePlan 호출
+                // 수정 모드
+                Log.d("WritePlannerFragment", "Updating plan with ID: ${planData.planId}")
+                Log.d("WritePlannerFragment", "PlanRequest (without photos): ${planRequest.toString()}")
+
                 viewModel.updatePlanToServer(planData.planId, planRequest,
                     onSuccess = {
+                        Log.d("WritePlannerFragment", "Plan updated successfully for ID: ${planData.planId}")
                         Toast.makeText(requireContext(), "플랜 수정 완료!", Toast.LENGTH_SHORT).show()
                         navigateToMySchedule()
                     },
                     onError = { error ->
+                        Log.e("WritePlannerFragment", "Plan update failed: ${error.message}")
                         Toast.makeText(requireContext(), "플랜 수정 실패: ${error.message}", Toast.LENGTH_SHORT).show()
                     }
                 )
             } else {
-                // 신규 저장 모드: savePlan 호출
+                // 신규 저장 모드
                 viewModel.savePlanToServer(planRequest,
                     onSuccess = { response ->
                         if (response.success) {
+                            Log.d("WritePlannerFragment", "Plan saved successfully with ID: ${response.planId}")
                             Toast.makeText(requireContext(), "플랜 저장 완료! ID: ${response.planId}", Toast.LENGTH_SHORT).show()
                             navigateToMySchedule()
                         } else {
+                            Log.e("WritePlannerFragment", "Plan save failed: ${response.error}")
                             Toast.makeText(requireContext(), "플랜 저장 실패: ${response.error}", Toast.LENGTH_SHORT).show()
                         }
                     },
                     onError = { error ->
+                        Log.e("WritePlannerFragment", "Plan save error: ${error.message}")
                         Toast.makeText(requireContext(), "오류 발생: ${error.message}", Toast.LENGTH_SHORT).show()
                     }
                 )
             }
         }
+
     }
 
 
@@ -197,41 +239,77 @@ class WritePlannerFragment : Fragment() {
         })
     }
 
+//    private fun observeViewModel() {
+//        viewModel.dayPlans.observe(viewLifecycleOwner, Observer { dayPlans ->
+//
+//
+//            // RecyclerView 갱신
+//            val currentDay = viewModel.selectedTab.value ?: 1
+//            val places = dayPlans.find { it.dayNumber == currentDay }?.places ?: emptyList()
+//            // PlaceDetails -> PlannerItem.Place로 변환
+//            val plannerItems = places.map { placeDetails ->
+//                PlannerItem.Place(placeDetails, placeDetails.memo) // memo 포함
+//            }
+//
+//            val adapter = PlaceAdapter(requireContext(), plannerItems.toMutableList(), viewModel)
+//            binding.dayRecycler.layoutManager = LinearLayoutManager(requireContext())
+//            binding.dayRecycler.adapter = adapter
+//        })
+//
+//        viewModel.selectedTab.observe(viewLifecycleOwner, Observer { tab ->
+//            if (tab != null) {
+//                // `tab`이 null이 아닌 경우에만 RecyclerView를 업데이트
+//                Toast.makeText(requireContext(), "$tab 탭 선택됨", Toast.LENGTH_SHORT).show()
+//                val places = viewModel.getPlacesForDay(tab)
+//                val plannerItems = places.map { placeDetails ->
+//                    PlannerItem.Place(placeDetails, placeDetails.memo)
+//                }
+//
+//                val adapter = PlaceAdapter(requireContext(), plannerItems.toMutableList(), viewModel)
+//                binding.dayRecycler.adapter = adapter
+//            } else {
+//                Log.w("WritePlannerFragment", "Selected tab is null, skipping RecyclerView update.")
+//            }
+//        })
+//    }
+
     private fun observeViewModel() {
-        viewModel.dayPlans.observe(viewLifecycleOwner, Observer { dayPlans ->
+        placeAdapter = PlaceAdapter(requireContext(), mutableListOf(), viewModel)
+        binding.dayRecycler.layoutManager = LinearLayoutManager(requireContext())
+        binding.dayRecycler.adapter = placeAdapter
 
-            // 현재 상태를 로그로 확인
-            Log.d("WritePlannerFragment", "Observed dayPlans: $dayPlans")
-
-            // RecyclerView 갱신
+        viewModel.dayPlans.observe(viewLifecycleOwner) { dayPlans ->
             val currentDay = viewModel.selectedTab.value ?: 1
             val places = dayPlans.find { it.dayNumber == currentDay }?.places ?: emptyList()
-            // PlaceDetails -> PlannerItem.Place로 변환
-            val plannerItems = places.map { placeDetails ->
-                PlannerItem.Place(placeDetails, placeDetails.memo) // memo 포함
-            }
+            val plannerItems = mutableListOf<PlannerItem>()
 
-            val adapter = PlaceAdapter(requireContext(), plannerItems.toMutableList())
-            binding.dayRecycler.layoutManager = LinearLayoutManager(requireContext())
-            binding.dayRecycler.adapter = adapter
-        })
+            // 헤더 추가
+            plannerItems.add(PlannerItem.Header(currentDay))
+            // Place 추가
+            plannerItems.addAll(places.map { placeDetails ->
+                PlannerItem.Place(placeDetails, placeDetails.memo)
+            })
 
-        viewModel.selectedTab.observe(viewLifecycleOwner, Observer { tab ->
+            placeAdapter.updateItems(plannerItems)
+        }
+
+        viewModel.selectedTab.observe(viewLifecycleOwner) { tab ->
             if (tab != null) {
-                // `tab`이 null이 아닌 경우에만 RecyclerView를 업데이트
-                Toast.makeText(requireContext(), "$tab 탭 선택됨", Toast.LENGTH_SHORT).show()
                 val places = viewModel.getPlacesForDay(tab)
-                val plannerItems = places.map { placeDetails ->
-                    PlannerItem.Place(placeDetails, placeDetails.memo)
-                }
+                val plannerItems = mutableListOf<PlannerItem>()
 
-                val adapter = PlaceAdapter(requireContext(), plannerItems.toMutableList())
-                binding.dayRecycler.adapter = adapter
-            } else {
-                Log.w("WritePlannerFragment", "Selected tab is null, skipping RecyclerView update.")
+                // 헤더 추가
+                plannerItems.add(PlannerItem.Header(tab))
+                // Place 추가
+                plannerItems.addAll(places.map { placeDetails ->
+                    PlannerItem.Place(placeDetails, placeDetails.memo)
+                })
+
+                placeAdapter.updateItems(plannerItems)
             }
-        })
+        }
     }
+
 
     private fun decodeBitmapFromString(photoString: String): Bitmap? {
         return try {

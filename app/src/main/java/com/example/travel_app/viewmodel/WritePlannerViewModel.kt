@@ -38,16 +38,13 @@ class WritePlannerViewModel : ViewModel() {
 
         isInitialized = true
         if (_dayPlans.value?.isNotEmpty() == true) {
-            Log.d("WritePlannerViewModel", "Day plans already initialized, skipping initialization.")
             return
         }
 
-        Log.d("WritePlannerViewModel", "Initializing day plans with count: $count")
         val dayPlansList = mutableListOf<DayPlan>()
         for (i in 1..count) {
             dayPlansList.add(DayPlan(i, mutableListOf()))
         }
-        Log.d("WritePlannerViewModel", "Initialized dayPlans: $dayPlansList")
         _dayPlans.value = dayPlansList
         _daysCount.value = count
     }
@@ -56,7 +53,6 @@ class WritePlannerViewModel : ViewModel() {
         if (isInitialized) return // 이미 초기화된 경우 실행하지 않음
 
         isInitialized = true
-        Log.d("WritePlannerViewModel", "Initializing day plans with provided list: $dayPlans")
 
         // Provided dayPlans를 ViewModel에 설정
         _dayPlans.value = dayPlans
@@ -74,33 +70,54 @@ class WritePlannerViewModel : ViewModel() {
     fun updatePlanToServer(planId: Long, planRequest: PlanRequest, onSuccess: () -> Unit, onError: (Throwable) -> Unit) {
         val call = repository.updatePlan(planId, planRequest)
 
-        // 요청 객체 로그 출력
-        Log.d("updatePlanToServer", "Updating PlanRequest: $planRequest")
-
+        // placePhoto를 제외한 요청 데이터만 로그로 출력
+        val loggablePlanRequest = mapOf(
+            "authorId" to planRequest.authorId,
+            "startDay" to planRequest.startDay,
+            "endDay" to planRequest.endDay,
+            "region" to planRequest.region,
+            "days" to planRequest.days.map { day ->
+                mapOf(
+                    "dayNumber" to day.dayNumber,
+                    "places" to day.places.map { place ->
+                        mapOf(
+                            "placeName" to place.placeName,
+                            "placeCategory" to place.placeCategory,
+                            "placeAddress" to place.placeAddress,
+                            "placeMemo" to place.placeMemo
+                        )
+                    }
+                )
+            }
+        )
+        Log.d("WritePlannerViewModel", "Updating plan ID: $planId with request: $loggablePlanRequest")
         call.enqueue(object : retrofit2.Callback<Plan> {
             override fun onResponse(call: Call<Plan>, response: retrofit2.Response<Plan>) {
-                // 응답 상태 로그 출력
-                Log.d("updatePlanToServer", "Response received: Code = ${response.code()}")
 
                 if (response.isSuccessful) {
-                    Log.d("updatePlanToServer", "Plan updated successfully")
+                    val updatedPlan = response.body()
+                    val loggableUpdatedPlan = updatedPlan?.let {
+                        mapOf(
+                            "id" to it.planId,
+                            "region" to it.region,
+                            "startDay" to it.startDay,
+                            "endDay" to it.endDay
+                        )
+                    }
+                    Log.d("WritePlannerViewModel", "Update successful (without photos): $loggableUpdatedPlan")
                     onSuccess()
                 } else {
-                    Log.e("updatePlanToServer", "Update failed: Code = ${response.code()}, ErrorBody = ${response.errorBody()?.string()}")
                     onError(Exception("Failed with code: ${response.code()}"))
                 }
             }
 
             override fun onFailure(call: Call<Plan>, t: Throwable) {
-                // 네트워크 또는 기타 실패 로그 출력
-                Log.e("updatePlanToServer", "Request failed with error: ${t.message}", t)
                 onError(t)
             }
         })
     }
 
     fun addPlaceToDay(dayNumber: Int, placeDetails: PlaceDetails) {
-        Log.d("WritePlannerViewModel", "Adding place to day: $dayNumber, place: $placeDetails")
         val updatedPlans = _dayPlans.value?.toMutableList() ?: mutableListOf()
         val dayPlan = updatedPlans?.find { it.dayNumber == dayNumber }
 
@@ -108,17 +125,13 @@ class WritePlannerViewModel : ViewModel() {
             // 기존 장소가 이미 있는지 확인
             val existingPlace = dayPlan.places.find { it.name == placeDetails.name }
             if (existingPlace != null) {
-                // 장소가 이미 존재하면 로그만 출력 (덮어쓰지 않음)
-                Log.d("WritePlannerViewModel", "Place already exists: ${placeDetails.name}")
             } else {
                 // 새로운 장소 추가
                 dayPlan.places.add(placeDetails)
-                Log.d("WritePlannerViewModel", "Updated dayPlan: $dayPlan")
             }
         } else {
             // 해당 날짜의 DayPlan이 없으면 새로 추가
             updatedPlans.add(DayPlan(dayNumber, mutableListOf(placeDetails)))
-            Log.e("WritePlannerViewModel", "DayPlan not found for dayNumber: $dayNumber. Created new DayPlan.")
         }
 
         // LiveData 갱신
@@ -127,32 +140,24 @@ class WritePlannerViewModel : ViewModel() {
 
     fun getPlacesForDay(dayNumber: Int): List<PlaceDetails> {
         val places = _dayPlans.value?.find { it.dayNumber == dayNumber }?.places ?: emptyList()
-        Log.d("WritePlannerViewModel", "Places for day $dayNumber: $places")
         return places
     }
 
     fun savePlanToServer(planRequest: PlanRequest, onSuccess: (PlanResponse) -> Unit, onError: (Throwable) -> Unit) {
         val call = repository.savePlan(planRequest)
 
-        // 요청 객체 로그 출력
-        Log.d("savePlanToServer", "Sending PlanRequest: $planRequest")
 
         call.enqueue(object : retrofit2.Callback<PlanResponse> {
             override fun onResponse(call: Call<PlanResponse>, response: retrofit2.Response<PlanResponse>) {
-                // 응답 상태 로그 출력
-                Log.d("savePlanToServer", "Response received: Code = ${response.code()}")
 
                 if (response.isSuccessful) {
                     val responseBody = response.body()
                     if (responseBody != null) {
-                        Log.d("savePlanToServer", "Response body: $responseBody")
                         onSuccess(responseBody)
                     } else {
-                        Log.e("savePlanToServer", "Response body is null")
                         onError(Exception("Response body is null"))
                     }
                 } else {
-                    Log.e("savePlanToServer", "Request failed: Code = ${response.code()}, ErrorBody = ${response.errorBody()?.string()}")
                     onError(Exception("Failed with code: ${response.code()}"))
                 }
             }
@@ -197,5 +202,24 @@ class WritePlannerViewModel : ViewModel() {
         _selectedTab.value = 1
         _daysCount.value = 0
     }
+    fun removePlaceFromDay(dayNumber: Int, placeDetails: PlaceDetails) {
+        val updatedPlans = _dayPlans.value?.toMutableList() ?: mutableListOf()
+        val dayPlan = updatedPlans.find { it.dayNumber == dayNumber }
+
+        if (dayPlan != null) {
+            val removed = dayPlan.places.removeIf { it.name == placeDetails.name && it.address == placeDetails.address }
+            if (removed) {
+                Log.d("WritePlannerViewModel", "Removed place: $placeDetails from day: $dayNumber")
+            } else {
+                Log.w("WritePlannerViewModel", "Place not found in day $dayNumber: $placeDetails")
+            }
+        } else {
+            Log.w("WritePlannerViewModel", "DayPlan not found for day $dayNumber")
+        }
+
+        _dayPlans.value = updatedPlans
+    }
+
+
 
 }

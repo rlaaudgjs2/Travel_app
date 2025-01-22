@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Base64
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +18,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.travel_app.model.PlaceDetails
+import com.example.travel_app.viewmodel.WritePlannerViewModel
 
 sealed class PlannerItem {
     data class Header(val dayNumber: Int) : PlannerItem()
@@ -25,7 +27,8 @@ sealed class PlannerItem {
 
 class PlaceAdapter(
     private val context: Context,
-    private val items: MutableList<PlannerItem>
+    private val items: MutableList<PlannerItem>,
+    private val viewModel: WritePlannerViewModel // ViewModel 추가
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -120,8 +123,43 @@ class PlaceAdapter(
     }
 
     private fun removeAt(position: Int) {
-        items.removeAt(position)
+        val removedItem = items.removeAt(position)
         notifyItemRemoved(position)
-        notifyItemRangeChanged(position, items.size)
+
+        // 삭제 이후 RecyclerView와 리스트의 범위를 정확히 맞춥니다.
+        notifyItemRangeChanged(position, items.size - position)
+
+        // ViewModel과 동기화
+        if (removedItem is PlannerItem.Place) {
+            val dayNumber = findDayNumberForPlace(position)
+            if (dayNumber != null) {
+                viewModel.removePlaceFromDay(dayNumber, removedItem.details)
+                Log.d("PlaceAdapter", "Removed item from ViewModel: $removedItem at day $dayNumber")
+            } else {
+                Log.w("PlaceAdapter", "Day number not found for position $position")
+            }
+        }
+    }
+
+
+
+    private fun findDayNumberForPlace(position: Int): Int? {
+        Log.d("PlaceAdapter", "Finding day number for position $position in items: $items")
+        for (i in position downTo 0) {
+            val item = items.getOrNull(i)
+            Log.d("PlaceAdapter", "Checking item at index $i: $item")
+            if (item is PlannerItem.Header) {
+                Log.d("PlaceAdapter", "Found header for day ${item.dayNumber} at position $i")
+                return item.dayNumber
+            }
+        }
+        Log.w("PlaceAdapter", "No header found for position $position")
+        return null
+    }
+
+    fun updateItems(newItems: List<PlannerItem>) {
+        items.clear()
+        items.addAll(newItems)
+        notifyDataSetChanged()
     }
 }

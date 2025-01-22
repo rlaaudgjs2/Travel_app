@@ -120,9 +120,20 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
         repository.fetchPlansByAuthorId(authorId).enqueue(object : Callback<List<PlanDto>> {
             override fun onResponse(call: Call<List<PlanDto>>, response: Response<List<PlanDto>>) {
                 if (response.isSuccessful) {
-                    val responseBody = response.body()
-                    Log.d("MySchedule", "Fetched plans: $responseBody") // 서버 응답 로그
 
+                    val responseBody = response.body()
+                    // placePhoto를 제외한 데이터만 로그로 출력
+                    val loggablePlans = responseBody?.map { planDto ->
+                        mapOf(
+                            "id" to planDto.id,
+                            "region" to planDto.region,
+                            "startDay" to planDto.startDay,
+                            "endDay" to planDto.endDay,
+                            "representativeRegion" to planDto.representativeRegion
+                        )
+                    }
+
+                    Log.d("MySchedule", "Fetched plans (without photos): $loggablePlans") // 가공된 데이터 로그
                     val plans = responseBody?.map { planDto ->
                         ScheduleItem(
                             planId = planDto.id,
@@ -232,13 +243,11 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
                             // PlanDto를 Plan으로 변환
                             val plan = it.toPlan()
 
-                            Log.d("MySchedulePlan", "Response: ${response.body()}")
 
                             // WritePlannerFragment로 데이터를 전달하면서 이동
                             val fragment = WritePlannerFragment().apply {
                                 arguments = Bundle().apply {
                                     putParcelable("planData", plan)  // Parcelable로 전달
-                                    Log.e("MySchedulePlan", plan.toString())
                                 }
                             }
                             requireActivity().supportFragmentManager.beginTransaction()

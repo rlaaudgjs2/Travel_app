@@ -6,4 +6,8 @@ data class PlanRequest(
     val startDay: String,
     val endDay: String,
     val region: String
-)
+){
+    override fun toString(): String {
+        return "PlanRequest(authorId=$authorId, startDay=$startDay, endDay=$endDay, region=$region, days=${days.map { it.toString() }})"
+    }
+}
