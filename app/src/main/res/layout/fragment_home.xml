@@ -89,7 +89,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/showBulletin"
                 android:layout_width="match_parent"
-                android:layout_height="403dp"
+                android:layout_height="495dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:listitem="@layout/item_bulletinview" />
         </LinearLayout>

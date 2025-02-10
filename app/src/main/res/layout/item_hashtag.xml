@@ -1,0 +1,11 @@
+<com.google.android.material.chip.Chip xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/chip"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Hashtag"
+    android:textSize="14dp"
+    app:chipBackgroundColor="#F3F4F6"
+    android:textColor="#4B5563"
+    android:textStyle="bold"
+    android:layout_marginEnd="4dp" />

@@ -51,6 +51,7 @@ class WriteHashTagFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         hashtagList.clear()
+        hideBottomNavigationView()
 
         binding.btnAddHashtag.setOnClickListener {
             val hashtag = binding.edtWriteHashtag.text.toString()
@@ -74,8 +75,9 @@ class WriteHashTagFragment : Fragment() {
         }
         val currentTime = DateUtility.getCurrentFormattedDate()
         val answerResponse = AnswerResponse(
+            id = id,
             answerTitle = AnswerTitle,
-            username = userID,
+            nickName = userID,
             answer = answer,
             region = selectedRegion,
             hashtagList = hashtagList,

@@ -22,8 +22,7 @@ import kotlinx.coroutines.withContext
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-    private lateinit var postAdapter: AnswerPostAdapter
-
+    private lateinit var answerPostAdapter: AnswerPostAdapter
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -40,10 +39,17 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        postAdapter = AnswerPostAdapter(emptyList())
+        answerPostAdapter = AnswerPostAdapter(emptyList()) { post ->
+            val detailFragment = AnswerWriteDetail.newInstance(post)
+            parentFragmentManager.beginTransaction().apply {
+                replace(R.id.mainFrameLayout, detailFragment)
+                addToBackStack(null)
+                commit()
+            }
+        }
         binding.showBulletin.apply {
             layoutManager = LinearLayoutManager(requireContext())
-            adapter = postAdapter
+            adapter = answerPostAdapter
         }
     }
 
@@ -91,35 +97,51 @@ class HomeFragment : Fragment() {
     private fun fetchAnswers() {
         lifecycleScope.launch {
             try {
+                Log.d("HomeFragment", "Fetching answers from server...")
+
                 val response = withContext(Dispatchers.IO) {
                     ServerClient.answerInstance.getAllAnswers().execute()
                 }
+
+                Log.d("HomeFragment", "Server response: ${response.code()} - ${response.message()}")
+
                 if (response.isSuccessful) {
                     val answerResponses = response.body() ?: emptyList()
 
                     // AnswerResponse -> AnswerPost 변환
                     val answerPosts = answerResponses.map { answerResponse ->
+
                         AnswerPost(
-                            nickName = answerResponse.username ?: "익명", // null 검사
+                            id = answerResponse.id,
+                            nickName = answerResponse.nickName ?: "익명",
                             currentTime = answerResponse.currentAt ?: "알 수 없음",
                             imageUrls = answerResponse.photoPaths ?: emptyList(),
-                            title = answerResponse.answerTitle ?: "제목 없음",
+                            answerTitle = answerResponse.answerTitle ?: "제목 없음",
                             answer = answerResponse.answer ?: "내용 없음",
-                            likes = answerResponse.likes ?: 0
-                        )
+                            likes = answerResponse.likes ?: 0,
+                            hashtagList = answerResponse.hashtagList ?: emptyList(),
+                            region = answerResponse.region
+                        ).also {
+                            Log.d("Mapping", "Converted AnswerPost: $it")
+                        }
                     }
 
+                    Log.d("HomeFragment", "Converted AnswerPosts: $answerPosts")
+
                     // RecyclerView 어댑터에 데이터 업데이트
-                    postAdapter.updatePosts(answerPosts)
+                    answerPostAdapter.updatePosts(answerPosts)
+                    Log.d("HomeFragment", "RecyclerView updated with new data")
                 } else {
                     Toast.makeText(requireContext(), "Failed to fetch answers: ${response.code()}", Toast.LENGTH_SHORT).show()
+                    Log.e("HomeFragment", "Failed to fetch answers: ${response.errorBody()?.string()}")
                 }
             } catch (e: Exception) {
-                Log.e("HomeFragment", "Failed to fetch answers", e)
+                Log.e("HomeFragment", "Exception during fetchAnswers", e)
                 Toast.makeText(requireContext(), "Failed to fetch answers: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
+
 
 
 

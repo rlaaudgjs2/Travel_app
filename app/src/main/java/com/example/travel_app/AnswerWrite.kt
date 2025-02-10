@@ -53,7 +53,7 @@ class AnswerWrite : Fragment() {
 
         setupRegionSpinner()
         setupRecyclerView()
-
+        hideBottomNavigationView()
         backSpace.setOnClickListener {
             parentFragmentManager.popBackStack()
             showBottomNavigationView()
@@ -159,6 +159,10 @@ class AnswerWrite : Fragment() {
     private fun showBottomNavigationView() {
         val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)
         bottomNavigationView?.visibility = View.VISIBLE
+    }
+    private fun hideBottomNavigationView() {
+        val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)
+        bottomNavigationView?.visibility = View.GONE
     }
 
 }

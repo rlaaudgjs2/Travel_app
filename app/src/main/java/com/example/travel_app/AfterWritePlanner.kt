@@ -43,7 +43,7 @@ class AfterWritePlanner : Fragment(), MyScheduleAdapter.OnItemClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        hideBottomNavigationView()
         // Set up RecyclerView
         val recyclerView: RecyclerView = binding.writePlanBulletin
         recyclerView.layoutManager = LinearLayoutManager(context)
@@ -233,4 +233,10 @@ class AfterWritePlanner : Fragment(), MyScheduleAdapter.OnItemClickListener {
         val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)
         bottomNavigationView?.visibility = View.VISIBLE
     }
+    private fun hideBottomNavigationView() {
+        val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)
+        bottomNavigationView?.visibility = View.GONE
+    }
+
+
 }

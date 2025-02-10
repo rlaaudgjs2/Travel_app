@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("org.jetbrains.kotlin.plugin.parcelize")
 }
 
 secrets {
@@ -55,7 +56,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.3"
+        kotlinCompilerExtensionVersion = "1.5.10"
     }
 
     packagingOptions {
@@ -76,6 +77,8 @@ configurations.all {
 }
 
 dependencies {
+    implementation ("com.google.android.material:material:1.9.0")
+
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.10")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
     implementation("androidx.activity:activity-compose:1.4.0")
@@ -120,6 +123,7 @@ dependencies {
         exclude(group = "org.threeten", module = "threetenbp")
 
     }
+    implementation ("com.google.android.flexbox:flexbox:3.0.0")
     implementation ("com.github.bumptech.glide:glide:4.12.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.10"))
