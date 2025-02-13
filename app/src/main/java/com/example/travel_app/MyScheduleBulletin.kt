@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.compose.material3.AlertDialog
 import androidx.fragment.app.Fragment
@@ -22,6 +23,7 @@ import com.example.travel_app.Spring.ServerClient
 import com.example.travel_app.Spring.User.UserIdResponse
 import com.example.travel_app.Spring.User.UserInterface
 import com.example.travel_app.databinding.MyScheduleBinding
+import com.example.travel_app.databinding.MyScheduleBulletinBinding
 import com.example.travel_app.repository.PlannerRepository
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import retrofit2.Call
@@ -30,8 +32,8 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
-    private var _binding: MyScheduleBinding?=null
+class MyScheduleBulletin: Fragment(), MyScheduleAdapter.OnItemClickListener {
+    private var _binding: MyScheduleBulletinBinding? = null
     private val binding get() = _binding!!
 
     private val repository = PlannerRepository()
@@ -42,7 +44,7 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-       _binding = MyScheduleBinding.inflate(inflater, container, false)
+        _binding = MyScheduleBulletinBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -53,7 +55,7 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
         val recyclerView: RecyclerView = binding.myScheduleRecycler
         recyclerView.layoutManager = LinearLayoutManager(context)
 
-        showBottomNavigationView()
+        hideBottomNavigationView()
         val sharedPreferences1 = requireContext().getSharedPreferences("TravelAppPrefs", Context.MODE_PRIVATE)
 
         val startDay = sharedPreferences1.getString("startDay", null) // 시작 날짜
@@ -71,28 +73,14 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
             Log.e("MySchedule", "Username not found")
             Toast.makeText(context, "Username not found", Toast.LENGTH_SHORT).show()
         }
-        binding.createButton.setOnClickListener{
-            val fragment = CreateSchedule()
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.mainFrameLayout, fragment)
-                .addToBackStack(null)
-                .commit()
-        }
-        binding.txtEdit.setOnClickListener {
-            toggleEditMode()
+
+        binding.btnBackspace.setOnClickListener{
+            parentFragmentManager.popBackStack()
+            showBottomNavigationView()
         }
     }
 
-    private fun toggleEditMode(){
-        myScheduleAdapter.toggleEditMode()
 
-        //'편집' 텍스트 변경
-        if(myScheduleAdapter.isEditMode){
-            binding.txtEdit.text = "완료"
-        }else{
-            binding.txtEdit.text = "편집"
-        }
-    }
 
     override fun onDeleteClick(position: Int) {
         val selectedplanId = myScheduleAdapter.getPlanIdAtPosition(position)
@@ -141,7 +129,7 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
     }
     private fun initializeRecyclerView() {
         binding.myScheduleRecycler.layoutManager = LinearLayoutManager(context)
-        myScheduleAdapter = MyScheduleAdapter(mutableListOf(), this@MySchedule)
+        myScheduleAdapter = MyScheduleAdapter(mutableListOf(), this@MyScheduleBulletin)
         binding.myScheduleRecycler.adapter = myScheduleAdapter
     }
     private fun fetchPlansByAuthorId(authorId: Long) {
@@ -175,7 +163,7 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
                     } ?: emptyList()
 
                     // RecyclerView 업데이트
-                    myScheduleAdapter = MyScheduleAdapter(plans.toMutableList(), this@MySchedule)
+                    myScheduleAdapter = MyScheduleAdapter(plans.toMutableList(), this@MyScheduleBulletin)
                     binding.myScheduleRecycler.adapter = myScheduleAdapter
                 } else {
                     Log.e("MySchedule", "Failed to fetch plans: ${response.errorBody()?.string()}")
@@ -225,7 +213,7 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
                             )
 
                             if (allPlans.size == planIds.size) {
-                                myScheduleAdapter = MyScheduleAdapter(allPlans, this@MySchedule)
+                                myScheduleAdapter = MyScheduleAdapter(allPlans, this@MyScheduleBulletin)
                                 binding.myScheduleRecycler.adapter = myScheduleAdapter
                             }
                         }
@@ -340,8 +328,6 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
             Toast.makeText(context, "Invalid plan ID", Toast.LENGTH_SHORT).show()
             return
         }
-
-
         // 바로 수정 기능 수행
         openPlan(position)
     }
@@ -351,6 +337,10 @@ class MySchedule: Fragment(), MyScheduleAdapter.OnItemClickListener {
     private fun showBottomNavigationView() {
         val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)
         bottomNavigationView?.visibility = View.VISIBLE
+    }
+    private fun hideBottomNavigationView() {
+        val bottomNavigationView = activity?.findViewById<BottomNavigationView>(R.id.navigationView)
+        bottomNavigationView?.visibility = View.GONE
     }
 
 }

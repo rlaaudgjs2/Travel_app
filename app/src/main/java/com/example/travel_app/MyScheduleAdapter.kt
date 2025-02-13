@@ -15,19 +15,28 @@ import androidx.recyclerview.widget.RecyclerView
 class MyScheduleAdapter(private val items: MutableList<ScheduleItem>, private val listener: OnItemClickListener) :
     RecyclerView.Adapter<MyScheduleAdapter.ViewHolder>() {
 
+    var isEditMode: Boolean = false //편집 모드 플래그
+
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imgRegion: ImageView = itemView.findViewById(R.id.img_region)
         val txtRegion: TextView = itemView.findViewById(R.id.txt_region)
         val txtTravelPreiod: TextView = itemView.findViewById(R.id.txt_travel_period)
         val txtLocation: TextView = itemView.findViewById(R.id.txt_location)
 //        val btnMore: ImageButton = itemView.findViewById(R.id.btn_more)
-
+        val btnDelete: ImageButton = itemView.findViewById(R.id.btn_delete)
         init {
             // 전체 아이템 클릭 리스너
             itemView.setOnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     listener.onActionClick(position)
+                }
+            }
+
+            btnDelete.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION){
+                    listener.onDeleteClick(position)
                 }
             }
 
@@ -61,6 +70,8 @@ class MyScheduleAdapter(private val items: MutableList<ScheduleItem>, private va
             holder.imgRegion.setImageResource(R.drawable.ic_more) // 기본 아이콘 설정
         }
 
+        holder.btnDelete.visibility = if(isEditMode) View.VISIBLE else View.GONE
+
     }
 
     override fun getItemCount(): Int = items.size
@@ -68,6 +79,12 @@ class MyScheduleAdapter(private val items: MutableList<ScheduleItem>, private va
     interface OnItemClickListener {
         fun onItemClick(position: Int)
         fun onActionClick(position: Int)
+        fun onDeleteClick(position: Int)
+    }
+
+    fun toggleEditMode(){
+        isEditMode = !isEditMode
+        notifyDataSetChanged()
     }
 
     fun getPlanIdAtPosition(position: Int): Long? {

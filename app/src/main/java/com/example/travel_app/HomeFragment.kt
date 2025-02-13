@@ -56,7 +56,7 @@ class HomeFragment : Fragment() {
                 when (item.itemId) {
                     R.id.menu_write_planner -> {
                         parentFragmentManager.beginTransaction().apply {
-                            replace(R.id.mainFrameLayout, MySchedule())
+                            replace(R.id.mainFrameLayout, MyScheduleBulletin())
                             addToBackStack(null)
                             commit()
                         }
